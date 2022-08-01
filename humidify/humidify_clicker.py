@@ -148,6 +148,11 @@ def close_interface():
     hotkey_press(close_key)
 
 
+def take_break():
+    print("Taking a break.")
+    clicker_common.rand_sleep(rng, break_min, break_max, debug=True)  # Longer break -> debug output
+
+
 def window():
     return clicker_common.window(window_name)
 
@@ -212,8 +217,12 @@ try:
     wait_min = int(settings['wait_min'])
     wait_max = int(settings['wait_max'])
 
-    wmin = int(settings['click_min'])
-    wmax = int(settings['click_max'])
+    # Random breaks interval
+    break_min = int(settings['break_min'])
+    break_max = int(settings['break_max'])
+
+    # Probability to take a random break
+    break_prob = float(settings['break_prob'])
 
     # Maximum precise target offset
     max_off = int(settings['max_off'])
@@ -224,6 +233,7 @@ try:
 
     running = True
     can_move = True
+    break_taken = False
     item_left = int(settings['item_left'])
 
     move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
@@ -276,8 +286,22 @@ try:
         if running:
             click_spell()
 
+
+    def break_action():
+        break_rnd = rng.random()
+        global break_taken, can_move
+        if not break_taken and break_rnd < break_prob:
+            can_move = False
+            take_break()
+            can_move = True
+            break_taken = True
+
+
     # Start looping
     while running:
+        # Reset break status every iteration
+        break_taken = False
+
         # Wait until spell action finished
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
 
@@ -291,23 +315,52 @@ try:
             break
 
         open_bank()
+        break_action()
+
+        if not running:
+            print("Not running anymore.")
+            break
 
         deposit_item()
+        break_action()
 
+        if not running:
+            print("Not running anymore.")
+            break
+
+        # Withdraw 27 items from bank
         if item_left < 27:
             print("Out of item(s). Exiting.")
             running = False
             break
-
-        # Withdraw 27 items from bank
         withdraw_item()
         item_left -= 27
+        break_action()
+
+        if not running:
+            print("Not running anymore.")
+            break
 
         close_interface()
+        break_action()
+
+        if not running:
+            print("Not running anymore.")
+            break
 
         open_spellbook()
+        break_action()
+
+        if not running:
+            print("Not running anymore.")
+            break
 
         click_spell()
+        break_action()
+
+        if not running:
+            print("Not running anymore.")
+            break
 
         secs = global_timer.elapsed() / 1000
         hrs = int(secs / 3600)

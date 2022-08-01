@@ -27,10 +27,6 @@ close_menu_key=ESC
 # Title of the game window (or some unambigous part of it) to recognize it
 window_title=RuneLite
 
-# Double click range (ms)
-click_min=200
-click_max=500
-
 # Mouse speed interval (ms)
 mouse_speed_min=100
 mouse_speed_max=180
@@ -42,6 +38,15 @@ action_max=180
 # Wait time for the spell action to finish
 wait_min=1800
 wait_max=2100
+
+# Random breaks' interval (ms)
+# 1 min - 4,5min (idle logout at 5min!)
+break_min=55000
+break_max=275000
+
+# Probability to take a break
+# Breaks only once per loop
+break_prob=0.05
 
 # How much the random movement moves the mouse
 rand_min=-9
