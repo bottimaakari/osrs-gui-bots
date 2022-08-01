@@ -27,7 +27,7 @@ class Random:
     # To have some reliable, tested defaults
     CHUNK_SIZE: int = 1024  # API Limit: 1024
     VALUE_SIZE: int = 16  # API: int16 -> 16
-    ARRAY_SIZE: int = 30  # Values in total: DATA_COUNT * CHUNK_SIZE
+    ARRAY_SIZE: int = 10  # Values in total: DATA_COUNT * CHUNK_SIZE
     AUTOFILL_INTEVAL: float = 1.0  # How often to check whether needed to refill random data
     AUTOFILL_THRESHOLD: int = 50  # Threshold when its time to refill the random data (nums left in the last list)
 
@@ -58,9 +58,10 @@ class Random:
         # Start autofill thread if autofill enabled
         if autofill:
             print("Autofill enabled.")
-            self._fill_thread = threading.Thread(target=self.__fill_thread, name="autofill_bg", daemon=True)
+            self._fill_thread = threading.Thread(target=self.__fill_thread, name="autofill_bg_thread", daemon=True)
             self._fill_thread.start()
         else:
+            self._fill_thread = None
             print("Autofill disabled.")
 
     def __fill_thread(self):
@@ -74,8 +75,6 @@ class Random:
                     self._value_it >= self._chunk_size - self.AUTOFILL_THRESHOLD - 1:
                 print("Random data at critical level. Reinit data.")
                 self.init()
-            # else:
-            #     print("No need to fill.")
 
         print("Autofill thread exiting.")
 
@@ -93,7 +92,9 @@ class Random:
     def __del__(self):
         # Ensure internal thread(s) are terminated before destructing the class
         self._running = False
-        self._fill_thread.join(5)
+        if self._fill_thread and self._fill_thread.is_alive():
+            print("Waiting for autofill thread to stop..")
+            self._fill_thread.join(5)
 
     def init(self) -> None:
         """
@@ -163,17 +164,17 @@ class Random:
         :param hi:
         :return:
         """
-        rng = hi - lo
+        dist = hi - lo
 
         # First check that if the range is valid
-        if rng < 0:
+        if dist < 0:
             raise ValueError("Max cannot be less than Min")
 
         # Limit the range to the maximum precision of 2^16
-        if rng > self._limit:
-            raise ValueError(f"Distance between min and max cannot be over {self._limit}")
+        # if rng > self._limit:
+        #     raise ValueError(f"Distance between min and max cannot be over {self._limit}")
 
-        return round(self.random() * rng) + lo
+        return round(self.random() * dist) + lo
 
 
 def read_settings(filename: str):
@@ -243,7 +244,7 @@ def rand_sleep(rng, minms: int, maxms: int, debug: bool = True):
     tm = rng.randint(minms, maxms)
     if debug:
         print(f"Delay for: {tm} ms")
-    pyautogui.sleep(tm / 1000)
+    time.sleep(tm / 1000)
     return tm
 
 
@@ -275,7 +276,7 @@ def mouse_movement_background(rng, move_min: int, move_max: int, max_off: int, d
     print("Mouse movement BG Thread started.")
 
     while globvals.running:
-        rand_sleep(rng, 10, 1000, debug)
+        rand_sleep(rng, 50, 1000, debug)
 
         if not globvals.running:
             break
@@ -284,7 +285,7 @@ def mouse_movement_background(rng, move_min: int, move_max: int, max_off: int, d
         if not globvals.can_move:
             continue
 
-        for i in range(0, rng.randint(0, rng.randint(0, 8))):
+        for i in range(0, rng.randint(0, rng.randint(0, 10))):
             rand_sleep(rng, 20, 50, debug)
             if not globvals.running or not globvals.can_move:
                 break
@@ -301,3 +302,10 @@ def mouse_movement_background(rng, move_min: int, move_max: int, max_off: int, d
 
 def window(name):
     return pyautogui.getWindowsWithTitle(name)[0]
+
+
+def print_info(key):
+    print(f"Started. Hit key with code {key} at any time to stop execution.")
+    print("NOTE: Ensure settings are correctly defined in settings file.")
+    print("NOTE: Ensure item details are correctly set in items data file (if applicable).")
+    print("NOTE: Please do not move the mouse anymore since the program has been started.")
