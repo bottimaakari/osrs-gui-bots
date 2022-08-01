@@ -21,11 +21,18 @@ mouse_info=False
 # Save (overwrite) current item counts to items file on exit
 save_on_exit=False
 
-# Keycode for key to interrupt (stop) the program
 # 1 = ESC
 # 82 = Numpad 0
 # 41 = §
+# 12 = +
+
+# Keycode for key to interrupt (stop) the program
 interrupt_key=41
+
+# Pause the program at any time by pressing this key
+# When already paused, the program resumes with the same key
+# Make sure it's different from the interrupt key!
+pause_key=12
 
 # Other action shortcut keys
 spellbook_key=F6

@@ -283,7 +283,7 @@ def create_movement_thread(rng, move_min: int, move_max: int, max_off: int, debu
         target=mouse_movement_background,
         name="bg_mouse_movement",
         args=(rng, move_min, move_max, max_off, debug),
-        daemon=True
+        # daemon=True
     )
 
 

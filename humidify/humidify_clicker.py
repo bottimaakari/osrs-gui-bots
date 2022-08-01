@@ -154,6 +154,20 @@ def interrupt(ev):
     print("Possibly still waiting for a sleep to finish..")
 
 
+# Catches pause key presses
+# Pauses the program until resumed
+def pause(ev):
+    if not globvals.paused:
+        print("Program paused.")
+        globvals.can_move = False
+        globvals.paused = True
+    else:
+        print("Program resumed.")
+        globvals.can_move = True
+        globvals.paused = False
+    print("Possibly still waiting for a sleep to finish..")
+
+
 if __name__ == '__main__':
     try:
         # Use quantumrandom as random data source for better entropy
@@ -186,6 +200,7 @@ if __name__ == '__main__':
 
         # Key codes
         interrupt_key: int = int(settings['interrupt_key'])
+        pause_key: int = int(settings['pause_key'])
 
         # UI Shortcut keys
         close_key: str = settings['close_menu_key']
@@ -243,16 +258,13 @@ if __name__ == '__main__':
 
         globvals.running = True
         globvals.can_move = True
-        globvals.break_taken = False
 
         move_thread = clicker_common.create_movement_thread(
             rng, move_min, move_max, max_off, debug_mode
         )
 
-        # Key 1 = ESC
-        # Key 82 = NUMPAD 0
-        # Key 41 = §
         keyboard.on_press_key(interrupt_key, interrupt)
+        keyboard.on_press_key(pause_key, pause)
 
         # Print instructions on start before start delay
         clicker_common.print_start_info(interrupt_key)
@@ -298,25 +310,31 @@ if __name__ == '__main__':
 
         def break_action():
             # If break not yet taken in this loop, enough time from previous break passed, and random number hits prob
-            if not globvals.break_taken and break_timer.elapsed() >= break_time and rng.random() < break_prob:
+            if break_timer.elapsed() >= break_time and rng.random() < break_prob:
                 break_timer.reset()
                 globvals.can_move = False
                 take_break()
                 globvals.can_move = True
-                globvals.break_taken = True
+
+
+        def pause_action():
+            while globvals.paused:
+                # globvals.can_move = False
+                clicker_common.rand_sleep(rng, 1000, 1000, debug_mode)
 
 
         # Start looping
         while globvals.running:
-            # Reset break status every iteration
-            globvals.break_taken = False
+            if not globvals.running:
+                break
+            pause_action()
 
             # Wait until spell action finished
-            clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
+            clicker_common.rand_sleep(rng, wait_min, wait_max, debug=True)
 
             if not globvals.running:
-                print("Not running anymore.")
                 break
+            pause_action()
 
             if global_timer.elapsed() >= run_max:
                 print("Max runtime reached. Stopping.")
@@ -327,15 +345,15 @@ if __name__ == '__main__':
             break_action()
 
             if not globvals.running:
-                print("Not running anymore.")
                 break
+            pause_action()
 
             deposit_item()
             break_action()
 
             if not globvals.running:
-                print("Not running anymore.")
                 break
+            pause_action()
 
             # Withdraw 27 items from bank
             if item_left < item_take:
@@ -347,27 +365,31 @@ if __name__ == '__main__':
             break_action()
 
             if not globvals.running:
-                print("Not running anymore.")
                 break
+            pause_action()
 
             close_interface()
             break_action()
 
             if not globvals.running:
-                print("Not running anymore.")
                 break
+            pause_action()
 
             open_spellbook()
             break_action()
 
             if not globvals.running:
-                print("Not running anymore.")
                 break
+            pause_action()
 
             click_spell()
-            break_action()
 
             clicker_common.print_status(global_timer)
+
+            break_action()
+
+        # END WHILE
+        print("Main loop stopped.")
 
         # Gracefully let the bg thread to exit
         if move_thread.is_alive():
