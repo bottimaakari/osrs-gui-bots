@@ -136,40 +136,40 @@ if __name__ == '__main__':
 
         if globvals.running and act_start:
             print("Running actions at program start..")
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.focus_window(**common_args)
-                clicker_common.pause_action(rng, debug_mode)
+                clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.close_interface(close_key, **common_args)
-                clicker_common.pause_action(rng, debug_mode)
+                clicker_common.pause_action(**common_args)
             # ACTION LOOP BEGINS HERE
             if globvals.running:
                 clicker_common.open_bank(bank_location, **common_args)
-                clicker_common.pause_action(rng, debug_mode)
+                clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.withdraw_item(withdraw_location, withdraw_offset, left_banking, item_take, **common_args)
-                clicker_common.pause_action(rng, debug_mode)
+                clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.close_interface(close_key, **common_args)
-                clicker_common.pause_action(rng, debug_mode)
+                clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.open_spell_book(spell_book_key, **common_args)
-                clicker_common.pause_action(rng, debug_mode)
+                clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.click_spell(spell_location, bank_location, **common_args)
-                clicker_common.pause_action(rng, debug_mode)
+                clicker_common.pause_action(**common_args)
 
         # Start looping
         while globvals.running:
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             # Wait until spell action finished
-            clicker_common.rand_sleep(rng, wait_min, wait_max, debug=True)
+            clicker_common.rand_sleep(wait_min, wait_max, debug=True, **common_args)
 
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
@@ -180,38 +180,38 @@ if __name__ == '__main__':
 
             # ACTION LOOP BEGINS HERE
             clicker_common.open_bank(bank_location, **common_args)
-            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
 
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             clicker_common.deposit_item(deposit_location, deposit_offset, left_banking, **common_args)
-            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
 
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             # Withdraw items from bank
             clicker_common.withdraw_item(withdraw_location, withdraw_offset, left_banking, item_take, **common_args)
-            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
 
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             clicker_common.close_interface(close_key, **common_args)
-            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
 
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             clicker_common.open_spell_book(spell_book_key, **common_args)
-            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
 
-            clicker_common.pause_action(rng, debug_mode)
+            clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
@@ -221,7 +221,7 @@ if __name__ == '__main__':
             # before rolling break dice to get status printed e.g. just before a very long break
             clicker_common.print_status(global_timer)
 
-            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
 
         # END WHILE
         print("Main loop stopped.")
