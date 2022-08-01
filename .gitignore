@@ -137,3 +137,9 @@ imglog/
 # Inventory items info file
 **/items.txt
 **/settings.txt
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/osrs-guibot.iml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
