@@ -1,3 +1,3 @@
-running = None
-can_move = None
-break_taken = None
+running: bool | None = None
+can_move: bool | None = None
+break_taken: bool | None = None
