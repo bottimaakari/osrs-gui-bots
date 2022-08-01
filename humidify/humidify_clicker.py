@@ -160,13 +160,13 @@ try:
     # Use quantumrandom as random data source for better entropy
     rng = clicker_common.init_rng()
 
-    settings_file = "settings.txt"
+    settings_file: str = "settings.txt"
 
     # Read configuration file
-    settings = clicker_common.read_settings(settings_file)
+    settings: dict[str, str] = clicker_common.read_settings(settings_file)
 
     # Collect game window info (topleft coords)
-    window_name = str(settings["window_title"])
+    window_name: str = str(settings["window_title"])
 
     try:
         window()
@@ -183,73 +183,71 @@ try:
         exit(0)
 
     # Debug prints etc.
-    debug_mode = settings['debug_mode'].lower() == 'true'
+    debug_mode: bool = settings['debug_mode'].lower() == 'true'
 
     # Key codes
-    interrupt_key = int(settings['interrupt_key'])
+    interrupt_key: int = int(settings['interrupt_key'])
 
     # UI Shortcut keys
-    close_key = settings['close_menu_key']
-    spellbook_key = settings['spellbook_key']
+    close_key: str = settings['close_menu_key']
+    spellbook_key: str = settings['spellbook_key']
 
     # Mouse speed limits
-    speed_min = int(settings['mouse_speed_min'])
-    speed_max = int(settings['mouse_speed_max'])
+    speed_min: int = int(settings['mouse_speed_min'])
+    speed_max: int = int(settings['mouse_speed_max'])
 
     # Random movement offset limits
-    move_min = int(settings['rand_min'])
-    move_max = int(settings['rand_max'])
+    move_min: int = int(settings['rand_min'])
+    move_max: int = int(settings['rand_max'])
 
     # Action delays
-    action_min = int(settings['action_min'])
-    action_max = int(settings['action_max'])
+    action_min: int = int(settings['action_min'])
+    action_max: int = int(settings['action_max'])
 
     # Loop interval - time to wait before every cycle
-    wait_min = int(settings['wait_min'])
-    wait_max = int(settings['wait_max'])
+    wait_min: int = int(settings['wait_min'])
+    wait_max: int = int(settings['wait_max'])
 
     # Additional delay before closing an interface
-    close_min = int(settings['close_min'])
-    close_max = int(settings['close_max'])
+    close_min: int = int(settings['close_min'])
+    close_max: int = int(settings['close_max'])
 
     # Random breaks interval
-    break_min = int(settings['break_min'])
-    break_max = int(settings['break_max'])
+    break_min: int = int(settings['break_min'])
+    break_max: int = int(settings['break_max'])
 
     # Probability to take a random break
-    break_prob = float(settings['break_prob'])
+    break_prob: float = float(settings['break_prob'])
 
     # Break timer elapsed min
-    break_time = int(settings['break_time_min'])
+    break_time: int = int(settings['break_time_min'])
 
     # Maximum precise target offset
-    max_off = int(settings['max_off'])
+    max_off: int = int(settings['max_off'])
 
-    run_max = int(settings['max_run_time'])
+    run_max: int = int(settings['max_run_time'])
 
-    act_start = settings['act_start'].lower() == "true"
+    act_start: bool = settings['act_start'].lower() == "true"
 
-    left_banking = settings['left_click_banking'].lower() == "true"
+    left_banking: bool = settings['left_click_banking'].lower() == "true"
 
-    spell_location = tuple(map(int, settings['spell_location'].split(',')))
-    bank_location = tuple(map(int, settings['bank_location'].split(',')))
-    deposit_location = tuple(map(int, settings['deposit_location'].split(',')))
-    withdraw_location = tuple(map(int, settings['withdraw_location'].split(',')))
+    spell_location: tuple = tuple(map(int, settings['spell_location'].split(',')[:2]))
+    bank_location: tuple = tuple(map(int, settings['bank_location'].split(',')[:2]))
+    deposit_location: tuple = tuple(map(int, settings['deposit_location'].split(',')[:2]))
+    withdraw_location: tuple = tuple(map(int, settings['withdraw_location'].split(',')[:2]))
 
-    deposit_offset = int(settings['deposit_offset'])
-    withdraw_offset = int(settings['withdraw_offset'])
+    deposit_offset: int = int(settings['deposit_offset'])
+    withdraw_offset: int = int(settings['withdraw_offset'])
 
-    item_left = int(settings['item_left'])
-    item_take = int(settings['item_take'])
+    item_left: int = int(settings['item_left'])
+    item_take: int = int(settings['item_take'])
 
     globvals.running = True
     globvals.can_move = True
     globvals.break_taken = False
 
-    move_thread = threading.Thread(
-        target=clicker_common.mouse_movement_background,
-        name="bg_mouse_movement",
-        args=(rng, move_min, move_max, max_off, debug_mode)
+    move_thread: threading.Thread = clicker_common.create_movement_thread(
+        rng, move_min, move_max, max_off, debug_mode
     )
 
     # Key 1 = ESC
@@ -265,8 +263,8 @@ try:
 
     # Timers for keeping track when allowed to commit next actions
     # Separate timer for each task
-    global_timer = clicker_common.Timer()
-    break_timer = clicker_common.Timer()
+    global_timer: clicker_common.Timer = clicker_common.Timer()
+    break_timer: clicker_common.Timer = clicker_common.Timer()
 
     # Before each operation, check that we are still running
     # and not interrupted (running == True)

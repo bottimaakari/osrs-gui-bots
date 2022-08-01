@@ -44,7 +44,7 @@ class Random:
         raise ValueError("CHUNK_SIZE must be between 1 and 1024.")
 
     if ARRAY_SIZE <= 0:
-        raise ValueError("ARRAY_SIZE must be at positive.")
+        raise ValueError("ARRAY_SIZE must be positive.")
 
     def __init__(self, count: int = None, size: int = None, autofill: bool = True):
         # Parameters for setting up data
@@ -275,6 +275,15 @@ def mouse_movement_background(rng, move_min: int, move_max: int, max_off: int, d
             pyautogui.moveRel(x, y, rand_mouse_speed(rng, 30, 80, debug))
 
     print("Mouse movement BG Thread terminated.")
+
+
+def create_movement_thread(rng, move_min: int, move_max: int, max_off: int, debug: bool = True) -> threading.Thread:
+    return threading.Thread(
+        target=mouse_movement_background,
+        name="bg_mouse_movement",
+        args=(rng, move_min, move_max, max_off, debug),
+        daemon=True
+    )
 
 
 def window(name):
