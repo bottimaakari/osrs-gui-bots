@@ -10,3 +10,4 @@ Main.py acts as the launcher for any of the scripts.
 - Banking (WIP)
 - Auto healing by eating food in combat (PLANNED)
 - Combat (PLANNED)
+- High alchemy (PLANNED)
