@@ -581,8 +581,11 @@ def focus_window(**kwargs) -> None:
     rng: any = kwargs['rng']
 
     print("Focus on game window.")
-    # Set max_off to 0 to for max accuracy
-    hover_click((rng.randint(50, 900), rng.randint(10, 40)), **{**kwargs, 'max_off': 0})
+    # Set max_off to static value low, to ensure the click hits correctly
+    # NOTE! This target depends on screen resolution! It should be compatible at least for FHD, 2K, 4K
+    # The lower resolution, the less pixels the correct area is!
+    # 4K: x=0-600 y=0-60 2K: x=0-300 y=0-30 FHD: x=0-150 y=0-15
+    hover_click((rng.randint(100, 350), rng.randint(8, 12)), **{**kwargs, 'max_off': 1})
 
 
 def close_interface(key: str, **kwargs) -> None:
