@@ -5,8 +5,8 @@
 
 # Amount of hard clay initially in bank
 # (Assuming unlimited supply of additional resources e.g. Astral runes)
-item1_left=9500
-item2_left=9500
+item1_left=5500
+item2_left=5500
 
 # How much of each item is withdrawn in every loop?
 item1_take=14
@@ -17,18 +17,20 @@ item2_take=14
 # Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 bank_location=315,200
 
-combine1_location=716,307
-combine2_location=716,307
+# Location for both items to click on to start the combination process
+# E.g. a jug of water for item1 and grapes for item2 in inventory
+combine1_location=626,366
+combine2_location=666,366
 
-withdraw_location=330,162
-withdraw_offset=70
+withdraw_location=379,234
+withdraw_offset=72
 
-snd_withdraw_location=380,162
+snd_withdraw_location=428,234
 snd_withdraw_offset=70
 
-# Position (Hor, Vert) (1,7)
-deposit_location1=580,474
-deposit_offset1=15
+# Bank all items button (only left click)
+deposit_location1=448,340
+deposit_offset1=NULL
 
 # Do a second deposit on a second position?
 # Coordinates defined below

@@ -193,6 +193,10 @@ def confirm_action():
     clicker_common.rand_sleep(rng, close_min, close_max, debug_mode)
     hotkey_press(confirm_key)
 
+    # Immediately hover mouse over bank after started action
+    loc = tuple(map(int, settings['bank_location'].split(',')))
+    hover(loc)
+
 
 def take_break():
     print("Taking a break.")
