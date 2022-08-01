@@ -314,10 +314,6 @@ try:
         # Reset break status every iteration
         globvals.break_taken = False
 
-        if not globvals.running:
-            print("Not running anymore.")
-            break
-
         # Wait until spell action finished
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
 

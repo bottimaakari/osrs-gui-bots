@@ -371,10 +371,6 @@ try:
         # Reset break status every iteration
         break_taken = False
 
-        if not running:
-            print("Not running anymore.")
-            break
-
         can_move = idle_move
         # Wait until spell action finished
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
