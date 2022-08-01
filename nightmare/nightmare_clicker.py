@@ -56,7 +56,7 @@ def hover_click(location):
     hover_target(x, y)
 
     # Wait for a while before next action
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Recalculate random-off x,y and click the target
     x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
@@ -65,7 +65,7 @@ def hover_click(location):
 
 def focus_window():
     print("Focus on game window.")
-    hover_click((10, 10))
+    hover_click((50, 5))
 
 
 def ensure_inventory_open():
@@ -82,6 +82,11 @@ def click_special_attack():
 
 def click_item(target):
     print("Use item.")
+    hover_click((target[0], target[1]))
+
+
+def click_snd_item(target):
+    print("Use secondary item.")
     hover_click((target[0], target[1]))
 
 
@@ -110,9 +115,15 @@ def move_outside_window():
         tuple(map(operator.add, (br.x, br.y), (50, 50))),
     ]
 
+    # Choose a random game window corner
     target = rng.choice(targets)
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+
+    # Hover away from the screen to the desired corner
     hover_target(target[0], target[1])
+
+    # Additionally, set the focus away from the game window
+    left_click_target(target[0], target[1])
 
 
 def window():
@@ -172,6 +183,9 @@ try:
 
     wmin = int(settings['click_min'])
     wmax = int(settings['click_max'])
+
+    action_min = int(settings['action_min'])
+    action_max = int(settings['action_max'])
 
     # Maximum precise target offset
     max_off = int(settings['max_off'])
@@ -281,7 +295,7 @@ try:
 
         # Use the snd item (e.g. stats potion)
         if running and use_snd_item:
-            click_item(snd_inv[snd_current])
+            click_snd_item(snd_inv[snd_current])
             snd_inv[snd_current][2] -= 1
 
         # Initially, ensure mouse is outside game window
@@ -295,9 +309,73 @@ try:
     snd_timer = clicker_common.Timer()
     special_timer = clicker_common.Timer()
 
+
+    def prayer_action():
+        # Double click the prayer button to reset regeneration
+        if use_prayer:
+            click_prayer()
+
+
+    def special_action():
+        if use_special and special_timer.elapsed() >= special_time and rng.random() <= special_prob:
+            special_timer.reset()
+            click_special_attack()
+
+
+    def item_action():
+        # Click the first item available, if is enabled, if odds hit, if minimum time passed
+        item_rnd = rng.random()
+        if debug_mode:
+            print(f"Item: {use_item}|{item_timer.elapsed()}|{item_time}|{item_rnd}|{item_prob}")
+        if use_item and item_timer.elapsed() >= item_time and item_rnd <= item_prob:
+            item_timer.reset()
+            print("Click next non-empty item if available.")
+
+            global current
+            while current < len(inventory) and inventory[current][2] <= 0:
+                print("Out of current item. Moving to next item.")
+                current += 1
+
+            if current >= len(inventory):
+                print("Out of items.")
+            else:
+                click_item(inventory[current])
+                inventory[current][2] -= 1
+
+
+    def snd_item_action():
+        # Click the first secondary item available, if is enabled, if odds hit, if minimum time passed
+        snd_rnd = rng.random()
+        if debug_mode:
+            print(f"Secondary item: {use_snd_item}|{snd_timer.elapsed()}|{snd_time}|{snd_rnd}|{snd_prob}")
+        if use_snd_item and snd_timer.elapsed() >= snd_time and snd_rnd <= snd_prob:
+            snd_timer.reset()
+            print("Click next non-empty secondary item if available.")
+
+            global snd_current
+            while snd_current < len(snd_inv) and snd_inv[snd_current][2] <= 0:
+                print("Out of current item. Moving to next item.")
+                snd_current += 1
+
+            if snd_current >= len(snd_inv):
+                print("Out of items.")
+            else:
+                print("Use secondary item.")
+                click_snd_item(snd_inv[snd_current])
+                snd_inv[snd_current][2] -= 1
+
+
+    actions = []
+
+    if use_special:
+        actions.append(special_action)
+    if use_item:
+        actions.append(item_action)
+    if use_snd_item:
+        actions.append(snd_item_action)
+
     # Start looping
     while running:
-        # TODO longer sleep max (allow regenerate & eat rock cake) ?
         # Sleep for a random time, at maximum the time the health regenerates
         can_move = False
         clicker_common.rand_sleep(rng, loop_min, loop_max)  # debug=True
@@ -312,56 +390,18 @@ try:
             running = False
             break
 
-        # Double click the prayer button to reset regeneration
-        if use_prayer:
-            click_prayer()
-
-        # TODO rock cake eat + guzzle?
-
-        if use_special and special_timer.elapsed() >= special_time and rng.random() <= special_prob:
-            special_timer.reset()
-            click_special_attack()
-
         # If the probability was hit, ensure the inventory tab is open
         if rng.random() <= inv_prob:
             ensure_inventory_open()
 
-        # Click the first item available, if is enabled, if odds hit, if minimum time passed
-        item_rnd = rng.random()
-        if debug_mode:
-            print(f"Item: {use_item}|{item_timer.elapsed()}|{item_time}|{item_rnd}|{item_prob}")
-        if use_item and item_timer.elapsed() >= item_time and item_rnd <= item_prob:
-            item_timer.reset()
-            print("Click next non-empty item if available.")
+        # Always do prayer action first (timing!)
+        # Excluded from the action list
+        prayer_action()
 
-            while current < len(inventory) and inventory[current][2] <= 0:
-                print("Out of current item. Moving to next item.")
-                current += 1
-
-            if current >= len(inventory):
-                print("Out of items.")
-            else:
-                click_item(inventory[current])
-                inventory[current][2] -= 1
-
-        # Click the first secondary item available, if is enabled, if odds hit, if minimum time passed
-        snd_rnd = rng.random()
-        if debug_mode:
-            print(f"Secondary item: {use_snd_item}|{snd_timer.elapsed()}|{snd_time}|{snd_rnd}|{snd_prob}")
-        if use_snd_item and snd_timer.elapsed() >= snd_time and snd_rnd <= snd_prob:
-            snd_timer.reset()
-            print("Click next non-empty secondary item if available.")
-
-            while snd_current < len(snd_inv) and snd_inv[snd_current][2] <= 0:
-                print("Out of current item. Moving to next item.")
-                snd_current += 1
-
-            if snd_current >= len(snd_inv):
-                print("Out of items.")
-            else:
-                print("Use secondary item.")
-                click_item(snd_inv[snd_current])
-                snd_inv[snd_current][2] -= 1
+        # Commit rest of the actions in random order
+        rng.shuffle(actions)
+        for action in actions:
+            action()
 
         # Finally, move the cursor outside the game window
         move_outside_window()

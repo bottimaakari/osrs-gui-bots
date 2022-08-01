@@ -26,29 +26,34 @@ snd_items_file=snd-items.txt
 # 1 = ESC
 # 82 = Numpad 0
 # 41 = §
-interrupt_key=1
+interrupt_key=41
 
 # Title of the game window (or some unambigous part of it) to recognize it
 window_title=RuneLite
 
 # Main loop interval (ms)
 loop_min=20000
-loop_max=50000
+loop_max=49000
 
 # Double click range (ms)
-click_min=200
-click_max=500
+click_min=80
+click_max=200
 
 # Mouse speed interval (ms)
 mouse_min=50
 mouse_max=300
 
+# Delays between common actions (ms)
+action_min=100
+action_max=300
+
 # How much the random movement moves the mouse
-rand_min=-9
-rand_max=9
+rand_min=-10
+rand_max=10
 
 # How much the click can be randomized off of the precise target
-max_off=6
+# Affects both X and Y (X +- max_off, Y +- max_off)
+max_off=4
 
 # Run all (enabled) actions at start?
 # Excluding primary item click (e.g. absorb points always full at start)
@@ -67,30 +72,30 @@ use_snd_items=True
 use_special=True
 
 # Probability to click the inventory tab on current loop
-inv_menu_prob=0.3
+inv_menu_prob=0.1
 
 # Probability of clicking an item (uses left) after minimum time passed
-item_prob=0.75
+item_prob=0.9
 
 # Probability of clicking an item (uses left) after minimum time passed
-snd_item_prob=0.75
+snd_item_prob=0.9
 
 # Special attack probability
-special_prob=0.75
+special_prob=0.9
 
 # Minimum time elapsed to click an item (ms)
 # Should be e.g. average time elapsed consuming 50 absorb pts
-# 4.75 min
-item_time_min=280000
+# Time varies depending on bosses, gear, location, etc.
+item_time_min=250000
 
 # Minimum time elapsed to click a secondary item (ms)
 # Should be e.g. average time elapsed consuming combat potion
-# 17.xx min
+# Time varies which potion, how long potion depletes, etc.
 snd_item_time_min=1025000
 
 # Minimum time elapsed to click special attack (ms)
 # Time for special attack to recharge
-# 5 min
+# Time varies depending on weapon
 special_time_min=300000
 
 # Maximum time the script runs before exiting
