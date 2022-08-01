@@ -1,5 +1,4 @@
 import datetime
-import operator
 import secrets
 import threading
 
@@ -109,15 +108,21 @@ def move_outside_window():
     bl = w.bottomleft
     br = w.bottomright
 
+    # How much to move away from the window
+    offset = 30
+
+    # Collect all possible targets
     targets = [
-        tuple(map(operator.add, (tl.x, tl.y), (-50, -50))),
-        tuple(map(operator.add, (tr.x, tr.y), (50, -50))),
-        tuple(map(operator.add, (bl.x, bl.y), (-50, 50))),
-        tuple(map(operator.add, (br.x, br.y), (50, 50))),
+        (rng.randint(tl.x - offset, tr.x + offset), tl.y - offset),
+        (rng.randint(bl.x - offset, br.x + offset), bl.y + offset),
+        (tl.x - offset, rng.randint(tl.y - offset, bl.y + offset)),
+        (tr.x + offset, rng.randint(tr.y - offset, br.y + offset)),
     ]
 
-    # Choose a random game window corner
+    # Pick a random target
     target = rng.choice(targets)
+
+    # Sleep for a while
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Hover away from the screen to the desired corner
