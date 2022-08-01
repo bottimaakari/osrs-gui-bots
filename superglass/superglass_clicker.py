@@ -358,6 +358,10 @@ try:
         # Reset break status every iteration
         break_taken = False
 
+        if not running:
+            print("Not running anymore.")
+            break
+
         # Wait until spell action finished
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
 
@@ -414,10 +418,6 @@ try:
 
         click_spell()
         break_action()
-
-        if not running:
-            print("Not running anymore.")
-            break
 
         secs = global_timer.elapsed() / 1000
         hrs = int(secs / 3600)
