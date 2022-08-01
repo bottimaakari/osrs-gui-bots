@@ -1,4 +1,5 @@
 import datetime
+import os
 import queue
 import threading
 import time
@@ -152,7 +153,13 @@ class Random:
         return round(self.random() * dist) + lo
 
 
-def read_settings(filename: str):
+def get_timestamp(local: bool, sep: str = ' ') -> str:
+    if local:
+        return datetime.datetime.now().isoformat(sep, 'seconds')
+    return datetime.datetime.utcnow().isoformat(sep, 'seconds')
+
+
+def read_settings(filename: str) -> dict[str, str]:
     try:
         file = open(filename, "r")
     except IOError as exc:
@@ -191,9 +198,9 @@ def read_inventory(filename: str):
     return data
 
 
-def save_inventory(filename: str, items: list):
+def save_inventory(filename: str, items: list) -> None:
     try:
-        file = open(filename, "r", encoding="utf-8")
+        file = open(filename, "a", encoding="utf-8")
     except IOError as ex:
         print(
             f"ERROR: Failed to write into item file ({filename}). Ensure this executable and the current user has "
@@ -201,14 +208,24 @@ def save_inventory(filename: str, items: list):
         print(f"Exception details: {ex}")
         raise ex
 
+    # Get ISO timestamp in local TZ
+    stamp: str = get_timestamp(local=True)
+
+    # First, append header to separate from previous runs
+    file.write(f"{os.linesep}### ITEMS SAVED ON {stamp} ###{os.linesep}")
+
+    # Then, append items with their curent status
     for it in items:
         file.write(str(it[0]) + ";" + str(it[1]) + ";" + str(it[2]))
-        file.write("\r\n")  # TODO CRLF on win, LF on *nix
+        file.write(os.linesep)  # TODO CRLF on win, LF on *nix
+
+    # Write the footer to separate from other runs
+    file.write(f"### END OF ITEMS ON {stamp}{os.linesep}")
 
     file.close()
 
 
-def init_rng():
+def init_rng() -> any:
     rng = Random()
     return rng
 
@@ -309,4 +326,4 @@ def print_status(timer: Timer):
     mins = int(secs / 60 - hrs * 60)
     secs = int(secs - hrs * 3600 - mins * 60)
     print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
-    print(f"Timestamp: {datetime.datetime.now()}")
+    print(f"Timestamp: {get_timestamp(local=True)}")
