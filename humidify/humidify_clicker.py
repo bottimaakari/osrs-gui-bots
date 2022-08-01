@@ -145,7 +145,7 @@ if __name__ == '__main__':
                 clicker_common.pause_action(**common_args)
             # ACTION LOOP BEGINS HERE
             if globvals.running:
-                clicker_common.open_bank(bank_location, **common_args)
+                clicker_common.open_location(bank_location, **common_args)
                 clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.withdraw_item(withdraw_location, withdraw_offset, left_banking, item_take, **common_args)
@@ -154,7 +154,7 @@ if __name__ == '__main__':
                 clicker_common.close_interface(close_key, **common_args)
                 clicker_common.pause_action(**common_args)
             if globvals.running:
-                clicker_common.open_spell_book(spell_book_key, **common_args)
+                clicker_common.open_menu(spell_book_key, **common_args)
                 clicker_common.pause_action(**common_args)
             if globvals.running:
                 clicker_common.click_spell(spell_location, bank_location, **common_args)
@@ -179,7 +179,7 @@ if __name__ == '__main__':
                 break
 
             # ACTION LOOP BEGINS HERE
-            clicker_common.open_bank(bank_location, **common_args)
+            clicker_common.open_location(bank_location, **common_args)
             clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)
@@ -208,7 +208,7 @@ if __name__ == '__main__':
             if not globvals.running:
                 break
 
-            clicker_common.open_spell_book(spell_book_key, **common_args)
+            clicker_common.open_menu(spell_book_key, **common_args)
             clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)

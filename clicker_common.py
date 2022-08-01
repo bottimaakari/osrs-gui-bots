@@ -571,11 +571,6 @@ def hover_context_click(location: tuple[int, int], offset: int, **kwargs) -> Non
     left_click_raw(x, y, **kwargs)
 
 
-def take_break(break_min, break_max, **kwargs) -> None:
-    print("Taking a break.")
-    rand_sleep(break_min, break_max, **{**kwargs, 'debug': True})  # Longer break -> always debug print output
-
-
 def focus_window(**kwargs) -> None:
     # Read common parameters from packed kwargs
     rng: any = kwargs['rng']
@@ -585,15 +580,30 @@ def focus_window(**kwargs) -> None:
     hover_click((rng.randint(50, 900), rng.randint(10, 40)), **{**kwargs, 'max_off': 0})
 
 
-def open_bank(bank_location: tuple[int, int], **kwargs) -> None:
-    print("Open bank.")
-    hover_click(bank_location, **kwargs)
+def close_interface(key: str, **kwargs) -> None:
+    # Read common parameters from packed kwargs
+    close_min: int = kwargs['close_min']
+    close_max: int = kwargs['close_max']
+
+    print("Close current interface.")
+    rand_sleep(close_min, close_max, **kwargs)
+    key_press(key, **kwargs)
+
+
+def open_location(location: tuple[int, int], **kwargs) -> None:
+    print("Open location.")
+    hover_click(location, **kwargs)
+
+
+def open_menu(key: str, **kwargs) -> None:
+    print("Ensure menu open.")
+    key_press(key, **kwargs)
 
 
 def withdraw_item(location: tuple[int, int], offset: int, left_banking: bool, item_take: int, **kwargs) -> None:
     debug: bool = kwargs['debug']
 
-    print("Withdraw item(s).")
+    print("Withdraw item.")
 
     if debug:
         print(f"Item subtraction: {globvals.item_left} - {item_take}")
@@ -615,7 +625,7 @@ def withdraw_item(location: tuple[int, int], offset: int, left_banking: bool, it
 
 
 def deposit_item(location: tuple[int, int], offset: int, left_banking: bool, **kwargs) -> None:
-    print("Deposit item(s).")
+    print("Deposit item.")
 
     if left_banking:
         print("Deposit using left click.")
@@ -625,19 +635,64 @@ def deposit_item(location: tuple[int, int], offset: int, left_banking: bool, **k
         hover_context_click(location, offset, **kwargs)
 
 
-def close_interface(key: str, **kwargs) -> None:
+def withdraw_items(
+        first_location: tuple[int, int],
+        first_offset: int,
+        item_take: int,
+        second_location: tuple[int, int],
+        second_offset: int,
+        item2_take: int,
+        left_banking: bool,
+        **kwargs
+) -> None:
     # Read common parameters from packed kwargs
-    close_min: int = kwargs['close_min']
-    close_max: int = kwargs['close_max']
+    debug: bool = kwargs['debug']
 
-    print("Close current interface.")
-    rand_sleep(close_min, close_max, **kwargs)
-    key_press(key, **kwargs)
+    print("Withdraw items.")
+
+    if debug:
+        print(f"Item subtraction: {globvals.item_left} - {item_take}")
+        print(f"Item2 subtraction: {globvals.item2_left} - {item2_take}")
+
+    # Throws Error if item_left not set by script
+    if globvals.item_left < item_take or globvals.item2_left < item2_take:
+        print("Out of item(s)! Stopping and exiting..")
+        globvals.running = False
+        return
+
+    globvals.item_left -= item_take
+    globvals.item2_left -= item2_take
+
+    if left_banking:
+        hover_click(first_location, **kwargs)
+        hover_click(second_location, **kwargs)
+    else:
+        hover_context_click(first_location, first_offset, **kwargs)
+        hover_context_click(second_location, second_offset, **kwargs)
 
 
-def open_spell_book(key: str, **kwargs) -> None:
-    print("Ensure spell book open.")
-    key_press(key, **kwargs)
+def deposit_items(
+        first_location: tuple[int, int],
+        first_offset: int,
+        second_location: tuple[int, int],
+        second_offset: int,
+        left_banking: bool,
+        **kwargs
+) -> None:
+    print("Deposit items.")
+
+    if left_banking:
+        hover_click(first_location, **kwargs)
+        hover_click(second_location, **kwargs)
+    else:
+        hover_context_click(first_location, first_offset, **kwargs)
+        hover_context_click(second_location, second_offset, **kwargs)
+
+
+def combine_items(first_location: tuple[int, int], second_location: tuple[int, int], **kwargs) -> None:
+    print("Combine items.")
+    hover_click(first_location, **kwargs)
+    hover_click(second_location, **kwargs)
 
 
 def click_spell(spell_location: tuple[int, int], bank_location: tuple[int: int], **kwargs) -> None:
@@ -647,6 +702,25 @@ def click_spell(spell_location: tuple[int, int], bank_location: tuple[int: int],
     if bank_location is not None:
         print("Already hover on bank right after.")
         hover(bank_location, **kwargs)
+
+
+def take_break(break_min, break_max, **kwargs) -> None:
+    print("Taking a break.")
+    rand_sleep(break_min, break_max, **{**kwargs, 'debug': True})  # Longer break -> always debug print output
+
+
+def confirm_action(key: str, next_location: tuple[int, int] = None, **kwargs):
+    # Read common parameters from packed kwargs
+    close_min: int = kwargs['close_min']
+    close_max: int = kwargs['close_max']
+
+    print("Confirm action.")
+    rand_sleep(close_min, close_max, **kwargs)
+    key_press(key, **kwargs)
+
+    # Immediately hover mouse over bank after started action
+    if next_location is not None:
+        hover(next_location, **kwargs)
 
 
 def break_action(break_min: int, break_max: int, break_time: int, break_prob: float, break_timer: Timer,
