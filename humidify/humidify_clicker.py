@@ -64,8 +64,9 @@ def right_click_target(x, y):
     can_move = True
 
 
-def press_key(key):
+def hotkey_press(key):
     print(f"Press Key: {key}")
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
     pyautogui.press(key, presses=1)
 
 
@@ -106,9 +107,9 @@ def hover_context_click(location, offset):
     left_click_target(x, y)
 
 
-def hotkey_press(key):
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    press_key(key)
+def focus_window():
+    print("Focus on game window.")
+    hover_click((10, 10))
 
 
 def click_spell():
@@ -191,7 +192,7 @@ try:
     # Key codes
     interrupt_key = int(settings['interrupt_key'])
 
-    # Shortcut keys
+    # UI Shortcut keys
     close_key = settings['close_menu_key']
     spellbook_key = settings['spellbook_key']
 
@@ -255,17 +256,24 @@ try:
 
     if running and act_start:
         print("Running actions at program start..")
-
+        if running:
+            focus_window()
         if running:
             close_interface()
+        if running:
             open_bank()
+        if running:
             if item_left < 27:
                 print("Out of item(s). Exiting.")
                 running = False
-            withdraw_item()
-            item_left -= 27
+            else:
+                withdraw_item()
+                item_left -= 27
+        if running:
             close_interface()
+        if running:
             open_spellbook()
+        if running:
             click_spell()
 
     # Start looping
@@ -274,6 +282,7 @@ try:
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
 
         if not running:
+            print("Not running anymore.")
             break
 
         if global_timer.elapsed() >= run_max:

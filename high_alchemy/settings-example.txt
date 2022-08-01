@@ -22,15 +22,14 @@ items_file=items.txt
 # 41 = §
 interrupt_key=1
 
+# Other action shortcut keys
+spellbook_key=F6
+
 # Title of the game window (or some unambigous part of it) to recognize it
 window_title=RuneLite
 
 # Static location data (X,Y)
 spell_location=720,330
-spellbook_location=745,210
-
-# For every loop, the probability for trying to open the spell menu again
-spellbook_prob=0.33
 
 # Mouse speed interval (ms)
 mouse_min=50

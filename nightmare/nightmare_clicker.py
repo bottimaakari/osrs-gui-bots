@@ -11,13 +11,13 @@ import clicker_common
 def mouse_movement_background():
     print("BG Thread started.")
     while running:
-        clicker_common.rand_sleep(rng, 10, 900, debug_mode)
+        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
 
         if not can_move:
             continue
 
-        for i in range(0, rng.randint(0, 8)):
-            clicker_common.rand_sleep(rng, 10, 50, debug_mode)
+        for i in range(0, rng.randint(0, rng.randint(0, 8))):
+            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
             if not running or not can_move:
                 break
             x, y = clicker_common.randomized_offset(rng,
@@ -26,7 +26,7 @@ def mouse_movement_background():
                                                     max_off,
                                                     debug=debug_mode
                                                     )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 90, debug_mode))
+            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
 
     print("BG Thread terminated.")
 
@@ -36,7 +36,7 @@ def hover_target(x, y):
     pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
 
 
-def click_target(x, y):
+def left_click_target(x, y):
     print(f"Click target: ({x}, {y})")
 
     # Temporarily prevent background movement
@@ -50,47 +50,52 @@ def click_target(x, y):
     can_move = True
 
 
+def hover_click(location):
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    hover_target(x, y)
+
+    # Wait for a while before next action
+    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
+
+    # Recalculate random-off x,y and click the target
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    left_click_target(x, y)
+
+
+def focus_window():
+    print("Focus on game window.")
+    hover_click((10, 10))
+
+
 def ensure_inventory_open():
+    print("Ensure inventory open.")
     loc = tuple(map(int, settings['inv_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    click_target(x, y)
-
-
-def click_prayer():
-    loc = tuple(map(int, settings['prayer_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    click_target(x, y)
-    clicker_common.rand_sleep(rng, wmin, wmax, debug_mode)  # Special sleep between double click
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    click_target(x, y)
+    hover_click(loc)
 
 
 def click_special_attack():
+    print("Click special attack.")
     loc = tuple(map(int, settings['special_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    click_target(x, y)
+    hover_click(loc)
 
 
 def click_item(target):
-    # Get randomized coords to the target item
-    x, y = clicker_common.randomized_offset(rng, target[0], target[1], max_off, window_name, debug_mode)
-    hover_target(x, y)  # Move to the target
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)  # Sleep for random time
-    # Get randomized coords to the target item
-    x, y = clicker_common.randomized_offset(rng, target[0], target[1], max_off, window_name, debug_mode)
-    click_target(x, y)  # Click the target
+    print("Use item.")
+    hover_click((target[0], target[1]))
+
+
+def click_prayer():
+    print("Double Click quick prayer.")
+    loc = tuple(map(int, settings['prayer_location'].split(',')))
+    hover_click(loc)
+    clicker_common.rand_sleep(rng, wmin, wmax, debug_mode)  # Special sleep between double click
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
+    left_click_target(x, y)
 
 
 def move_outside_window():
+    print("Move mouse outside game window.")
     w = window()
 
     tl = w.topleft
@@ -254,19 +259,20 @@ try:
     if running and act_start:
         print("Running actions at program start..")
 
+        # Ensure game window focused
+        if running:
+            focus_window()
+
         # First, ensure inventory tab is open
         if running:
-            print("Ensure inventory open.")
             ensure_inventory_open()
 
         # Double click the prayer button to reset regeneration
         if running and use_prayer:
-            print("Double click quick prayer.")
             click_prayer()
 
         # use the special attack
         if running and use_special:
-            print("Click special attack.")
             click_special_attack()
 
         # No need for using the primary item
@@ -275,7 +281,6 @@ try:
 
         # Use the snd item (e.g. stats potion)
         if running and use_snd_item:
-            print("Use secondary item.")
             click_item(snd_inv[snd_current])
             snd_inv[snd_current][2] -= 1
 
@@ -299,6 +304,7 @@ try:
         can_move = True
 
         if not running:
+            print("Not running anymore.")
             break
 
         if global_timer.elapsed() >= run_max:
@@ -308,19 +314,16 @@ try:
 
         # Double click the prayer button to reset regeneration
         if use_prayer:
-            print("Double click quick prayer.")
             click_prayer()
 
         # TODO rock cake eat + guzzle?
 
         if use_special and special_timer.elapsed() >= special_time and rng.random() <= special_prob:
             special_timer.reset()
-            print("Click special attack.")
             click_special_attack()
 
         # If the probability was hit, ensure the inventory tab is open
         if rng.random() <= inv_prob:
-            print("Ensure inventory open.")
             ensure_inventory_open()
 
         # Click the first item available, if is enabled, if odds hit, if minimum time passed
@@ -338,7 +341,6 @@ try:
             if current >= len(inventory):
                 print("Out of items.")
             else:
-                print("Use item.")
                 click_item(inventory[current])
                 inventory[current][2] -= 1
 
@@ -378,6 +380,7 @@ try:
         move_thread.join()
 
 except Exception as e:
+    running = False
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
 

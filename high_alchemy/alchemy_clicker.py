@@ -10,13 +10,13 @@ import clicker_common
 def mouse_movement_background():
     print("BG Thread started.")
     while running:
-        clicker_common.rand_sleep(rng, 10, 900, debug_mode)
+        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
 
         if not can_move:
             continue
 
-        for i in range(0, rng.randint(0, 8)):
-            clicker_common.rand_sleep(rng, 10, 50, debug_mode)
+        for i in range(0, rng.randint(0, rng.randint(0, 8))):
+            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
             if not running or not can_move:
                 break
             x, y = clicker_common.randomized_offset(rng,
@@ -25,58 +25,68 @@ def mouse_movement_background():
                                                     max_off,
                                                     debug=debug_mode
                                                     )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 90, debug_mode))
+            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
 
     print("BG Thread terminated.")
 
 
 def hover_target(x, y):
     print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max))
+    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max))
 
 
-def click_target(x, y):
-    print(f"Click target: ({x}, {y})")
+def left_click_target(x, y):
+    print(f"Left Click target: ({x}, {y})")
 
     # Temporarily prevent background movement
     # to ensure the click hits target correctly
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max))
+    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.leftClick()
 
     can_move = True
 
 
-def open_spellbook():
-    loc = tuple(map(int, settings['spellbook_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
+def hover_click(location, delay_min, delay_max):
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
-    # Recalculate x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    click_target(x, y)
+
+    # Wait for a while before next action
+    clicker_common.rand_sleep(rng, delay_min, delay_max, debug_mode)
+
+    # Recalculate random-off x,y and click the target
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    left_click_target(x, y)
+
+
+def hotkey_press(key):
+    print(f"Press Key: {key}")
+    clicker_common.rand_sleep(rng, 50, 400, debug_mode)
+    pyautogui.press(key, presses=1)
+
+
+def focus_window():
+    print("Focus on game window.")
+    hover_click((10, 10), 50, 400)
+
+
+def open_spellbook():
+    print("Open spellbook menu.")
+    hotkey_press(spellbook_key)
 
 
 def click_spell():
+    print("Click spell.")
     loc = tuple(map(int, settings['spell_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, 1200, 1300, debug_mode)
-    # Recalculate x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    click_target(x, y)
+    hover_click(loc, 1200, 1300)
 
 
 def click_item(item):
-    x, y = clicker_common.randomized_offset(rng, item[0], item[1], max_off, window_name, debug_mode)
-    # Calculate x,y and alredy hover on the target
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, 30, 500, debug_mode)
-    # Recalculate x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, item[0], item[1], max_off, window_name, debug_mode)
-    click_target(x, y)
+    print("Click item.")
+    hover_click((item[0], item[1]), 50, 400)
 
 
 def window():
@@ -121,8 +131,8 @@ try:
         exit(0)
 
     # Mouse speed limits
-    mouse_min = int(settings['mouse_min'])
-    mouse_max = int(settings['mouse_max'])
+    speed_min = int(settings['mouse_min'])
+    speed_max = int(settings['mouse_max'])
 
     # Random movement offset limits
     move_min = int(settings['rand_min'])
@@ -137,7 +147,11 @@ try:
     # Filename of the items file
     items_file = settings['items_file']
 
+    # Keyboard event key codes
     interrupt_key = int(settings['interrupt_key'])
+
+    # UI Shortcut keys
+    spellbook_key = settings['spellbook_key']
 
     # From this point on, catch any interruption caused by special key
     keyboard.on_press_key(interrupt_key, interrupt)
@@ -170,8 +184,10 @@ try:
     move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
     move_thread.start()
 
+    # Ensure game window focused
+    focus_window()
+
     # First, ensure spell menu open
-    print("Opening spell menu..")
     open_spellbook()
 
     # Start looping
@@ -217,6 +233,7 @@ try:
         move_thread.join()
 
 except Exception as e:
+    running = False
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
 
