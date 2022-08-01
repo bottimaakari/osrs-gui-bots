@@ -319,7 +319,7 @@ if __name__ == '__main__':
 
 
         def break_action():
-            # If break not yet taken in this loop, enough time from previous break passed, and random number hits prob
+            # If enough time from previous break passed, and random number hits prob
             if break_timer.elapsed() >= break_time and rng.random() < break_prob:
                 break_timer.reset()
                 globvals.can_move = False
@@ -328,11 +328,12 @@ if __name__ == '__main__':
 
 
         def pause_action():
+            # Disable random movement during pause
+            globvals.can_move = False
             while globvals.paused:
                 if not globvals.running:
                     break
-                globvals.can_move = False
-                # globvals.can_move = False
+                # Only sleep 1 sec per loop to minimize response delay
                 clicker_common.rand_sleep(rng, 1000, 1000, debug_mode)
             globvals.can_move = True
 
