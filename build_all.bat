@@ -24,7 +24,7 @@ SET PROCN=pyinstaller.exe
 FOR /F %%i IN ('tasklist /NH /FI "IMAGENAME eq %PROCN%"') DO IF %%i == %PROCN% GOTO EXISTS
 GOTO :DONE
 :EXISTS
-TIMEOUT /T 0
+TIMEOUT /T 1
 GOTO :LOOP
 :DONE
 
