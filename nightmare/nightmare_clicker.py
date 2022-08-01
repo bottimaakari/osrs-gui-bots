@@ -4,13 +4,13 @@ import threading
 import keyboard
 import pyautogui
 
-import clicker_common
+import clicker_framework
 import globvals
 
 
 def hover_target(x, y):
     print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_framework._rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
 
 
 def left_click_target(x, y):
@@ -21,7 +21,7 @@ def left_click_target(x, y):
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_framework._rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
     pyautogui.leftClick()
 
     can_move = True
@@ -29,14 +29,14 @@ def left_click_target(x, y):
 
 def hover_click(location):
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    clicker_framework.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Recalculate random-off x,y and click the target
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     left_click_target(x, y)
 
 
@@ -71,8 +71,8 @@ def click_prayer():
     print("Double Click quick prayer.")
     loc = tuple(map(int, settings['prayer_location'].split(',')))
     hover_click(loc)
-    clicker_common.rand_sleep(rng, wmin, wmax, debug_mode)  # Special sleep between double click
-    x, y = clicker_common._randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
+    clicker_framework.rand_sleep(rng, wmin, wmax, debug_mode)  # Special sleep between double click
+    x, y = clicker_framework._randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     left_click_target(x, y)
 
 
@@ -100,7 +100,7 @@ def move_outside_window():
     target = rng.choice(targets)
 
     # Sleep for a while
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    clicker_framework.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Hover away from the screen to the desired corner
     hover_target(target[0], target[1])
@@ -110,7 +110,7 @@ def move_outside_window():
 
 
 def window():
-    return clicker_common.window(window_name)
+    return clicker_framework.window(window_name)
 
 
 # Catches key interrupt events
@@ -124,15 +124,15 @@ def interrupt(ev):
 try:
     # Register a custom exit handler
     # To make sure things happen after everything else is done
-    atexit.register(clicker_common.exit_handler)
+    atexit.register(clicker_framework.exit_handler)
 
     # Use system random data source
-    rng = clicker_common.init_rng()
+    rng = clicker_framework.init_rng()
 
     settings_file = "settings.txt"
 
     # Read configuration file
-    settings = clicker_common.read_settings(settings_file)
+    settings = clicker_framework.read_settings(settings_file)
 
     # Collect game window info (topleft coords)
     window_name = str(settings["window_title"])
@@ -208,7 +208,7 @@ try:
     # (ITEM POSX, ITEM POSY, ITEM COUNT)
     inventory = None
     if use_item:
-        inventory = clicker_common.read_inventory(items_file)
+        inventory = clicker_framework.read_inventory(items_file)
         if len(inventory) <= 0:
             print(
                 f"ERROR: No items found in items file ({items_file}). Ensure items configured correctly first. See the "
@@ -219,7 +219,7 @@ try:
 
     snd_inv = None
     if use_snd_item:
-        snd_inv = clicker_common.read_inventory(snd_file)
+        snd_inv = clicker_framework.read_inventory(snd_file)
         if len(snd_inv) <= 0:
             print(
                 f"ERROR: No items found in secondary items file ({snd_file}). Ensure items configured correctly first. "
@@ -235,7 +235,7 @@ try:
     snd_current: int = 0
 
     move_thread: threading.Thread = threading.Thread(
-        target=clicker_common._mouse_movement_background,
+        target=clicker_framework._mouse_movement_background,
         name="bg_mouse_movement",
         args=(rng, move_min, move_max, max_off, debug_mode)
     )
@@ -246,10 +246,10 @@ try:
     keyboard.on_press_key(interrupt_key, interrupt)
 
     # Print instructions on start before start delay
-    clicker_common.print_start_info(interrupt_key)
+    clicker_framework.print_start_info(interrupt_key)
 
     # Initial sleep for user to have time to react on startup
-    clicker_common.start_delay(rng)
+    clicker_framework.start_delay(rng)
 
     # Before each operation, check that we are still running
     # and not interrupted (running == True)
@@ -293,10 +293,10 @@ try:
 
     # Timers for keeping track when allowed to commit next actions
     # Separate timer for each task
-    global_timer = clicker_common.Timer()
-    item_timer = clicker_common.Timer()
-    snd_timer = clicker_common.Timer()
-    special_timer = clicker_common.Timer()
+    global_timer = clicker_framework.Timer()
+    item_timer = clicker_framework.Timer()
+    snd_timer = clicker_framework.Timer()
+    special_timer = clicker_framework.Timer()
 
 
     def prayer_action():
@@ -366,7 +366,7 @@ try:
     while globvals.running:
         # Sleep for a random time, at maximum the time the health regenerates
         can_move = False
-        clicker_common.rand_sleep(rng, loop_min, loop_max)  # debug=True
+        clicker_framework.rand_sleep(rng, loop_min, loop_max)  # debug=True
         can_move = True
 
         if not globvals.running:
@@ -394,7 +394,7 @@ try:
         # Finally, move the cursor outside the game window
         move_outside_window()
 
-        clicker_common.print_status(global_timer)
+        clicker_framework.print_status(global_timer)
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():

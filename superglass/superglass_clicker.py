@@ -5,35 +5,35 @@ import threading
 import keyboard
 import pyautogui
 
-import clicker_common
+import clicker_framework
 
 
 def mouse_movement_background():
     print("BG Thread started.")
     while running:
-        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
+        clicker_framework.rand_sleep(rng, 10, 1000, debug_mode)
 
         if not can_move:
             continue
 
         for i in range(0, rng.randint(0, rng.randint(0, 8))):
-            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
+            clicker_framework.rand_sleep(rng, 20, 50, debug_mode)
             if not running or not can_move:
                 break
-            x, y = clicker_common._randomized_offset(rng,
-                                                     rng.randint(move_min, move_max),
-                                                     rng.randint(move_min, move_max),
-                                                     max_off,
-                                                     debug=debug_mode
-                                                     )
-            pyautogui.moveRel(x, y, clicker_common._rand_mouse_speed(rng, 30, 80, debug_mode))
+            x, y = clicker_framework._randomized_offset(rng,
+                                                        rng.randint(move_min, move_max),
+                                                        rng.randint(move_min, move_max),
+                                                        max_off,
+                                                        debug=debug_mode
+                                                        )
+            pyautogui.moveRel(x, y, clicker_framework._rand_mouse_speed(rng, 30, 80, debug_mode))
 
     print("BG Thread terminated.")
 
 
 def hover_target(x, y):
     print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_framework._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
 
 
 def left_click_target(x, y):
@@ -44,7 +44,7 @@ def left_click_target(x, y):
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_framework._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.leftClick()
 
     can_move = True
@@ -58,7 +58,7 @@ def right_click_target(x, y):
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_framework._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.rightClick()
 
     can_move = True
@@ -66,53 +66,53 @@ def right_click_target(x, y):
 
 def hotkey_press(key):
     print(f"Press Key: {key}")
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    clicker_framework.rand_sleep(rng, action_min, action_max, debug_mode)
     pyautogui.press(key, presses=1)
 
 
 def hover(location):
     # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    clicker_framework.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
 
 def hover_click(location):
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    clicker_framework.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Recalculate random-off x,y and click the target
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     left_click_target(x, y)
 
 
 def hover_context_click(location, offset):
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    clicker_framework.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Right click the target to open context menu
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     right_click_target(x, y)
 
     # Hover to the context menu offset
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait a bit before proceeding
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    clicker_framework.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Finally, click the menu option in the predefined offset
-    x, y = clicker_common._randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
+    x, y = clicker_framework._randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
     left_click_target(x, y)
 
 
@@ -181,17 +181,17 @@ def open_spellbook():
 
 def close_interface():
     print("Close current interface.")
-    clicker_common.rand_sleep(rng, close_min, close_max, debug_mode)
+    clicker_framework.rand_sleep(rng, close_min, close_max, debug_mode)
     hotkey_press(close_key)
 
 
 def take_break():
     print("Taking a break.")
-    clicker_common.rand_sleep(rng, break_min, break_max, debug=True)  # Longer break -> debug output
+    clicker_framework.rand_sleep(rng, break_min, break_max, debug=True)  # Longer break -> debug output
 
 
 def window():
-    return clicker_common.window(window_name)
+    return clicker_framework.window(window_name)
 
 
 # Catches key interrupt events
@@ -206,7 +206,7 @@ def interrupt(ev):
 try:
     # Register a custom exit handler
     # To make sure things happen after everything else is done
-    atexit.register(clicker_common.exit_handler)
+    atexit.register(clicker_framework.exit_handler)
 
     # Use system random data source
     rng = secrets.SystemRandom()
@@ -214,7 +214,7 @@ try:
     settings_file = "settings.txt"
 
     # Read configuration file
-    settings = clicker_common.read_settings(settings_file)
+    settings = clicker_framework.read_settings(settings_file)
 
     # Collect game window info (topleft coords)
     window_name = str(settings["window_title"])
@@ -300,15 +300,15 @@ try:
     keyboard.on_press_key(interrupt_key, interrupt)
 
     # Print instructions on start before start delay
-    clicker_common.print_start_info(interrupt_key)
+    clicker_framework.print_start_info(interrupt_key)
 
     # Initial sleep for user to have time to react on startup
-    clicker_common.start_delay(rng)
+    clicker_framework.start_delay(rng)
 
     # Timers for keeping track when allowed to commit next actions
     # Separate timer for each task
-    global_timer = clicker_common.Timer()
-    break_timer = clicker_common.Timer()
+    global_timer = clicker_framework.Timer()
+    break_timer = clicker_framework.Timer()
 
     # Before each operation, check that we are still running
     # and not interrupted (running == True)
@@ -360,7 +360,7 @@ try:
         break_taken = False
 
         # Wait until spell action finished
-        clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
+        clicker_framework.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
 
         if not running:
             print("Not running anymore.")
@@ -416,7 +416,7 @@ try:
         click_spell()
         break_action()
 
-        clicker_common.print_status(global_timer)
+        clicker_framework.print_status(global_timer)
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():

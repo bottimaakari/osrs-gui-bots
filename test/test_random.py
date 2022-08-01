@@ -1,6 +1,6 @@
 import time
 
-from clicker_common import Random
+from clicker_framework import Random
 
 Random.ARRAY_SIZE = 10
 Random.CHUNK_SIZE = 1024

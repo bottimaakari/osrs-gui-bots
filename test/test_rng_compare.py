@@ -1,6 +1,6 @@
 import secrets
 
-from clicker_common import Random
+from clicker_framework import Random
 
 lo = 31234
 hi = 285000

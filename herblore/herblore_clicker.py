@@ -3,32 +3,32 @@ import atexit
 import keyboard
 import pyautogui
 
-import clicker_common
+import clicker_framework
 import globvals
 
 if __name__ == '__main__':
     try:
         # Register a custom exit handler
         # To make sure things happen after everything else is done
-        atexit.register(clicker_common.exit_handler)
+        atexit.register(clicker_framework.exit_handler)
 
         # Use quantumrandom as random data source for better entropy
-        rng = clicker_common.init_rng()
+        rng = clicker_framework.init_rng()
 
         settings_file: str = "settings.txt"
 
         # Read configuration file
-        settings: dict[str, str] = clicker_common.read_settings(settings_file)
+        settings: dict[str, str] = clicker_framework.read_settings(settings_file)
 
         # Collect game window info (top left coords)
         window_name: str = str(settings["window_title"])
 
         # Ensure game window is detected
-        clicker_common.window(window_name)
+        clicker_framework.window(window_name)
 
         # Check if mouse info mode enabled in settings
         if bool(settings['mouse_info'].lower() == 'true'):
-            print(f"TopLeft corner location: {clicker_common.window(window_name).topleft}")
+            print(f"TopLeft corner location: {clicker_framework.window(window_name).topleft}")
             print("Tip: To get correct relative position, calculate: target.x/y - topLeft.x/y")
             pyautogui.mouseInfo()
             exit(0)
@@ -128,21 +128,21 @@ if __name__ == '__main__':
             'debug': debug_mode
         }
 
-        keyboard.on_press_key(interrupt_key, clicker_common.interrupt_handler)
-        keyboard.on_press_key(pause_key, clicker_common.pause_handler)
+        keyboard.on_press_key(interrupt_key, clicker_framework.interrupt_handler)
+        keyboard.on_press_key(pause_key, clicker_framework.pause_handler)
 
         # Print instructions on start before start delay
-        clicker_common.print_start_info(interrupt_key)
+        clicker_framework.print_start_info(interrupt_key)
 
         # Initial sleep for user to have time to react on startup
-        clicker_common.start_delay(rng)
+        clicker_framework.start_delay(rng)
 
         # Timers for keeping track when allowed to commit next actions
         # Separate timer for each task
-        global_timer: clicker_common.Timer = clicker_common.Timer()
-        break_timer: clicker_common.Timer = clicker_common.Timer()
+        global_timer: clicker_framework.Timer = clicker_framework.Timer()
+        break_timer: clicker_framework.Timer = clicker_framework.Timer()
 
-        move_thread = clicker_common.init_movement_thread(rand_min, rand_max, **common)
+        move_thread = clicker_framework.init_movement_thread(rand_min, rand_max, **common)
 
         # Before each operation, check that we are still running
         # and not interrupted (running == True)
@@ -153,45 +153,45 @@ if __name__ == '__main__':
 
         if globvals.running and act_start:
             print("Running actions at program start..")
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.focus_window(**common)
-                clicker_common.pause_action(**common)
+                clicker_framework.focus_window(**common)
+                clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.close_interface(close_key, **common)
-                clicker_common.pause_action(**common)
+                clicker_framework.close_interface(close_key, **common)
+                clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.open_location(bank_location, **common)
-                clicker_common.pause_action(**common)
+                clicker_framework.open_location(bank_location, **common)
+                clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
-                                              snd_withdraw_offset, item2_take, left_banking, **common)
-                clicker_common.pause_action(**common)
+                clicker_framework.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
+                                                 snd_withdraw_offset, item2_take, left_banking, **common)
+                clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.close_interface(close_key, **common)
-                clicker_common.pause_action(**common)
+                clicker_framework.close_interface(close_key, **common)
+                clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.open_menu(inventory_key, **common)
-                clicker_common.pause_action(**common)
+                clicker_framework.open_menu(inventory_key, **common)
+                clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.combine_items(fst_combine_location, snd_combine_location, **common)
-                clicker_common.pause_action(**common)
+                clicker_framework.combine_items(fst_combine_location, snd_combine_location, **common)
+                clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_common.confirm_action(confirm_key, bank_location, **common)
-                clicker_common.pause_action(**common)
+                clicker_framework.confirm_action(confirm_key, bank_location, **common)
+                clicker_framework.pause_action(**common)
 
         # Start looping
         while globvals.running:
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
             # Wait until spell action finished
             globvals.can_move = idle_move
-            clicker_common.rand_sleep(wait_min, wait_max, **{**common, 'debug': True})
+            clicker_framework.rand_sleep(wait_min, wait_max, **{**common, 'debug': True})
             globvals.can_move = True
 
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
@@ -202,57 +202,57 @@ if __name__ == '__main__':
 
             # ACTION LOOP BEGINS HERE
 
-            clicker_common.open_location(bank_location, **common)
-            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+            clicker_framework.open_location(bank_location, **common)
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
-            clicker_common.deposit_items(fst_deposit_location, deposit_offset, snd_deposit_location, snd_deposit_offset,
-                                         left_banking, deposit_all=True, **common)
-            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+            clicker_framework.deposit_items(fst_deposit_location, deposit_offset, snd_deposit_location, snd_deposit_offset,
+                                            left_banking, deposit_all=True, **common)
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
             # Withdraw 27 items from bank
-            clicker_common.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
-                                          snd_withdraw_offset, item2_take, left_banking, **common)
-            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+            clicker_framework.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
+                                             snd_withdraw_offset, item2_take, left_banking, **common)
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
-            clicker_common.close_interface(close_key, **common)
-            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+            clicker_framework.close_interface(close_key, **common)
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
-            clicker_common.open_menu(inventory_key, **common)
-            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+            clicker_framework.open_menu(inventory_key, **common)
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
-            clicker_common.combine_items(fst_combine_location, snd_combine_location, **common)
-            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+            clicker_framework.combine_items(fst_combine_location, snd_combine_location, **common)
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            clicker_common.pause_action(**common)
+            clicker_framework.pause_action(**common)
             if not globvals.running:
                 break
 
-            clicker_common.confirm_action(confirm_key, bank_location, **common)
+            clicker_framework.confirm_action(confirm_key, bank_location, **common)
 
-            clicker_common.print_status(global_timer)
+            clicker_framework.print_status(global_timer)
 
             # Do possible breaking right status info print to keep track of script runtime
-            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
         # END WHILE
         print("Main loop stopped.")
