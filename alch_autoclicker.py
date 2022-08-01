@@ -85,7 +85,7 @@ def open_spell_menu():
 def click_spell():
     x, y = randomized_offset(718, 328)
     hover_target(x, y)
-    randomized_sleep(1000, 1200)
+    randomized_sleep(1200, 1400)
     click_target(x, y)
 
 
@@ -128,11 +128,11 @@ mouse_min = 30
 mouse_max = 200
 
 # Random movement offset limits
-move_min = -7
-move_max = 7
+move_min = -8
+move_max = 8
 
 # Maximum precise target offset
-max_off = 6
+max_off = 4
 
 # Collect game window info (topleft coords)
 window_name = "RuneLite"

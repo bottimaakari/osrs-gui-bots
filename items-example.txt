@@ -1,10 +1,18 @@
 # Inventory item data for autoclicker
-# Coordinates and item count in noted items
+# Coordinates and item count of the items in noted form
 # Coordinates are X and Y relative offsets (from game window top left corner)
 # Expects the game window is in minimal size, using classic, fixed view.
 # X;Y;Count
 
-580;328;55
-625;328;32
-665;328;11
-708;328;68
+580;328;35
+625;328;57
+665;328;19
+708;328;98
+584;362;60
+626;362;32
+668;362;81
+709;362;62
+583;400;28
+625;400;15
+665;400;22
+708;400;13
