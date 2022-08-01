@@ -11,35 +11,29 @@ import clicker_common
 def mouse_movement_background():
     print("BG Thread started.")
     while running:
-        clicker_common.rand_sleep(rng, 10, 800)
+        clicker_common.rand_sleep(rng, 10, 900, debug_mode)
 
         if not can_move:
             continue
 
-        for i in range(0, rng.randint(0, 6)):
-            clicker_common.rand_sleep(rng, 10, 50)
+        for i in range(0, rng.randint(0, 8)):
+            clicker_common.rand_sleep(rng, 10, 50, debug_mode)
             if not can_move:
-                continue
-            x, y = randomized_offset(rng.randint(move_min, move_max), rng.randint(move_min, move_max), use_window=False)
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 60))
+                break
+            x, y = clicker_common.randomized_offset(rng,
+                                                    rng.randint(move_min, move_max),
+                                                    rng.randint(move_min, move_max),
+                                                    max_off,
+                                                    debug=debug_mode
+                                                    )
+            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 90, debug_mode))
 
     print("BG Thread terminated.")
 
 
-def randomized_offset(x, y, use_window=True):
-    w = window().topleft
-
-    ox = w.x + x if use_window else x
-    oy = w.y + y if use_window else y
-
-    return \
-        rng.randint(ox - max_off, ox + max_off), \
-        rng.randint(oy - max_off, oy + max_off)
-
-
 def hover_target(x, y):
     print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max))
+    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
 
 
 def click_target(x, y):
@@ -50,51 +44,49 @@ def click_target(x, y):
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max))
+    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
     pyautogui.leftClick()
 
     can_move = True
 
 
-def window():
-    return clicker_common.window(window_name)
-
-
 def ensure_inventory_open():
     loc = tuple(map(int, settings['inv_location'].split(',')))
-    x, y = randomized_offset(loc[0], loc[1])
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     hover_target(x, y)
-    clicker_common.rand_sleep(rng, 50, 500)
-    x, y = randomized_offset(loc[0], loc[1])
+    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     click_target(x, y)
 
 
 def click_prayer():
     loc = tuple(map(int, settings['prayer_location'].split(',')))
-    x, y = randomized_offset(loc[0], loc[1])
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     hover_target(x, y)
-    clicker_common.rand_sleep(rng, 50, 500)
-    x, y = randomized_offset(loc[0], loc[1])
+    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     click_target(x, y)
-    clicker_common.rand_sleep(rng, wmin, wmax)  # Special sleep between double click
-    x, y = randomized_offset(loc[0], loc[1])
+    clicker_common.rand_sleep(rng, wmin, wmax, debug_mode)  # Special sleep between double click
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     click_target(x, y)
 
 
 def click_special_attack():
     loc = tuple(map(int, settings['special_location'].split(',')))
-    x, y = randomized_offset(loc[0], loc[1])
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     hover_target(x, y)
-    clicker_common.rand_sleep(rng, 50, 500)
-    x, y = randomized_offset(loc[0], loc[1])
+    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
+    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     click_target(x, y)
 
 
 def click_item(target):
-    x, y = randomized_offset(target[0], target[1])  # Get randomized coords to the target item
+    # Get randomized coords to the target item
+    x, y = clicker_common.randomized_offset(rng, target[0], target[1], max_off, window_name, debug_mode)
     hover_target(x, y)  # Move to the target
-    clicker_common.rand_sleep(rng, 50, 500)  # Sleep for random time
-    x, y = randomized_offset(target[0], target[1])  # Get randomized coords to the target item
+    clicker_common.rand_sleep(rng, 50, 500, debug_mode)  # Sleep for random time
+    # Get randomized coords to the target item
+    x, y = clicker_common.randomized_offset(rng, target[0], target[1], max_off, window_name, debug_mode)
     click_target(x, y)  # Click the target
 
 
@@ -114,8 +106,12 @@ def move_outside_window():
     ]
 
     target = rng.choice(targets)
-    clicker_common.rand_sleep(rng, 50, 500)
+    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
     hover_target(target[0], target[1])
+
+
+def window():
+    return clicker_common.window(window_name)
 
 
 # Catches key interrupt events
@@ -147,9 +143,12 @@ try:
     mouse_info = settings['mouse_info'].lower() == 'true'
 
     if mouse_info:
-        print(f"TopLeft corner location: {window}")
+        print(f"TopLeft corner location: {window().topleft}")
         pyautogui.mouseInfo()
         exit(0)
+
+    # Debug prints etc.
+    debug_mode = settings['debug_mode'].lower() == 'true'
 
     # Mouse speed limits
     mouse_min = int(settings['mouse_min'])
@@ -175,15 +174,55 @@ try:
     # Probability to click an item
     item_prob = float(settings['item_prob'])
 
+    # Probability to click an item
+    snd_prob = float(settings['snd_item_prob'])
+
     # Special attack probability
     special_prob = float(settings['special_prob'])
 
     item_time = int(settings['item_time_min'])
+    snd_time = int(settings['snd_item_time_min'])
     special_time = int(settings['special_time_min'])
 
     use_prayer = settings['use_prayer'].lower() == "true"
     use_item = settings['use_items'].lower() == "true"
+    use_snd_item = settings['use_snd_items'].lower() == "true"
     use_special = settings['use_special'].lower() == "true"
+
+    items_file = settings['items_file']
+    snd_file = settings['snd_items_file']
+
+    # Read inventory data file
+    # (ITEM POSX, ITEM POSY, ITEM COUNT)
+    inventory = None
+    if use_item:
+        inventory = clicker_common.read_inventory(items_file)
+
+    snd_inv = None
+    if use_snd_item:
+        snd_inv = clicker_common.read_inventory(snd_file)
+
+    if use_item and len(inventory) <= 0:
+        print(f"ERROR: No items found in items file ({items_file}). Ensure items configured correctly first. See the "
+              f"items example file for reference.")
+        raise ValueError("No items defined in items file.")
+    else:
+        print("Read item data from items file.")
+
+    if use_snd_item and len(snd_inv) <= 0:
+        print(
+            f"ERROR: No items found in secondary items file ({snd_file}). Ensure items configured correctly first. "
+            f"See the items example file for reference.")
+        raise ValueError("No items defined in items file.")
+    else:
+        print("Read item data from secondary items file.")
+
+    running = True
+    can_move = True
+    current = 0
+    snd_current = 0
+
+    move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
 
     # Key 1 = ESC
     # Key 82 = NUMPAD 0
@@ -194,50 +233,36 @@ try:
     print("NOTE: Ensure item details are correctly set in items data file.")
     print("NOTE: Please do not move the mouse at all after the program has been started.")
 
-    items_file = settings['items_file']
-
-    # Read inventory data file
-    # (ITEM POSX, ITEM POSY, ITEM COUNT)
-    inventory = clicker_common.read_inventory(items_file)
-
-    if len(inventory) <= 0:
-        print(f"ERROR: No items found in items file ({items_file}). Ensure items configured correctly first. See the "
-              f"items example file for reference.")
-        raise ValueError("No items defined in items file.")
-
-    print("Read item data from items file.")
-
-    running = True
-    can_move = True
-    current = 0
-
     # Initial sleep to have time to react
-    print("Waiting 3 seconds before starting..")
-    clicker_common.rand_sleep(rng, 3000, 3000)
+    print("Waiting 4 seconds before starting..")
+    clicker_common.rand_sleep(rng, 4000, 4000)  # debug=True
 
-    move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
-    move_thread.start()
+    if running:
+        move_thread.start()
+        print("Mouse movement bg thread started.")
 
     # Double click the prayer button to reset regeneration
-    if use_prayer:
+    if running and use_prayer:
         print("Double click quick prayer.")
         click_prayer()
 
     # Initially, ensure mouse is outside game window
-    move_outside_window()
+    if running:
+        move_outside_window()
 
-    # Collect timestamp right before starting to loop
-    # Time point at start in ms
+    # Timers for keeping track when allowed to commit next actions
+    # Separate timer for each task
     global_timer = clicker_common.Timer()
     item_timer = clicker_common.Timer()
+    snd_timer = clicker_common.Timer()
     special_timer = clicker_common.Timer()
 
     # Start looping
     while running:
-        # TODO longer max (allow regenerate & eat rock cake) ?
+        # TODO longer sleep max (allow regenerate & eat rock cake) ?
         # Sleep for a random time, at maximum the time the health regenerates
         can_move = False
-        clicker_common.rand_sleep(rng, loop_min, loop_max)
+        clicker_common.rand_sleep(rng, loop_min, loop_max)  # debug=True
         can_move = True
 
         if not running:
@@ -248,7 +273,7 @@ try:
             print("Double click quick prayer.")
             click_prayer()
 
-        # TODO rock cake ?
+        # TODO rock cake eat + guzzle?
 
         if use_special and special_timer.elapsed() >= special_time and rng.random() <= special_prob:
             special_timer.reset()
@@ -260,8 +285,11 @@ try:
             print("Ensure inventory open.")
             ensure_inventory_open()
 
-        # After Looped 4 times in a row, click the first item available
-        if use_item and item_timer.elapsed() >= item_time and rng.random() <= item_prob:
+        # After Looped 4 times in a row, click the first item available, if is enabled, if odds hit
+        item_rnd = rng.random()
+        if debug_mode:
+            print(f"Item: {use_item}|{item_timer.elapsed()}|{item_time}|{item_rnd}|{item_prob}")
+        if use_item and item_timer.elapsed() >= item_time and item_rnd <= item_prob:
             item_timer.reset()
             print("Click next non-empty item if available.")
 
@@ -275,18 +303,38 @@ try:
                 click_item(inventory[current])
                 inventory[current][2] -= 1
 
+        # After Looped 4 times in a row, click the first secondary item available, if feature enabled, if odds hit
+        snd_rnd = rng.random()
+        if debug_mode:
+            print(f"Secondary item: {use_snd_item}|{snd_timer.elapsed()}|{snd_time}|{snd_rnd}|{snd_prob}")
+        if use_snd_item and snd_timer.elapsed() >= snd_time and snd_rnd <= snd_prob:
+            snd_timer.reset()
+            print("Click next non-empty secondary item if available.")
+
+            while snd_inv[snd_current][2] <= 0 and snd_current < len(snd_inv):
+                print("Out of current item. Moving to next item.")
+                snd_current += 1
+
+            if snd_current >= len(snd_inv):
+                print("Out of items.")
+            else:
+                click_item(snd_inv[snd_current])
+                snd_inv[snd_current][2] -= 1
+
         move_outside_window()
 
-        print(f"Total elapsed: {(global_timer.elapsed() / 1000):0.2f} seconds.")
+        secs = global_timer.elapsed() / 1000
+        mins = secs / 60
+        hrs = mins / 60
+
+        print(f"Total elapsed: {int(hrs)} hrs | {int(mins)} mins | {int(secs)} secs.")
 
     # Gracefully let the bg thread to exit
-    move_thread.join()
-
-    print("Sleep 5 seconds before exiting..")
-    clicker_common.rand_sleep(rng, 5000, 5000)
+    if move_thread.is_alive():
+        move_thread.join()
 
 except Exception as e:
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
-    print("SLEEP 10 SECONDS BEFORE EXITING..")
-    clicker_common.rand_sleep(rng, 10000, 10000)
+
+input("Press ENTER to EXIT..")

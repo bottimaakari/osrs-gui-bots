@@ -1,3 +1,4 @@
+import secrets
 import time
 
 import pyautogui
@@ -76,22 +77,38 @@ def save_inventory(filename, items: list):
     file.close()
 
 
-def rand_sleep(rng, minms, maxms):
+def rand_sleep(rng, minms, maxms, debug=True):
     if minms > maxms:
         raise ValueError("Min must be less than max.")
-
     tm = rng.randint(minms, maxms)
-    print(f"Delay for: {tm} ms")
+    if debug:
+        print(f"Delay for: {tm} ms")
     pyautogui.sleep(tm / 1000)
     return tm
 
 
-def rand_mouse_speed(rng, minms, maxms):
+def rand_mouse_speed(rng, minms, maxms, debug=True):
     if minms > maxms:
         raise ValueError("Min must be less than max.")
     tm = rng.randint(minms, maxms)
-    print(f"Mouse speed: {tm} ms")
+    if debug:
+        print(f"Mouse speed: {tm} ms")
     return tm / 1000
+
+
+def randomized_offset(rng: secrets.SystemRandom, x: int, y: int, max_off: int, window_title: str = None, debug=True):
+    w = window(window_title).topleft if window_title is not None else None
+
+    ox = w.x + x if w is not None else x
+    oy = w.y + y if w is not None else y
+
+    nx = rng.randint(ox - max_off, ox + max_off)
+    ny = rng.randint(oy - max_off, oy + max_off)
+
+    if debug:
+        print(f"Target: X: {nx}, Y: {ny}")
+
+    return nx, ny
 
 
 def window(name):

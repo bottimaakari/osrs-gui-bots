@@ -3,13 +3,24 @@
 # Lines starting with '#' are ignored
 # Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
 
+# Run in debugging mode (debug printouts, etc.)
+# Exception is for long sleep delays
+# Causes lots of console log flood
+debug_mode=False
+
 # Run mouse info program only and exit (for determining target(s) coordinates)
 mouse_info=False
 
 # Save (overwrite) current item counts to items file on exit
 save_on_exit=False
 
+# Inventory file, containing items coordinates and counts
 items_file=items.txt
+
+# Secondary inventory file, containing secondary items, if enabled
+# Having different time intervals, configuration etc.
+# E.g. some potions with longer duration
+snd_items_file=snd-items.txt
 
 # Keycode for key to interrupt (stop) the program
 # 1 = ESC
@@ -44,6 +55,9 @@ use_prayer=True
 # Use items defined in items file?
 use_items=True
 
+# Use secondary items defined in secondary items file?
+use_snd_items=True
+
 # Click the special attack when charged?
 use_special=True
 
@@ -53,13 +67,21 @@ inv_menu_prob=0.3
 # Probability of clicking an item (uses left) after minimum time passed
 item_prob=0.75
 
+# Probability of clicking an item (uses left) after minimum time passed
+snd_item_prob=0.75
+
 # Special attack probability
 special_prob=0.75
 
 # Minimum time elapsed to click an item (ms)
 # Should be e.g. average time elapsed consuming 50 absorb pts
-# 4,5 min
-item_time_min=270000
+# 4.75 min
+item_time_min=285000
+
+# Minimum time elapsed to click a secondary item (ms)
+# Should be e.g. average time elapsed consuming combat potion
+# 15.x min
+snd_item_time_min=905000
 
 # Minimum time elapsed to click special attack (ms)
 # Time for special attack to recharge
