@@ -57,7 +57,7 @@ def click_offset():
 
 
 def rand_bool(prob) -> bool:
-    return rng.random() <= prob
+    return rng.random() < prob
 
 
 def init_bot(use_region: bool):

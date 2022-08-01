@@ -203,7 +203,7 @@ try:
 
         # 33 % chance for ensuring spell menu is open
         # before clicking the spell
-        if do_click_spell and rng.random() <= spellbook_prob:
+        if do_click_spell and rng.random() < spellbook_prob:
             open_spellbook()
 
         if do_click_spell:

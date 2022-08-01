@@ -317,7 +317,7 @@ try:
 
 
     def special_action():
-        if use_special and special_timer.elapsed() >= special_time and rng.random() <= special_prob:
+        if use_special and special_timer.elapsed() >= special_time and rng.random() < special_prob:
             special_timer.reset()
             click_special_attack()
 
@@ -327,7 +327,7 @@ try:
         item_rnd = rng.random()
         if debug_mode:
             print(f"Item: {use_item}|{item_timer.elapsed()}|{item_time}|{item_rnd}|{item_prob}")
-        if use_item and item_timer.elapsed() >= item_time and item_rnd <= item_prob:
+        if use_item and item_timer.elapsed() >= item_time and item_rnd < item_prob:
             item_timer.reset()
             print("Click next non-empty item if available.")
 
@@ -348,7 +348,7 @@ try:
         snd_rnd = rng.random()
         if debug_mode:
             print(f"Secondary item: {use_snd_item}|{snd_timer.elapsed()}|{snd_time}|{snd_rnd}|{snd_prob}")
-        if use_snd_item and snd_timer.elapsed() >= snd_time and snd_rnd <= snd_prob:
+        if use_snd_item and snd_timer.elapsed() >= snd_time and snd_rnd < snd_prob:
             snd_timer.reset()
             print("Click next non-empty secondary item if available.")
 
@@ -390,7 +390,7 @@ try:
             break
 
         # If the probability was hit, ensure the inventory tab is open
-        if rng.random() <= inv_prob:
+        if rng.random() < inv_prob:
             ensure_inventory_open()
 
         # Always do prayer action first (timing!)
