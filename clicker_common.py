@@ -222,8 +222,10 @@ class Random:
 
 def get_timestamp(local: bool, sep: str = ' ') -> str:
     if local:
-        return datetime.datetime.now().isoformat(sep, 'seconds')
-    return datetime.datetime.utcnow().isoformat(sep, 'seconds')
+        tm = datetime.datetime.now()
+    else:
+        tm = datetime.datetime.utcnow()
+    return tm.isoformat(sep, 'seconds')
 
 
 def read_settings(filename: str) -> dict[str, str]:
