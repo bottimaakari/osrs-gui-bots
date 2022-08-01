@@ -6,7 +6,6 @@ from guibot import config as gconfig
 from guibot import guibot as gbot
 from guibot import target as gtarget
 from guibot import region as gregion
-from guibot.fileresolver import FileResolver
 
 import mouse
 
@@ -52,26 +51,26 @@ def rand_bool(prob) -> bool:
     return rng.random() <= prob
 
 
-def init_bot(region: bool):
+def init_bot(use_region: bool):
     gconfig.GlobalConfig.image_quality = 0
     gconfig.GlobalConfig.smooth_mouse_drag = False
 
-    if region:
+    if use_region:
         pos = get_window_pos("RuneLite")
 
         fr = gbot.FileResolver()
         reg = gbot.Region(pos[0], pos[1], pos[2], pos[3])
 
-        fr.add_path('img/')
+        fr.add_path('assets/')
 
         return (fr, reg)
     else:
         bot = gbot.GuiBot()
-        bot.add_path('img/')
+        bot.add_path('assets/')
         return bot
 
 
-def load_assets(name_prefix: str, fr: FileResolver, randomizeOrder: bool):
+def load_assets(name_prefix: str, fr: gbot.FileResolver, randomizeOrder: bool):
     assets = []
 
     # Collect bank booth image assets
