@@ -38,7 +38,7 @@ def run():
         # Check if we have 28 logs in inv
         if (items and len(items) >= 28):
             print("INV FULL")
-            common.delay(True, max=58219)  # TODO remove, set default limit higher
+            common.delay(True, maxx=58219)  # TODO remove, set default limit higher
             continue
 
         stump = None

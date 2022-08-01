@@ -8,6 +8,7 @@ gy = None
 gw = None
 gh = None
 
+
 def callback(hwnd, extra):
     rect = win32gui.GetWindowRect(hwnd)
 
@@ -34,20 +35,21 @@ def callback(hwnd, extra):
     global gh
     gh = h
 
+
 def get_window_pos(name):
     global gname
     gname = name
-    
+
     win32gui.EnumWindows(callback, None)
 
     tries = 50
-    while (tries > 0 and (gx is None or gy is None or gw is None or gh is None)):
+    while tries > 0 and (gx is None or gy is None or gw is None or gh is None):
         tries -= 1
         print("Waiting for pos..")
         sleep(0.1)
-        
+
     if tries <= 0:
         print(f"ERROR: Failed to find window pos for Window: {name}")
         return None
 
-    return (gx, gy, gw, gh)
+    return gx, gy, gw, gh

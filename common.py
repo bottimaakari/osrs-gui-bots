@@ -27,15 +27,15 @@ def micro_delay():
     sleep(tm)
 
 
-def delay(long: bool, min=None, max=None):
-    if min is not None and min < 100:
-        min = None
-    
+def delay(long: bool, minn=None, maxx=None):
+    if minn is not None and minn < 100:
+        minn = None
+
     # Ensure max at least 1 sec or most 5min (afk kick time)
-    if max is not None and (max > 280000):
-        max = None
-        
-    if min is not None and max is not None and min > max:
+    if maxx is not None and (maxx > 280000):
+        maxx = None
+
+    if minn is not None and maxx is not None and minn > maxx:
         print("MIN cannot be larger than MAX")
 
     tm = None
@@ -43,10 +43,10 @@ def delay(long: bool, min=None, max=None):
     if long:
         # ~1 sec -- ~10 sec
         # TODO higher max (4min)
-        tm = rng.randint(900 if min is None else min, 11000 if max is None else max) / 1000
+        tm = rng.randint(900 if minn is None else minn, 11000 if maxx is None else maxx) / 1000
     else:
         # ~ 1sec
-        tm = rng.randint(900 if min is None else min, 1100 if max is None else max) / 1000
+        tm = rng.randint(900 if minn is None else minn, 1100 if maxx is None else maxx) / 1000
 
     print("DELAY: " + str(tm) + " SEC")
     sleep(tm)
@@ -78,7 +78,7 @@ def init_bot(use_region: bool):
         fr.add_path('assets/inventory')
         fr.add_path('assets/yew')
 
-        return (fr, reg)
+        return fr, reg
     else:
         bot = gbot.GuiBot()
         bot.add_path('assets/')
@@ -169,7 +169,7 @@ def click_labeled_target(bot: gbot.Region, target, label: str, max_count: int = 
     # TODO fix text target recognition speed
 
     # label_tgt = gtarget.Text(label, gfinder.TextFinder()).with_similarity(0.1)
-    
+
     # delay(False)
 
     # if bot.exists(label_tgt):
