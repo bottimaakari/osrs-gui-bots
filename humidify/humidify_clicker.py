@@ -6,148 +6,6 @@ import pyautogui
 import clicker_common
 import globvals
 
-
-def hover_target(x, y):
-    print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
-
-
-def left_click_target(x, y):
-    print(f"Left Click target: ({x}, {y})")
-
-    # Temporarily prevent background movement
-    # to ensure the click hits target correctly
-    globvals.can_move = False
-
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
-    pyautogui.leftClick()
-
-    globvals.can_move = True
-
-
-def right_click_target(x, y):
-    print(f"Right Click target: ({x}, {y})")
-
-    # Temporarily prevent background movement
-    # to ensure the click hits target correctly
-    globvals.can_move = False
-
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
-    pyautogui.rightClick()
-
-    globvals.can_move = True
-
-
-def hotkey_press(key):
-    print(f"Press Key: {key}")
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    pyautogui.press(key, presses=1)
-
-
-def take_break():
-    print("Taking a break.")
-    clicker_common.rand_sleep(rng, break_min, break_max, debug=True)  # Longer break -> debug output
-
-
-def window():
-    return clicker_common.window(window_name)
-
-
-def hover(location):
-    # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-
-
-def hover_click(location):
-    # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-
-    # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Recalculate random-off x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    left_click_target(x, y)
-
-
-def hover_context_click(location, offset):
-    # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-
-    # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Right click the target to open context menu
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    right_click_target(x, y)
-
-    # Hover to the context menu offset
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
-    hover_target(x, y)
-
-    # Wait a bit before proceeding
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Finally, click the menu option in the predefined offset
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
-    left_click_target(x, y)
-
-
-def focus_window():
-    print("Focus on game window.")
-    hover_click((50, 5))
-
-
-def click_spell():
-    print("Click spell.")
-    hover_click(spell_location)
-
-    print("Hover on bank.")
-    hover(bank_location)
-
-
-def open_bank():
-    print("Open bank.")
-    hover_click(bank_location)
-
-
-def deposit_item():
-    print("Deposit item(s).")
-
-    if left_banking:
-        print("Using left click.")
-        hover_click(deposit_location)
-    else:
-        print("Using right click context menu.")
-        hover_context_click(deposit_location, deposit_offset)
-
-
-def withdraw_item():
-    print("Withdraw item(s).")
-
-    if left_banking:
-        hover_click(withdraw_location)
-    else:
-        hover_context_click(withdraw_location, withdraw_offset)
-
-
-def open_spellbook():
-    print("Ensure spellbook open.")
-    hotkey_press(spellbook_key)
-
-
-def close_interface():
-    print("Close current interface.")
-    clicker_common.rand_sleep(rng, close_min, close_max, debug_mode)
-    hotkey_press(close_key)
-
-
 if __name__ == '__main__':
     try:
         # Register a custom exit handler
@@ -167,7 +25,7 @@ if __name__ == '__main__':
 
         # Check if mouse info mode enabled in settings
         if bool(settings['mouse_info'].lower() == 'true'):
-            print(f"TopLeft corner location: {window().topleft}")
+            print(f"TopLeft corner location: {clicker_common.window(window_name).topleft}")
             print("Tip: To get correct relative position, calculate: target.x/y - topLeft.x/y")
             pyautogui.mouseInfo()
             exit(0)
@@ -184,7 +42,7 @@ if __name__ == '__main__':
 
         # UI Shortcut keys
         close_key: str = settings['close_menu_key']
-        spellbook_key: str = settings['spellbook_key']
+        spell_book_key: str = settings['spellbook_key']
 
         # Mouse speed limits
         speed_min: int = int(settings['mouse_speed_min'])
@@ -233,9 +91,9 @@ if __name__ == '__main__':
         deposit_offset: int = int(settings['deposit_offset'])
         withdraw_offset: int = int(settings['withdraw_offset'])
 
-        item_left: int = int(settings['item_left'])
         item_take: int = int(settings['item_take'])
 
+        globvals.item_left = int(settings['item_left'])
         globvals.running = True
         globvals.can_move = True
 
@@ -257,6 +115,19 @@ if __name__ == '__main__':
         global_timer: clicker_common.Timer = clicker_common.Timer()
         break_timer: clicker_common.Timer = clicker_common.Timer()
 
+        common_args = {
+            'rng': rng,
+            'max_off': max_off,
+            'action_min': action_min,
+            'action_max': action_max,
+            'speed_min': speed_min,
+            'speed_max': speed_max,
+            'close_min': close_min,
+            'close_max': close_max,
+            'window_name': window_name,
+            'debug': debug_mode
+        }
+
         # Before each operation, check that we are still running
         # and not interrupted (running == True)
 
@@ -267,57 +138,40 @@ if __name__ == '__main__':
 
         if globvals.running and act_start:
             print("Running actions at program start..")
+            clicker_common.pause_action(rng, debug_mode)
             if globvals.running:
-                focus_window()
+                clicker_common.focus_window(**common_args)
+                clicker_common.pause_action(rng, debug_mode)
             if globvals.running:
-                close_interface()
+                clicker_common.close_interface(close_key, **common_args)
+                clicker_common.pause_action(rng, debug_mode)
+            # ACTION LOOP BEGINS HERE
             if globvals.running:
-                open_bank()
+                clicker_common.open_bank(bank_location, **common_args)
+                clicker_common.pause_action(rng, debug_mode)
             if globvals.running:
-                if item_left < item_take:
-                    print("Out of item(s). Exiting.")
-                    globvals.running = False
-                else:
-                    withdraw_item()
-                    item_left -= item_take
+                clicker_common.withdraw_item(withdraw_location, withdraw_offset, left_banking, item_take, **common_args)
+                clicker_common.pause_action(rng, debug_mode)
             if globvals.running:
-                close_interface()
+                clicker_common.close_interface(close_key, **common_args)
+                clicker_common.pause_action(rng, debug_mode)
             if globvals.running:
-                open_spellbook()
+                clicker_common.open_spell_book(spell_book_key, **common_args)
+                clicker_common.pause_action(rng, debug_mode)
             if globvals.running:
-                click_spell()
-
-
-        def break_action():
-            # If enough time from previous break passed, and random number hits prob
-            if break_timer.elapsed() >= break_time and rng.random() < break_prob:
-                break_timer.reset()
-                globvals.can_move = False
-                take_break()
-                globvals.can_move = True
-
-
-        def pause_action():
-            # Disable random movement during pause
-            globvals.can_move = False
-            while globvals.paused:
-                if not globvals.running:
-                    break
-                # Only sleep 1 sec per loop to minimize response delay
-                clicker_common.rand_sleep(rng, 1000, 1000, debug_mode)
-            globvals.can_move = True
-
+                clicker_common.click_spell(spell_location, bank_location, **common_args)
+                clicker_common.pause_action(rng, debug_mode)
 
         # Start looping
         while globvals.running:
-            pause_action()
+            clicker_common.pause_action(rng, debug_mode)
             if not globvals.running:
                 break
 
             # Wait until spell action finished
             clicker_common.rand_sleep(rng, wait_min, wait_max, debug=True)
 
-            pause_action()
+            clicker_common.pause_action(rng, debug_mode)
             if not globvals.running:
                 break
 
@@ -326,52 +180,50 @@ if __name__ == '__main__':
                 globvals.running = False
                 break
 
-            open_bank()
-            break_action()
+            # ACTION LOOP BEGINS HERE
+            clicker_common.open_bank(bank_location, **common_args)
+            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
 
-            pause_action()
+            clicker_common.pause_action(rng, debug_mode)
             if not globvals.running:
                 break
 
-            deposit_item()
-            break_action()
+            clicker_common.deposit_item(deposit_location, deposit_offset, left_banking, **common_args)
+            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
 
-            pause_action()
+            clicker_common.pause_action(rng, debug_mode)
             if not globvals.running:
                 break
 
-            # Withdraw 27 items from bank
-            if item_left < item_take:
-                print("Out of item(s). Exiting.")
-                globvals.running = False
-                break
-            withdraw_item()
-            item_left -= item_take
-            break_action()
+            # Withdraw items from bank
+            clicker_common.withdraw_item(withdraw_location, withdraw_offset, left_banking, item_take, **common_args)
+            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
 
-            pause_action()
+            clicker_common.pause_action(rng, debug_mode)
             if not globvals.running:
                 break
 
-            close_interface()
-            break_action()
+            clicker_common.close_interface(close_key, **common_args)
+            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
 
-            pause_action()
+            clicker_common.pause_action(rng, debug_mode)
             if not globvals.running:
                 break
 
-            open_spellbook()
-            break_action()
+            clicker_common.open_spell_book(spell_book_key, **common_args)
+            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
 
-            pause_action()
+            clicker_common.pause_action(rng, debug_mode)
             if not globvals.running:
                 break
 
-            click_spell()
+            clicker_common.click_spell(spell_location, bank_location, **common_args)
 
+            # At the end of the loop, print the status first right after last action
+            # before rolling break dice to get status printed e.g. just before a very long break
             clicker_common.print_status(global_timer)
 
-            break_action()
+            clicker_common.break_action(rng, break_timer, break_time, break_prob, break_min, break_max)
 
         # END WHILE
         print("Main loop stopped.")

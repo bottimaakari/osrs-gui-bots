@@ -209,6 +209,9 @@ class Random:
         # First check that if the range is valid
         if dist < 0:
             raise ValueError("Max cannot be less than Min")
+        # If lo == hi => return lo/hi
+        if dist == 0:
+            return lo
 
         # Limit the range to the maximum precision of 2^16
         # if rng > self._limit:
@@ -294,29 +297,30 @@ def init_rng() -> any:
     return rng
 
 
-def rand_sleep(rng, minms: int, maxms: int, debug: bool = True):
-    if minms > maxms:
+def rand_sleep(rng: any, min_ms: int, max_ms: int, debug: bool = True):
+    if min_ms > max_ms:
         raise ValueError("Min must be less than max.")
-    if minms == maxms:
-        tm = minms
+    if min_ms == max_ms:
+        tm = min_ms
     else:
-        tm = rng.randint(minms, maxms)
+        tm = rng.randint(min_ms, max_ms)
     if debug:
         print(f"Delay for: {tm} ms")
     time.sleep(tm / 1000)
     return tm
 
 
-def rand_mouse_speed(rng, minms: int, maxms: int, debug: bool = True):
-    if minms > maxms:
+def rand_mouse_speed(rng: any, min_ms: int, max_ms: int, debug: bool = True) -> float:
+    if min_ms > max_ms:
         raise ValueError("Min must be less than max.")
-    tm = rng.randint(minms, maxms)
+    tm = rng.randint(min_ms, max_ms)
     if debug:
         print(f"Mouse speed: {tm} ms")
     return tm / 1000
 
 
-def randomized_offset(rng, x: int, y: int, max_off: int, window_title: str = None, debug: bool = True):
+def randomized_offset(rng: any, x: int, y: int, max_off: int, window_title: str = None, debug: bool = True) \
+        -> tuple[int, int]:
     w = window(window_title).topleft if window_title is not None else None
 
     ox = w.x + x if w is not None else x
@@ -326,12 +330,13 @@ def randomized_offset(rng, x: int, y: int, max_off: int, window_title: str = Non
     ny = rng.randint(oy - max_off, oy + max_off)
 
     if debug:
-        print(f"Target: X: {nx}, Y: {ny}")
+        print(f"Original Target: X: {x} Y: {y}")
+        print(f"New Target: X: {nx}, Y: {ny}")
 
     return nx, ny
 
 
-def mouse_movement_background(rng, move_min: int, move_max: int, max_off: int, debug: bool = True):
+def mouse_movement_background(rng: any, move_min: int, move_max: int, max_off: int, debug: bool = True) -> None:
     print("Mouse movement BG Thread started.")
 
     while globvals.running:
@@ -359,7 +364,8 @@ def mouse_movement_background(rng, move_min: int, move_max: int, max_off: int, d
     print("Mouse movement BG Thread terminated.")
 
 
-def create_movement_thread(rng, move_min: int, move_max: int, max_off: int, debug: bool = True) -> threading.Thread:
+def create_movement_thread(rng: any, move_min: int, move_max: int, max_off: int, debug: bool = True) \
+        -> threading.Thread:
     return threading.Thread(
         target=mouse_movement_background,
         name="bg_mouse_movement",
@@ -368,7 +374,7 @@ def create_movement_thread(rng, move_min: int, move_max: int, max_off: int, debu
     )
 
 
-def window(name):
+def window(name: str) -> any:
     try:
         return pyautogui.getWindowsWithTitle(name)[0]
     except IndexError:
@@ -377,30 +383,31 @@ def window(name):
         raise RuntimeError("Could not detect game window.")
 
 
-def print_start_info(key):
+def print_start_info(key: int) -> None:
     print(f"Started. Hit key with code {key} at any time to stop execution.")
     print("NOTE: Ensure settings are correctly defined in settings file.")
     print("NOTE: Ensure item details are correctly set in items data file (if applicable).")
     print("NOTE: Please do not move the mouse anymore since the program has been started.")
 
 
-def start_delay(rng):
-    print("Waiting 4 seconds before starting..")
-    rand_sleep(rng, 4000, 4000)  # debug=True
+def start_delay(rng: any) -> None:
+    print("Waiting 5 seconds before starting to action...")
+    rand_sleep(rng, 5000, 5000)  # debug=True
 
 
-def print_status(timer: Timer):
-    secs = timer.elapsed() / 1000
-    hrs = int(secs / 3600)
-    mins = int(secs / 60 - hrs * 60)
-    secs = int(secs - hrs * 3600 - mins * 60)
-    print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
+def print_status(timer: Timer) -> None:
+    seconds = timer.elapsed() / 1000
+    hours = int(seconds / 3600)
+    minutes = int(seconds / 60 - hours * 60)
+    seconds = int(seconds - hours * 3600 - minutes * 60)
+
+    print(f"Total elapsed: {hours} h | {minutes} min | {seconds} sec.")
     print(f"Timestamp: {get_timestamp(local=True)}")
 
 
 # Catches key interrupt events
-# Gracefully erminates the program
-def interrupt_handler(ev):
+# Gracefully terminates the program
+def interrupt_handler(event) -> None:
     print("Program interrupted.")
     globvals.running = False
     print("Possibly still waiting for a sleep to finish..")
@@ -408,7 +415,7 @@ def interrupt_handler(ev):
 
 # Catches pause key presses
 # Pauses the program until resumed
-def pause_handler(ev):
+def pause_handler(event) -> None:
     if not globvals.paused:
         print("Program paused.")
         # can_move does not globally change from here!
@@ -424,5 +431,315 @@ def pause_handler(ev):
     print("Possibly still waiting for a sleep to finish..")
 
 
-def exit_handler():
+def exit_handler() -> None:
     input("Press ENTER to EXIT...")
+
+
+def hover_raw(rng: any, x: int, y: int, speed_min: int, speed_max: int, debug: bool = True):
+    if debug:
+        print(f"Hover target: ({x}, {y})")
+    pyautogui.moveTo(x, y, rand_mouse_speed(rng, speed_min, speed_max, debug))
+
+
+def left_click_raw(rng: any, x: int, y: int, speed_min: int, speed_max: int, debug: bool = True):
+    if debug:
+        print(f"Left Click target: ({x}, {y})")
+    # Temporarily prevent background movement
+    # to ensure the click hits target correctly
+    globvals.can_move = False
+    pyautogui.moveTo(x, y, rand_mouse_speed(rng, speed_min, speed_max, debug))
+    pyautogui.leftClick()
+    globvals.can_move = True
+
+
+def right_click_raw(rng: any, x: int, y: int, speed_min: int, speed_max: int, debug: bool = True):
+    if debug:
+        print(f"Right Click target: ({x}, {y})")
+    # Temporarily prevent background movement
+    # to ensure the click hits target correctly
+    globvals.can_move = False
+    pyautogui.moveTo(x, y, rand_mouse_speed(rng, speed_min, speed_max, debug))
+    pyautogui.rightClick()
+    globvals.can_move = True
+
+
+def key_press_raw(key: str, debug: bool = True):
+    if debug:
+        print(f"Press Key: {key}")
+    pyautogui.press(key, presses=1)
+
+
+def key_press(
+        rng: any,
+        key: str,
+        action_min: int,
+        action_max: int,
+        debug: bool = True
+) -> None:
+    rand_sleep(rng, action_min, action_max, debug)
+    key_press_raw(key)
+
+
+def hover(
+        rng: any,
+        location: tuple[int, int],
+        max_off: int,
+        action_min: int,
+        action_max: int,
+        speed_min: int,
+        speed_max: int,
+        window_name: str,
+        debug: bool = True
+) -> None:
+    # Wait for a while before next action
+    rand_sleep(rng, action_min, action_max, debug)
+
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = randomized_offset(rng, location[0], location[1], max_off, window_name, debug)
+    hover_raw(rng, x, y, speed_min, speed_max, debug)
+
+
+def hover_click(
+        rng: any,
+        location: tuple[int, int],
+        max_off: int,
+        action_min: int,
+        action_max: int,
+        speed_min: int,
+        speed_max: int,
+        window_name: str,
+        debug: bool = True
+) -> None:
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = randomized_offset(rng, location[0], location[1], max_off, window_name, debug)
+    hover_raw(rng, x, y, speed_min, speed_max, debug)
+
+    # Wait for a while before next action
+    rand_sleep(rng, action_min, action_max, debug)
+
+    # Recalculate random-off x,y and click the target
+    x, y = randomized_offset(rng, location[0], location[1], max_off, window_name, debug)
+    left_click_raw(rng, x, y, speed_min, speed_max, debug)
+
+
+def hover_context_click(
+        rng: any,
+        location: tuple[int, int],
+        offset: int,
+        max_off: int,
+        action_min: int,
+        action_max: int,
+        speed_min: int,
+        speed_max: int,
+        window_name: str,
+        debug: bool = True
+) -> None:
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = randomized_offset(rng, location[0], location[1], max_off, window_name, debug)
+    hover_raw(rng, x, y, speed_min, speed_max, debug)
+
+    # Wait for a while before next action
+    rand_sleep(rng, action_min, action_max, debug)
+
+    # Right click the target to open context menu
+    x, y = randomized_offset(rng, location[0], location[1], max_off, window_name, debug)
+    right_click_raw(rng, x, y, speed_min, speed_max, debug)
+
+    # Hover to the context menu offset
+    x, y = randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug)
+    hover_raw(rng, x, y, speed_min, speed_max, debug)
+
+    # Wait a bit before proceeding
+    rand_sleep(rng, action_min, action_max, debug)
+
+    # Finally, click the menu option in the predefined offset
+    x, y = randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug)
+    left_click_raw(rng, x, y, speed_min, speed_max, debug)
+
+
+def take_break(rng, break_min, break_max) -> None:
+    print("Taking a break.")
+    rand_sleep(rng, break_min, break_max)  # Longer break -> always debug print output
+
+
+def focus_window(
+        debug: bool = True,
+        **kwargs
+) -> None:
+    # Read generic parameters from packaged kwargs
+    rng: any = kwargs['rng']
+    action_min: int = kwargs['action_min']
+    action_max: int = kwargs['action_max']
+    speed_min: int = kwargs['speed_min']
+    speed_max: int = kwargs['speed_max']
+    window_name: str = kwargs['window_name']
+
+    print("Focus on game window.")
+    hover_click(rng, (100, 5), 0, action_min, action_max, speed_min, speed_max, window_name, debug)
+
+
+def open_bank(
+        bank_location: tuple[int, int],
+        **kwargs
+) -> None:
+    # Read generic parameters from packaged kwargs
+    rng: any = kwargs['rng']
+    max_off: int = kwargs['max_off']
+    action_min: int = kwargs['action_min']
+    action_max: int = kwargs['action_max']
+    speed_min: int = kwargs['speed_min']
+    speed_max: int = kwargs['speed_max']
+    window_name: str = kwargs['window_name']
+    debug: bool = kwargs['debug']
+
+    print("Open bank.")
+    hover_click(rng, bank_location, max_off, action_min, action_max, speed_min, speed_max, window_name, debug)
+
+
+def withdraw_item(
+        location: tuple[int, int],
+        offset: int,
+        left_banking: bool,
+        item_take: int,
+        **kwargs
+) -> None:
+    # Read generic parameters from packaged kwargs
+    rng: any = kwargs['rng']
+    max_off: int = kwargs['max_off']
+    action_min: int = kwargs['action_min']
+    action_max: int = kwargs['action_max']
+    speed_min: int = kwargs['speed_min']
+    speed_max: int = kwargs['speed_max']
+    window_name: str = kwargs['window_name']
+    debug: bool = kwargs['debug']
+
+    print("Withdraw item(s).")
+
+    if debug:
+        print(f"Item subtraction: {globvals.item_left} - {item_take}")
+
+    if globvals.item_left < item_take:
+        print("Out of item(s)! Stopping and exiting.")
+        globvals.running = False
+        return
+
+    globvals.item_left -= item_take
+
+    if left_banking:
+        print("Using left click method.")
+        hover_click(rng, location, max_off, action_min, action_max, speed_min, speed_max, window_name, debug)
+    else:
+        print("Using context menu method.")
+        hover_context_click(rng, location, offset, max_off, action_min, action_max, speed_min,
+                            speed_max, window_name, debug)
+
+
+def deposit_item(
+        location: tuple[int, int],
+        offset: int,
+        left_banking: bool,
+        **kwargs
+) -> None:
+    # Read generic parameters from packaged kwargs
+    rng: any = kwargs['rng']
+    max_off: int = kwargs['max_off']
+    action_min: int = kwargs['action_min']
+    action_max: int = kwargs['action_max']
+    speed_min: int = kwargs['speed_min']
+    speed_max: int = kwargs['speed_max']
+    window_name: str = kwargs['window_name']
+    debug: bool = kwargs['debug']
+
+    print("Deposit item(s).")
+
+    if left_banking:
+        print("Deposit using left click.")
+        hover_click(rng, location, max_off, action_min, action_max, speed_min, speed_max, window_name, debug)
+    else:
+        print("Deposit using right click context menu.")
+        hover_context_click(rng, location, offset, max_off, action_min, action_max, speed_min,
+                            speed_max, window_name, debug)
+
+
+def close_interface(
+        key: str,
+        **kwargs
+) -> None:
+    # Read generic parameters from packaged kwargs
+    rng: any = kwargs['rng']
+    action_min: int = kwargs['action_min']
+    action_max: int = kwargs['action_max']
+    close_min: int = kwargs['close_min']
+    close_max: int = kwargs['close_max']
+    debug: bool = kwargs['debug']
+
+    print("Close current interface.")
+    rand_sleep(rng, close_min, close_max, debug)
+    key_press(rng, key, action_min, action_max, debug)
+
+
+def open_spell_book(
+        key: str,
+        **kwargs
+) -> None:
+    # Read generic parameters from packaged kwargs
+    rng: any = kwargs['rng']
+    action_min: int = kwargs['action_min']
+    action_max: int = kwargs['action_max']
+    debug: bool = kwargs['debug']
+
+    print("Ensure spell book open.")
+    key_press(rng, key, action_min, action_max, debug)
+
+
+def click_spell(
+        spell_location: tuple[int, int],
+        bank_location: tuple[int: int],
+        **kwargs
+) -> None:
+    # Read generic parameters from packaged kwargs
+    rng: any = kwargs['rng']
+    max_off: int = kwargs['max_off']
+    action_min: int = kwargs['action_min']
+    action_max: int = kwargs['action_max']
+    speed_min: int = kwargs['speed_min']
+    speed_max: int = kwargs['speed_max']
+    window_name: str = kwargs['window_name']
+    debug: bool = kwargs['debug']
+
+    print("Click spell.")
+    hover_click(rng, spell_location, max_off, action_min, action_max, speed_min, speed_max, window_name, debug)
+
+    if bank_location is not None:
+        print("Already hover on bank right after.")
+        hover(rng, bank_location, max_off, action_min, action_max, speed_min, speed_max, window_name, debug)
+
+
+def break_action(
+        rng: any,
+        break_timer: Timer,
+        break_time: int,
+        break_prob: float,
+        break_min: int,
+        break_max: int
+) -> None:
+    # If enough time from previous break passed, and random number hits prob
+    if break_timer.elapsed() >= break_time and rng.random() < break_prob:
+        break_timer.reset()
+        globvals.can_move = False
+        take_break(rng, break_min, break_max)
+        globvals.can_move = True
+
+
+def pause_action(
+        rng: any,
+        debug: bool = True
+) -> None:
+    # Disable random movement during pause
+    globvals.can_move = False
+    while globvals.paused:
+        if not globvals.running:
+            break
+        # Only sleep 1 sec per loop to minimize response delay
+        rand_sleep(rng, 1000, 1000, debug)
+    globvals.can_move = True
