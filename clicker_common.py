@@ -327,3 +327,7 @@ def print_status(timer: Timer):
     secs = int(secs - hrs * 3600 - mins * 60)
     print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
     print(f"Timestamp: {get_timestamp(local=True)}")
+
+
+def exit_handler():
+    input("Press ENTER to EXIT...")

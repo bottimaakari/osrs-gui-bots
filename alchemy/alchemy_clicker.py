@@ -1,3 +1,4 @@
+import atexit
 import threading
 
 import keyboard
@@ -78,6 +79,10 @@ def interrupt(ev):
 
 
 try:
+    # Register a custom exit handler
+    # To make sure things happen after everything else is done
+    atexit.register(clicker_common.exit_handler)
+
     # Use system random data source
     rng = clicker_common.init_rng()
 
@@ -232,5 +237,3 @@ except Exception as e:
     globvals.running = False
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
-
-input("Press ENTER to EXIT..")

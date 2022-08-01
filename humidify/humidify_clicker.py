@@ -1,3 +1,5 @@
+import atexit
+
 import keyboard
 import pyautogui
 
@@ -174,6 +176,10 @@ def pause(ev):
 
 if __name__ == '__main__':
     try:
+        # Register a custom exit handler
+        # To make sure things happen after everything else is done
+        atexit.register(clicker_common.exit_handler)
+
         # Use quantumrandom as random data source for better entropy
         rng = clicker_common.init_rng()
 
@@ -411,5 +417,3 @@ if __name__ == '__main__':
         globvals.running = False
         print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
         print(e)
-
-    input("Press ENTER to EXIT..")

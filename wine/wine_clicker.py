@@ -1,3 +1,4 @@
+import atexit
 import secrets
 import threading
 
@@ -215,10 +216,14 @@ def interrupt(ev):
     print("Possibly still waiting for a sleep to finish..")
 
 
-# Use system random data source
-rng = secrets.SystemRandom()
-
 try:
+    # Register a custom exit handler
+    # To make sure things happen after everything else is done
+    atexit.register(clicker_common.exit_handler)
+
+    # Use system random data source
+    rng = secrets.SystemRandom()
+
     settings_file = "settings.txt"
 
     # Read configuration file
@@ -448,5 +453,3 @@ except Exception as e:
     running = False
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
-
-input("Press ENTER to EXIT..")
