@@ -286,9 +286,10 @@ try:
         if running:
             click_spell()
 
+    break_rnd = float()
+
 
     def break_action():
-        break_rnd = rng.random()
         global break_taken, can_move
         if not break_taken and break_rnd < break_prob:
             can_move = False
@@ -301,6 +302,8 @@ try:
     while running:
         # Reset break status every iteration
         break_taken = False
+        # Roll break dice only once per loop
+        break_rnd = rng.random()
 
         # Wait until spell action finished
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
