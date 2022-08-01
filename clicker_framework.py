@@ -255,7 +255,7 @@ def read_settings(filename: str) -> dict[str, str]:
     return data
 
 
-def read_inventory(filename: str):
+def read_inventory(filename: str) -> list[list[int]]:
     try:
         file = open(filename, "r", encoding="utf-8")
     except IOError as exc:
@@ -271,6 +271,15 @@ def read_inventory(filename: str):
         data.append([int(values[0].strip()), int(values[1].strip()), int(values[2].strip())])
 
     file.close()
+
+    if len(data) <= 0:
+        print(
+            f"ERROR: No items found in items file ({filename}). Ensure items configured correctly first. See the "
+            f"items example file for reference.")
+        raise ValueError("No items defined in items file.")
+
+    print("Read item data from items file.")
+
     return data
 
 
@@ -615,6 +624,29 @@ def open_menu(key: str, **kwargs) -> None:
     _key_press(key, **kwargs)
 
 
+def consume_item(inventory_num: int, **kwargs) -> None:
+    print("Consume item.")
+
+    current: int = globvals.inventories[inventory_num]['current']
+    content: list[list[int]] = globvals.inventories[inventory_num]['content']
+    content_current = content[current]
+
+    while current < len(content) and content_current[2] <= 0:
+        print("Out of current item. Moving to next item.")
+        globvals.inventories[inventory_num]['current'] += 1
+        current: int = globvals.inventories[inventory_num]['current']
+        content: list[list[int]] = globvals.inventories[inventory_num]['content']
+        content_current = content[current]
+
+    if current >= len(content):
+        print("Out of items.")
+        globvals.running = False
+        return
+
+    _hover_click((content_current[0], content_current[1]), **kwargs)
+    globvals.inventories[inventory_num]['content'][current][2] -= 1
+
+
 def withdraw_item(location: tuple[int, int], offset: int, left_banking: bool, item_take: int, **kwargs) -> None:
     # Read common parameters from packed kwargs
     debug: bool = kwargs['debug']
@@ -679,6 +711,11 @@ def withdraw_items(
 
     print("Withdraw items.")
 
+    # TODO: arg = array[location, offset, take]
+    #   globals.items as arrays
+    #   inventory load => as array
+    #   for each item do ... substract, left/context + pause
+
     if debug:
         print(f"Item subtraction: {globvals.item_left} - {item_take}")
         print(f"Item2 subtraction: {globvals.item2_left} - {item2_take}")
@@ -715,6 +752,11 @@ def deposit_items(
     close_max: int = kwargs['close_max']
 
     print("Deposit items.")
+
+    # TODO: arg = array[location, offset, take]
+    #   globals.items as arrays
+    #   inventory load => as array
+    #   for each item do ... left/context + pause
 
     if deposit_all:
         rand_sleep(close_min, close_max, **kwargs)
