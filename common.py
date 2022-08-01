@@ -14,33 +14,39 @@ rng = secrets.SystemRandom()
 
 
 def click_count(max):
-    return rng.randint(1, max + 1)
+    return rng.randint(1, max)
 
 
 def mouse_speed():
-    return rng.randint(83, 241)
+    return rng.randint(80, 240)
 
 
 def micro_delay():
-    tm = rng.randint(11, 91) / 1000
+    tm = rng.randint(30, 90) / 1000
     print("DELAY: " + str(tm) + " SEC")
     sleep(tm)
 
 
-def delay(long: bool, max=None):
+def delay(long: bool, min=None, max=None):
+    if min is not None and min < 100:
+        min = None
+    
     # Ensure max at least 1 sec or most 5min (afk kick time)
-    if max is not None and (max <= 1000 or max > 280000):
+    if max is not None and (max > 280000):
         max = None
+        
+    if min is not None and max is not None and min > max:
+        print("MIN cannot be larger than MAX")
 
     tm = None
 
     if long:
         # ~1 sec -- ~10 sec
-        tm = rng.randint(927, 11352 if max is None else max) / \
-            1000  # TODO higher max (4min)
+        # TODO higher max (4min)
+        tm = rng.randint(900 if min is None else min, 11000 if max is None else max) / 1000
     else:
         # ~ 1sec
-        tm = rng.randint(913, 1185 if max is None else max) / 1000
+        tm = rng.randint(900 if min is None else min, 1100 if max is None else max) / 1000
 
     print("DELAY: " + str(tm) + " SEC")
     sleep(tm)
@@ -67,6 +73,7 @@ def init_bot(use_region: bool):
         # for some reason only parent dir
         # or wildcards dont work
         # TODO figure out how to import all subdirs
+        fr.add_path('assets/alchemy')
         fr.add_path('assets/bank')
         fr.add_path('assets/inventory')
         fr.add_path('assets/yew')
@@ -101,7 +108,7 @@ def load_assets(name_prefix: str, fr: gbot.FileResolver, randomizeOrder: bool):
 
 
 def hover_away(bot: gbot.Region):
-    delay(False)
+    micro_delay()
     bot.hover(bot.top_left)
 
 
@@ -109,45 +116,69 @@ def click_text_target(bot: gbot.Region, target: gtarget.Text, max_count: int = 1
     # First, move the mouse out of the way
     if hover:
         hover_away(bot)
-    
-    delay(False)
+
+    micro_delay()
+    bot.hover(target)
+
+    micro_delay(False)
+
+    # Minor random delay before clicking
+    for _ in range(0, click_count(max_count)):
+        micro_delay()
+        bot.click(target)
+        print(f"CLICKED TEXT TARGET")
+
+
+def click_image_target(bot: gbot.Region, target: gtarget.Image, max_count: int = 1, hover: bool = True):
+    # First, move the mouse out of the way
+    if hover:
+        hover_away(bot)
+
+    micro_delay()
     if bot.exists(target):
         bot.hover(target)
     else:
         print("CLICK TARGET LOST")
         return
 
-    # text = gtarget.Text(text, gfinder.TextFinder()).with_similarity(0.1)
-
-    delay(False)
+    micro_delay()
     if bot.exists(target):
-        # Minor random delay before clicking
-        print(f"LABEL {target.value} FOUND")
+        print(f"IMAGE TARGET FOUND")
 
+        # Minor random delay before clicking
         for _ in range(0, click_count(max_count)):
             micro_delay()
             bot.click(target)
-            print(f"CLICKED {target.value}")
+            print(f"CLICKED IMAGE TARGET")
 
     else:
-        print(f"LABEL {target.value} NOT FOUND")
+        print(f"IMAGE TARGET WAS NOT FOUND")
 
 
-def click_labeled_target(bot: gbot.Region, target, text: str, max_count: int = 1):
+def click_labeled_target(bot: gbot.Region, target, label: str, max_count: int = 1):
     # First, move the mouse out of the way
     hover_away(bot)
-    
-    delay(False)
+
+    micro_delay()
     if bot.exists(target):
         bot.hover(target)
     else:
         print("CLICK TARGET LOST")
         return
 
-    # text = gtarget.Text(text, gfinder.TextFinder()).with_similarity(0.1)
+    # TODO fix text target recognition speed
 
-    # click_text_target(bot, text, max_count, hover=False)
-    click_text_target(bot, target, max_count, hover=False)
+    # label_tgt = gtarget.Text(label, gfinder.TextFinder()).with_similarity(0.1)
+    
+    # delay(False)
+
+    # if bot.exists(label_tgt):
+    #     print(f"LABEL {label} FOUND")
+    #     click_image_target(bot, target, max_count, False)
+    # else:
+    #     print(f"LABEL {label} WAS NOT FOUND")
+
+    click_image_target(bot, target, max_count, False)
 
 
 # Returns the given object name as finder image with given similarity
