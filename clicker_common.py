@@ -93,14 +93,16 @@ class Random:
         return self._data.get(block=True, timeout=self.FETCH_TIMEOUT)
 
     def __generate(self):
-        # GET CHUNK_SIZE number of BITS-bit unsigned integers
-        # One full chunk at a time for maximum efficiency
         # print("Fetching data..")
-        for val in [int(h, 16) for h in quantumrandom.get_data('hex16', self._chunk_size, int(self.BITS / 8))]:
-            # For each iteration, ensure we are stil running
-            # To minimize unresponsive time
-            if self._running:
-                self._data.put(val, block=True, timeout=self.INSERT_TIMEOUT)
+        # Fetch as much data than it roughly fits in the queue at the moment
+        while self._data.qsize() < self._array_size * self._chunk_size - self._chunk_size:
+            # GET CHUNK_SIZE number of BITS-bit unsigned integers
+            # One full chunk at a time for maximum efficiency
+            for val in [int(h, 16) for h in quantumrandom.get_data('hex16', self._chunk_size, int(self.BITS / 8))]:
+                # For each iteration, ensure we are stil running
+                # To minimize unresponsive time
+                if self._running:
+                    self._data.put(val, block=True, timeout=self.INSERT_TIMEOUT)
 
     def __init(self) -> None:
         """
