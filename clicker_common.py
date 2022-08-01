@@ -4,7 +4,7 @@ import threading
 import time
 
 import pyautogui
-import quantumrandom
+import quantumrandom as quantumrandom
 
 import globvals
 
@@ -67,7 +67,7 @@ class Random:
         # Start autofill thread if autofill enabled
         if autofill:
             print("Autofill enabled.")
-            self._fill_thread = threading.Thread(target=self.__fill_thread, name="autofill_bg_thread", daemon=True)
+            self._fill_thread = threading.Thread(target=self.__fill_bg, name="autofill_bg_thread", daemon=True)
             self._fill_thread.start()
         else:
             self._fill_thread = None
@@ -76,11 +76,11 @@ class Random:
     def __del__(self):
         # Ensure internal thread(s) are terminated before destructing the class
         self._running = False
-        if self._fill_thread and self._fill_thread.is_alive():
+        if self._fill_thread is not None and self._fill_thread.is_alive():
             print("Waiting for autofill thread to stop..")
             self._fill_thread.join(5)
 
-    def __fill_thread(self):
+    def __fill_bg(self):
         while self._running:
             time.sleep(self.AUTOFILL_INTEVAL)
             if self._running and self._data.qsize() < self._chunk_size:
