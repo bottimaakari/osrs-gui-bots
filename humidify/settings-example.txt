@@ -79,7 +79,7 @@ max_run_time=7200000
 #### Static location data (X,Y) ####
 # Relative X,Y from topleft corner
 # Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
-bank_location=319,200
+bank_location=315,200
 
 spell_location=572,307
 

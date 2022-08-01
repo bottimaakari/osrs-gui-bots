@@ -1,3 +1,4 @@
+import datetime
 import operator
 import secrets
 import threading
@@ -413,6 +414,7 @@ try:
         secs = int(secs - hrs * 3600 - mins * 60)
 
         print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
+        print(f"Timestamp: {datetime.datetime.now()}")
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():
