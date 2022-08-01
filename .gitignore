@@ -130,3 +130,6 @@ dmypy.json
 
 # Personal details
 user_secrets.py
+
+# Debug files from autopy finder
+imglog/

@@ -1,19 +1,20 @@
 import secrets
-
 from time import sleep
 
 from guibot import config as gconfig
+from guibot import finder as gfinder
 from guibot import guibot as gbot
-from guibot import target as gtarget
+from guibot import location as glocation
 from guibot import region as gregion
+from guibot import target as gtarget
 
 import mouse
 
 rng = secrets.SystemRandom()
 
 
-def click_count():
-    return rng.randint(1, 5)
+def click_count(max):
+    return rng.randint(1, max + 1)
 
 
 def mouse_speed():
@@ -22,12 +23,13 @@ def mouse_speed():
 
 def micro_delay():
     tm = rng.randint(11, 91) / 1000
+    print("DELAY: " + str(tm) + " SEC")
     sleep(tm)
 
 
-def delay(long: bool, max: int = None):
+def delay(long: bool, max=None):
     # Ensure max at least 1 sec or most 5min (afk kick time)
-    if max is not None and max <= 1000 or max > 280000:
+    if max is not None and (max <= 1000 or max > 280000):
         max = None
 
     tm = None
@@ -40,6 +42,7 @@ def delay(long: bool, max: int = None):
         # ~ 1sec
         tm = rng.randint(913, 1185 if max is None else max) / 1000
 
+    print("DELAY: " + str(tm) + " SEC")
     sleep(tm)
 
 
@@ -61,7 +64,12 @@ def init_bot(use_region: bool):
         fr = gbot.FileResolver()
         reg = gbot.Region(pos[0], pos[1], pos[2], pos[3])
 
-        fr.add_path('assets/')
+        # for some reason only parent dir
+        # or wildcards dont work
+        # TODO figure out how to import all subdirs
+        fr.add_path('assets/bank')
+        fr.add_path('assets/inventory')
+        fr.add_path('assets/yew')
 
         return (fr, reg)
     else:
@@ -81,7 +89,7 @@ def load_assets(name_prefix: str, fr: gbot.FileResolver, randomizeOrder: bool):
             assets.append(fn)
         except:
             pass
-        
+
     if len(assets) <= 0:
         print(f"WARNING: NO ASSETS FOUND WITH PREFIX: '{name_prefix}'")
         return assets
@@ -92,29 +100,57 @@ def load_assets(name_prefix: str, fr: gbot.FileResolver, randomizeOrder: bool):
     return assets
 
 
-def click_text_target(bot: gbot.Region, target, text: str):
+def hover_away(bot: gbot.Region):
+    delay(False)
+    bot.hover(bot.top_left)
+
+
+def click_text_target(bot: gbot.Region, target: gtarget.Text, max_count: int = 1, hover: bool = True):
+    # First, move the mouse out of the way
+    if hover:
+        hover_away(bot)
+    
+    delay(False)
     if bot.exists(target):
         bot.hover(target)
     else:
         print("CLICK TARGET LOST")
         return
 
-    text = gtarget.Text(text, bot.cv_backend()).with_similarity(0.2)
+    # text = gtarget.Text(text, gfinder.TextFinder()).with_similarity(0.1)
 
-    if bot.exists(text):
+    delay(False)
+    if bot.exists(target):
         # Minor random delay before clicking
-        print(f"LABEL {text} FOUND")
-        delay(False)
+        print(f"LABEL {target.value} FOUND")
 
-        for i in range(click_count()):
+        for _ in range(0, click_count(max_count)):
             micro_delay()
             bot.click(target)
-            print(f"CLICKED {target}")
+            print(f"CLICKED {target.value}")
+
     else:
-        print(f"LABEL {text} NOT FOUND")
+        print(f"LABEL {target.value} NOT FOUND")
 
 
-# Returns the given object name as finder image with given similarity 
+def click_labeled_target(bot: gbot.Region, target, text: str, max_count: int = 1):
+    # First, move the mouse out of the way
+    hover_away(bot)
+    
+    delay(False)
+    if bot.exists(target):
+        bot.hover(target)
+    else:
+        print("CLICK TARGET LOST")
+        return
+
+    # text = gtarget.Text(text, gfinder.TextFinder()).with_similarity(0.1)
+
+    # click_text_target(bot, text, max_count, hover=False)
+    click_text_target(bot, target, max_count, hover=False)
+
+
+# Returns the given object name as finder image with given similarity
 def as_image(name, similarity):
     return gtarget.Image(name).with_similarity(similarity)
 

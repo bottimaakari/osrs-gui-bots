@@ -75,9 +75,9 @@ def run():
 
             # 33% prob
             if common.rand_bool(0.33):
-                print("EXTRA CLICK")
+                print("EXTRA CLICKS")
                 try:
-                    common.click_text_target(bot, tree, 'Chop Down Yew')
+                    common.click_labeled_target(bot, tree, 'Chop Down Yew', 5)
                 except:
                     print("TREE NO LONGER EXISTS")
                     tree = None
@@ -87,7 +87,7 @@ def run():
             common.delay(long=True)
             print("START CUTTING")
             try:
-                common.click_text_target(bot, tree, 'Chop Down Yew')
+                common.click_labeled_target(bot, tree, 'Chop Down Yew', 5)
             except:
                 print("TREE NO LONGER EXISTS")
                 tree = None

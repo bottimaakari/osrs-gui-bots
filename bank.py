@@ -5,28 +5,53 @@ from guibot import target as gtarget
 import common
 import user_secrets
 
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+
+print(pytesseract)
 
 def open_bank(bot: gbot.Region, booths: list) -> bool:
+    common.hover_away(bot)
+
+    # Try to find bank booth from screen
     for b in booths:
-        if bot.exists(b):
+        img = common.as_image(b, 0.05)
+        # If found, hover mouse to the booth and click it
+        if bot.exists(img):
             print("BANK BOOTH FOUND")
-            common.click_text_target(bot, b, "Bank Bank Booth")
+            common.click_labeled_target(bot, b, "Bank Bank booth")
             return True
     return False
 
 
 def check_pin(bot: gbot.Region) -> bool:
-    tgt = gtarget.Text("Please enter your PIN", bot.cv_backend())
+    # tgt = gtarget.Text("Please enter your PIN", gfinder.TextFinder()).with_similarity(0.1)
+    tgt = common.as_image('pin_screen', 0.1)
+    
+    common.hover_away(bot)
 
     if bot.exists(tgt):
-        print("PIN TEXT FOUND")
+        print("PIN SCREEN FOUND")
         return True
     else:
+        print("PIN SCREEN NOT FOUND")
         return False
 
 
 def solve_pin(bot: gbot.Region, pin: list):
-    pass
+    c = 0
+    for p in pin:
+        c += 1
+        txt = gtarget.Text(str(p), gfinder.TextFinder()).with_similarity(0.1)
+        
+        common.hover_away(bot)
+        
+        if bot.exists(txt):
+            print(f"FOUND DIGIT {c}")
+            common.click_text_target(bot, txt)
+        else:
+            print(f"DIDNT FIND DIGIT {c}")
+            raise Exception("Digit not found on screen.")
 
 
 def bank_all_items(bot):
@@ -46,6 +71,8 @@ def test():
     if not open_bank(bot, booths):
         print("FAILED TO OPEN BANK")
         return
+    
+    common.delay(False)
 
     if check_pin(bot):
         print("HAS PIN")
