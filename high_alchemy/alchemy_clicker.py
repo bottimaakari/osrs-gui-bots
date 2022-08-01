@@ -5,29 +5,7 @@ import keyboard
 import pyautogui
 
 import clicker_common
-
-
-def mouse_movement_background():
-    print("BG Thread started.")
-    while running:
-        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
-
-        if not can_move:
-            continue
-
-        for i in range(0, rng.randint(0, rng.randint(0, 8))):
-            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
-            if not running or not can_move:
-                break
-            x, y = clicker_common.randomized_offset(rng,
-                                                    rng.randint(move_min, move_max),
-                                                    rng.randint(move_min, move_max),
-                                                    max_off,
-                                                    debug=debug_mode
-                                                    )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
-
-    print("BG Thread terminated.")
+import globvals
 
 
 def hover_target(x, y):
@@ -40,13 +18,12 @@ def left_click_target(x, y):
 
     # Temporarily prevent background movement
     # to ensure the click hits target correctly
-    global can_move
-    can_move = False
+    globvals.can_move = False
 
     pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.leftClick()
 
-    can_move = True
+    globvals.can_move = True
 
 
 def hover_click(location, delay_min, delay_max):
@@ -97,15 +74,14 @@ def window():
 # Gracefully erminates the program
 def interrupt(ev):
     print("Program interrupted.")
-    global running
-    running = False
+    globvals.running = False
     print("Possibly still waiting for a sleep to finish..")
 
 
-# Use system random data source
-rng = secrets.SystemRandom()
-
 try:
+    # Use system random data source
+    rng = secrets.SystemRandom()
+
     settings_file = "settings.txt"
 
     # Read configuration file
@@ -124,7 +100,7 @@ try:
     # Debug prints etc.
     debug_mode = settings['debug_mode'].lower() == 'true'
 
-    mouse_info = settings['mouse_info'] == 'True'
+    mouse_info = settings['mouse_info'].lower() == 'true'
 
     if mouse_info:
         print(f"TopLeft corner location: {window}")
@@ -173,8 +149,8 @@ try:
 
     print("Read item data from items file.")
 
-    can_move = True
-    running = True
+    globvals.running = True
+    globvals.can_move = True
     do_click_spell = True
     current = 0
 
@@ -182,7 +158,11 @@ try:
     print("Waiting 4 seconds..")
     clicker_common.rand_sleep(rng, 4000, 4000)
 
-    move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
+    move_thread = threading.Thread(
+        target=clicker_common.mouse_movement_background,
+        name="bg_mouse_movement",
+        args=(rng, move_min, move_max, max_off, debug_mode)
+    )
     move_thread.start()
 
     # Ensure game window focused
@@ -192,15 +172,15 @@ try:
     open_spellbook()
 
     # Start looping
-    while running:
+    while globvals.running:
         # Must sleep enough between the moves
         # should be close to a constant value
         clicker_common.rand_sleep(rng, 50, 90)
 
-        if not running:
+        if not globvals.running:
             break
 
-        print(f"do_click_spell: {do_click_spell}")
+        print(f"Click spell: {do_click_spell}")
 
         # 33 % chance for ensuring spell menu is open
         # before clicking the spell
@@ -230,11 +210,11 @@ try:
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():
-        print("Waiting for BG thread to stop..")
+        print("Waiting for BG thread(s) to stop..")
         move_thread.join()
 
 except Exception as e:
-    running = False
+    globvals.running = False
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
 
