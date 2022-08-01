@@ -78,14 +78,14 @@ def click_target(x, y):
 def open_spell_menu():
     x, y = randomized_offset(745, 210)
     hover_target(x, y)
-    randomized_sleep(30, 500)
+    randomized_sleep(50, 500)
     click_target(x, y)
 
 
 def click_spell():
     x, y = randomized_offset(718, 328)
     hover_target(x, y)
-    randomized_sleep(1200, 1400)
+    randomized_sleep(1200, 1300)
     click_target(x, y)
 
 
@@ -97,8 +97,13 @@ def click_item(item):
 
 
 def read_items():
-    name = "items.txt"
-    file = open(name, "r")
+    file = None
+
+    try:
+        file = open(items_file, "r")
+    except IOError as exc:
+        print(f"ERROR: Failed to read item file ({items_file}). Ensure it exists in the current directory.")
+        raise exc
 
     data = []
     for line in file:
@@ -108,7 +113,27 @@ def read_items():
         values = line.split(";")
         data.append([int(values[0]), int(values[1]), int(values[2])])
 
+    file.close()
     return data
+
+
+def save_items():
+    file = None
+
+    try:
+        file = open(items_file, "r")
+    except IOError as ex:
+        print(
+            f"ERROR: Failed to write into item file ({items_file}). Ensure this executable and the current user has "
+            f"write permissions on this directory.")
+        print(f"Exception details: {ex}")
+        raise ex
+
+    for it in items:
+        file.write(str(it[0]) + ";" + str(it[1]) + ";" + str(it[2]))
+        file.write("\r\n")  # TODO CRLF on win, LF on *nix
+
+    file.close()
 
 
 def interrupt(event):
@@ -117,72 +142,86 @@ def interrupt(event):
     running = False
 
 
-# TODO enable for pos info
-# mouse_info()
+try:
+    # TODO enable for pos info
+    # mouse_info()
 
-# Use system random data source
-rng = secrets.SystemRandom()
+    # Use system random data source
+    rng = secrets.SystemRandom()
 
-# Mouse speed limits
-mouse_min = 30
-mouse_max = 200
+    # Mouse speed limits
+    mouse_min = 50
+    mouse_max = 300
 
-# Random movement offset limits
-move_min = -8
-move_max = 8
+    # Random movement offset limits
+    move_min = -8
+    move_max = 8
 
-# Maximum precise target offset
-max_off = 4
+    # Maximum precise target offset
+    max_off = 4
 
-# Collect game window info (topleft coords)
-window_name = "RuneLite"
-window = pyautogui.getWindowsWithTitle(window_name)[0].topleft
+    # Collect game window info (topleft coords)
+    window_name = "Rune"
 
-can_move = True
-running = True
-doClickSpell = True
-current = 0
+    try:
+        window = pyautogui.getWindowsWithTitle(window_name)[0].topleft
+    except IndexError as ex:
+        print("ERROR: Game client window was not detected. Ensure the game client is running first.")
+        raise ex
 
-# Key 1 = ESC
-# Key 82 = NUMPAD 0
-keyboard.on_press_key(1, interrupt)
+    items_file = "items.txt"
 
-print("Started. Hit ESC at any time to stop execution.")
-print("NOTE: Ensure item details are correctly set in items data file.")
+    can_move = True
+    running = True
+    do_click_spell = True
+    current = 0
 
-# Initial sleep for 1.5 sec
-randomized_sleep(1500, 1500)
+    # Key 1 = ESC
+    # Key 82 = NUMPAD 0
+    keyboard.on_press_key(1, interrupt)
 
-# (ITEM POSX, ITEM POSY, ITEM COUNT)
-items = read_items()
-print("Read item data from file.")
+    print("Started. Hit ESC at any time to stop execution.")
+    print("NOTE: Ensure item details are correctly set in items data file.")
+    print("NOTE: Please do not move the mouse at all after the program has been started.")
 
-move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement", args=(None,))
-move_thread.start()
+    # Initial sleep for 1.5 sec
+    print("Waiting 2 seconds..")
+    randomized_sleep(2000, 2000)
 
-# First, ensure spell menu open
-print("Opening spell menu..")
-open_spell_menu()
+    # (ITEM POSX, ITEM POSY, ITEM COUNT)
+    items = read_items()
 
-# Start looping
-while running:
-    # Must sleep enough between the moves
-    # should be close to a constant value
-    randomized_sleep(50, 80)
+    if len(items) <= 0:
+        print(f"ERROR: No items found in items file ({items_file}). Ensure items configured correctly first. See the "
+              f"items example file for reference.")
+        raise ValueError("No items defined in items file.")
 
-    print(f"DoClickSpell: {doClickSpell}")
+    print("Read item data from items file.")
 
-    # 20 % chance for ensuring spell menu is open
-    # before clicking the spell
-    if doClickSpell and rng.random() <= 0.2:
-        open_spell_menu()
-        continue
+    move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement", args=(None,))
+    move_thread.start()
 
-    if doClickSpell:
-        click_spell()
-        doClickSpell = False
+    # First, ensure spell menu open
+    print("Opening spell menu..")
+    open_spell_menu()
 
-    else:
+    # Start looping
+    while running:
+        # Must sleep enough between the moves
+        # should be close to a constant value
+        randomized_sleep(50, 80)
+
+        print(f"do_click_spell: {do_click_spell}")
+
+        # 33 % chance for ensuring spell menu is open
+        # before clicking the spell
+        if do_click_spell and rng.random() <= 0.33:
+            open_spell_menu()
+
+        if do_click_spell:
+            click_spell()
+            do_click_spell = False
+            continue
 
         if current >= len(items):
             print("Out of items.")
@@ -196,7 +235,16 @@ while running:
 
         click_item(items[current])
         items[current][2] -= 1
-        doClickSpell = True
+        do_click_spell = True
 
-# Gracefully let the bg thread to exit
-move_thread.join()
+    # Gracefully let the bg thread to exit
+    move_thread.join()
+
+    print("Sleeping 5 seconds before exiting..")
+    randomized_sleep(5000, 5000)
+
+except Exception as e:
+    print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
+    print(e)
+    print("SLEEPING 10 SECONDS BEFORE EXITING..")
+    randomized_sleep(10000, 10000)
