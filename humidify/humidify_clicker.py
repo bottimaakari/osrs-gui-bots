@@ -37,7 +37,7 @@ def hover_target(x, y):
 
 
 def left_click_target(x, y):
-    print(f"Click target: ({x}, {y})")
+    print(f"Left Click target: ({x}, {y})")
 
     # Temporarily prevent background movement
     # to ensure the click hits target correctly
@@ -69,73 +69,82 @@ def press_key(key):
     pyautogui.press(key, presses=1)
 
 
+def hover_click(location):
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    hover_target(x, y)
+
+    # Wait for a while before next action
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+
+    # Recalculate random-off x,y and click the target
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    left_click_target(x, y)
+
+
+def hover_context_click(location, offset):
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    hover_target(x, y)
+
+    # Wait for a while before next action
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+
+    # Right click the target to open context menu
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    right_click_target(x, y)
+
+    # Hover to the context menu offset
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
+    hover_target(x, y)
+
+    # Wait a bit before proceeding
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+
+    # Finally, click the menu option in the predefined offset
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
+    left_click_target(x, y)
+
+
+def hotkey_press(key):
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    press_key(key)
+
+
 def click_spell():
     print("Click spell.")
     loc = tuple(map(int, settings['spell_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    # Recalculate x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    left_click_target(x, y)
+    hover_click(loc)
 
 
 def open_bank():
     print("Open bank.")
     loc = tuple(map(int, settings['bank_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    left_click_target(x, y)
+    hover_click(loc)
 
 
 def deposit_item():
     print("Deposit item(s).")
     loc = tuple(map(int, settings['deposit_location'].split(',')))
-    offset = int(settings['deposit_offset'])
-
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    right_click_target(x, y)
-
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1] + offset, 1, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1] + offset, 1, window_name, debug_mode)
-    left_click_target(x, y)
+    off = int(settings['deposit_offset'])
+    hover_context_click(loc, off)
 
 
 def withdraw_item():
     print("Withdraw item(s).")
     loc = tuple(map(int, settings['withdraw_location'].split(',')))
-    offset = int(settings['withdraw_offset'])
-
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    right_click_target(x, y)
-
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1] + offset, 1, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1] + offset, 1, window_name, debug_mode)
-    left_click_target(x, y)
+    off = int(settings['withdraw_offset'])
+    hover_context_click(loc, off)
 
 
 def open_spellbook():
     print("Ensure spellbook open.")
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    press_key(spellbook_key)
+    hotkey_press(spellbook_key)
 
 
 def close_interface():
     print("Close current interface.")
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    press_key(close_key)
+    hotkey_press(close_key)
 
 
 def window():
