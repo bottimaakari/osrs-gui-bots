@@ -81,10 +81,10 @@ if __name__ == '__main__':
         # Script max run time
         run_max = int(settings['max_run_time'])
 
-        snd_deposit = settings['snd_deposit'].lower() == "true"
         act_start = settings['act_start'].lower() == "true"
-        left_banking = settings['left_click_banking'].lower() == "true"
         idle_move = settings['idle_movement'].lower() == "true"
+        snd_deposit = settings['snd_deposit'].lower() == "true"
+        left_banking = settings['left_click_banking'].lower() == "true"
 
         # Location coordinates for click & hover targets
         bank_location: tuple = tuple(map(int, settings['bank_location'].split(',')[:2]))
@@ -98,10 +98,10 @@ if __name__ == '__main__':
         fst_deposit_location: tuple = tuple(map(int, settings['deposit_location'].split(',')[:2]))
         snd_deposit_location: tuple = tuple(map(int, settings['snd_deposit_location'].split(',')[:2]))
 
-        withdraw_offset: int = int(settings['withdraw_offset'])
+        fst_withdraw_offset: int = int(settings['withdraw_offset'])
         snd_withdraw_offset: int = int(settings['snd_withdraw_offset'])
 
-        deposit_offset: int = int(settings['deposit_offset'])
+        fst_deposit_offset: int = int(settings['deposit_offset'])
         snd_deposit_offset: int = int(settings['snd_deposit_offset'])
 
         # Items management
@@ -164,7 +164,8 @@ if __name__ == '__main__':
                 clicker_framework.open_location(bank_location, **common)
                 clicker_framework.pause_action(**common)
             if globvals.running:
-                clicker_framework.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
+                clicker_framework.withdraw_items(fst_withdraw_location, fst_withdraw_offset, item1_take,
+                                                 snd_withdraw_location,
                                                  snd_withdraw_offset, item2_take, left_banking, **common)
                 clicker_framework.pause_action(**common)
             if globvals.running:
@@ -209,8 +210,8 @@ if __name__ == '__main__':
             if not globvals.running:
                 break
 
-            clicker_framework.deposit_items(fst_deposit_location, deposit_offset, snd_deposit_location, snd_deposit_offset,
-                                            left_banking, deposit_all=True, **common)
+            clicker_framework.deposit_items(fst_deposit_location, fst_deposit_offset, snd_deposit_location,
+                                            snd_deposit_offset, snd_deposit, left_banking, deposit_all=True, **common)
             clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
             clicker_framework.pause_action(**common)
@@ -218,7 +219,8 @@ if __name__ == '__main__':
                 break
 
             # Withdraw 27 items from bank
-            clicker_framework.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
+            clicker_framework.withdraw_items(fst_withdraw_location, fst_withdraw_offset, item1_take,
+                                             snd_withdraw_location,
                                              snd_withdraw_offset, item2_take, left_banking, **common)
             clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 

@@ -698,6 +698,7 @@ def deposit_items(
         first_offset: int,
         second_location: tuple[int, int],
         second_offset: int,
+        snd_deposit: bool,
         left_banking: bool,
         deposit_all: bool = False,
         **kwargs
@@ -713,10 +714,16 @@ def deposit_items(
 
     if left_banking:
         _hover_click(first_location, **kwargs)
-        _hover_click(second_location, **kwargs)
+        # If requested a secondary deposit
+        if snd_deposit:
+            print("Doing a secondary deposit")
+            _hover_click(second_location, **kwargs)
     else:
         _hover_context_click(first_location, first_offset, **kwargs)
-        _hover_context_click(second_location, second_offset, **kwargs)
+        # If requested a secondary deposit
+        if snd_deposit:
+            print("Doing a secondary deposit")
+            _hover_context_click(second_location, second_offset, **kwargs)
 
 
 def combine_items(first_location: tuple[int, int], second_location: tuple[int, int], **kwargs) -> None:
