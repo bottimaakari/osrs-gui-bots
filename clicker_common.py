@@ -5,9 +5,10 @@ import threading
 import time
 
 import pyautogui
-import quantumrandom as quantumrandom
 
 import globvals
+# noinspection PyRedeclaration
+import quantumrandom_patched as quantumrandom
 
 
 class Timer:
@@ -47,14 +48,25 @@ class Random:
     if ARRAY_SIZE <= 0:
         raise ValueError("ARRAY_SIZE must be positive.")
 
-    def __init__(self, count: int = None, size: int = None, autofill: bool = True):
-        # Parameters for setting up data
+    def __init__(self, count: int = None, size: int = None, autofill: bool = True, debug: bool = True):
+        # Parameters for setting up
+        self._debug: bool = debug
         self._array_size: int = count if count is not None else self.ARRAY_SIZE
         self._chunk_size: int = size if size is not None else self.CHUNK_SIZE
 
+        if self._array_size <= 0:
+            raise ValueError("array_size must be positive (>= 1).")
+        if not 0 < self._chunk_size <= 1024:
+            raise ValueError("size must be between 1 and 1024.")
+
+        self._max_size = self._array_size * self._chunk_size
+
         # Object for storing random data fetched from the API
         # Size is _chunk_size for all arrays plus one chunk extra space for filling
-        self._data: queue.Queue = queue.Queue(self._array_size * self._chunk_size)
+        self._data: queue.Queue = queue.Queue(self._max_size)
+
+        if debug:
+            print(f"Random: Queue initial status: {self._data.qsize()} / {self._max_size}")
 
         # Limit for int size, base of single random unit size in bits (decimal)
         self._limit: int = 2 ** self.BITS
@@ -70,6 +82,8 @@ class Random:
             print("Autofill enabled.")
             self._fill_thread = threading.Thread(target=self.__fill_bg, name="autofill_bg_thread", daemon=True)
             self._fill_thread.start()
+            if debug:
+                print("Random: Fill thread started.")
         else:
             self._fill_thread = None
             print("Autofill disabled.")
@@ -80,24 +94,37 @@ class Random:
         if self._fill_thread is not None and self._fill_thread.is_alive():
             print("Waiting for autofill thread to stop..")
             self._fill_thread.join(5)
+            if self._debug:
+                print("Random: fill thread joined.")
+        if self._debug:
+            print("Random: __del__ finished.")
 
     def __fill_bg(self):
         while self._running:
             time.sleep(self.AUTOFILL_INTEVAL)
             if self._running and self._data.qsize() < self._chunk_size:
                 print("Random data at critical level. Fetch more data.")
-                self.__generate()
+                if self._debug:
+                    print(f"Random: DATA STATUS: {self._data.qsize()} / {self._max_size}")
+                # Fetch as much data than it roughly fits in the queue at the moment
+                if self._array_size > 1:
+                    self.__generate(self._max_size - self._chunk_size)
+                else:
+                    self.__generate(self._chunk_size)
         print("Autofill thread terminated.")
 
-    def __get_value(self) -> int:
-        # Block until new values are received, or timeout is reached
-        return self._data.get(block=True, timeout=self.FETCH_TIMEOUT)
-
-    def __generate(self):
-        # print("Fetching data..")
-        # Fetch as much data than it roughly fits in the queue at the moment
-        size = (self._array_size * self._chunk_size - self._chunk_size) if self._array_size > 1 else self._chunk_size
-        while self._data.qsize() < size:
+    def __generate(self, limit):
+        """
+        Fills the data until the given limit.
+        The limit should be calculated based on the current number of values left compared to the max size.
+        :param limit:
+        :return:
+        """
+        if self._debug:
+            print("Random: Generate data..")
+            print(f"Random: LIMIT: {limit}")
+            print(f"Random: DATA STATUS: {self._data.qsize()} / {self._max_size}")
+        while self._data.qsize() < limit:
             # GET CHUNK_SIZE number of BITS-bit unsigned integers
             # One full chunk at a time for maximum efficiency
             for val in [int(h, 16) for h in quantumrandom.get_data('hex16', self._chunk_size, int(self.BITS / 8))]:
@@ -110,15 +137,30 @@ class Random:
         """
         (Re)initializes the rng with fresh values.
         Can be called to ensure enough random values are buffered.
-        CAUTION! Most expensive method, use only when necessary
+        CAUTION! Most expensive method, use only when necessary.
         :return:
         """
         print("Initializing RNG..")
 
-        for i in range(self._array_size):
-            self.__generate()
+        if self._debug:
+            print(f"Random: BEFORE init: DATA STATUS {self._data.qsize()} / {self._max_size}")
+
+        # Initialize only ~50% of the limit at start to optimize for speed
+        size = int(self._array_size / 2) * self._chunk_size if self._array_size > 1 else self._chunk_size
+
+        if self._debug:
+            print(f"Init fill size: {size}")
+
+        self.__generate(size)
+
+        if self._debug:
+            print(f"Random: AFTER init: DATA STATUS {self._data.qsize()} / {self._max_size}")
 
         print("Initializing RNG done.")
+
+    def __get_value(self) -> int:
+        # Block until new values are received, or timeout is reached
+        return self._data.get(block=True, timeout=self.FETCH_TIMEOUT)
 
     def random(self) -> float:
         """
@@ -226,7 +268,7 @@ def save_inventory(filename: str, items: list) -> None:
 
 
 def init_rng() -> any:
-    rng = Random()
+    rng = Random(debug=False)
     return rng
 
 
