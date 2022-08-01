@@ -234,7 +234,7 @@ try:
 
     # Start looping
     while running:
-        # TODO longer max (allow regenerate
+        # TODO longer max (allow regenerate & eat rock cake) ?
         # Sleep for a random time, at maximum the time the health regenerates
         can_move = False
         clicker_common.rand_sleep(rng, loop_min, loop_max)
@@ -248,7 +248,7 @@ try:
             print("Double click quick prayer.")
             click_prayer()
 
-        # TODO rock cake
+        # TODO rock cake ?
 
         if use_special and special_timer.elapsed() >= special_time and rng.random() <= special_prob:
             special_timer.reset()
