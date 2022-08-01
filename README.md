@@ -1,7 +1,14 @@
-# osrs-bots-collection
-A Bot collection for OSRS (OldSchool RuneScape (tm)) using AutoPy and OpenCV for automating different processes. 
+# osrs-bot-collection
+
+If you found this repo anywhere close to useful, please hit it with a Star and maybe even give it a Follow to keep yourself tuned on any updates.
+
+A collection of bots for OSRS (OldSchool RuneScape (tm)) using AutoPy and OpenCV for automating different processes.
 
 Repository also contains several 'blind' coordinate-based clicker bots to serve the purpose until guibots have been finished.
+
+Based on the randomness of the clicker bots and independecy over the OSRS client process, these scripts should be pretty undetectable. A random quantum data is used as the randomness source to maximize the entropy. Every action is randomized as much as possible.
+
+DISCLAIMER: This is solely a study project on creating automation over OSRS. Note that it is against the TOS and rules of Runescape to use any kind of automation while playing, thus I (the author) will not hold any responsibility on any account bans, loss of money or effort, or any other kind of loss caused to you by these bots. You have been warned.
 
 # GUI-bots
 Scripts for different purposes separated in own Python files.
@@ -38,7 +45,7 @@ Tested and developed with:
 - Nightmare Zone AFK autoclicker (DONE)
 - Cooking / Herblore / Wine Maker autoclicker (DONE)
 
-## GUI-bots
+## GUI-elements based bots
 - Yew woodcutting in Edgeville (WIP)
 - Auto banking (WIP)
 - Auto healing by eating food & potions in combat (PLANNED)
