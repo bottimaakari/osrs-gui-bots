@@ -2,10 +2,8 @@ from guibot import finder as gfinder
 from guibot import guibot as gbot
 from guibot import target as gtarget
 
-import personal
-
 import common
-
+import user_secrets
 
 
 def open_bank(bot: gbot.Region, booths: list) -> bool:
@@ -27,7 +25,7 @@ def check_pin(bot: gbot.Region) -> bool:
         return False
 
 
-def solve_pin(bot: gbot, pin: list):
+def solve_pin(bot: gbot.Region, pin: list):
     pass
 
 
@@ -51,7 +49,8 @@ def test():
 
     if check_pin(bot):
         print("HAS PIN")
-        solve_pin(bot, personal.BANK_PIN)
+        # Create a file personal.py and add list variable with pin numbers: BANK_PIN = [first, second, third, fourth]
+        solve_pin(bot, user_secrets.BANK_PIN)
     else:
         print("NO PIN CONFIGURED")
 

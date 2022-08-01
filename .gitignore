@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # Personal details
-personal.py
+user_secrets.py
