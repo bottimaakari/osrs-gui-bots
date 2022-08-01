@@ -197,25 +197,24 @@ try:
     inventory = None
     if use_item:
         inventory = clicker_common.read_inventory(items_file)
+        if len(inventory) <= 0:
+            print(
+                f"ERROR: No items found in items file ({items_file}). Ensure items configured correctly first. See the "
+                f"items example file for reference.")
+            raise ValueError("No items defined in items file.")
+        else:
+            print("Read item data from items file.")
 
     snd_inv = None
     if use_snd_item:
         snd_inv = clicker_common.read_inventory(snd_file)
-
-    if use_item and len(inventory) <= 0:
-        print(f"ERROR: No items found in items file ({items_file}). Ensure items configured correctly first. See the "
-              f"items example file for reference.")
-        raise ValueError("No items defined in items file.")
-    else:
-        print("Read item data from items file.")
-
-    if use_snd_item and len(snd_inv) <= 0:
-        print(
-            f"ERROR: No items found in secondary items file ({snd_file}). Ensure items configured correctly first. "
-            f"See the items example file for reference.")
-        raise ValueError("No items defined in items file.")
-    else:
-        print("Read item data from secondary items file.")
+        if len(snd_inv) <= 0:
+            print(
+                f"ERROR: No items found in secondary items file ({snd_file}). Ensure items configured correctly first. "
+                f"See the items example file for reference.")
+            raise ValueError("No items defined in items file.")
+        else:
+            print("Read item data from secondary items file.")
 
     running = True
     can_move = True
@@ -293,7 +292,7 @@ try:
             item_timer.reset()
             print("Click next non-empty item if available.")
 
-            while inventory[current][2] <= 0 and current < len(inventory):
+            while current < len(inventory) and inventory[current][2] <= 0:
                 print("Out of current item. Moving to next item.")
                 current += 1
 
@@ -311,7 +310,7 @@ try:
             snd_timer.reset()
             print("Click next non-empty secondary item if available.")
 
-            while snd_inv[snd_current][2] <= 0 and snd_current < len(snd_inv):
+            while snd_current < len(snd_inv) and snd_inv[snd_current][2] <= 0:
                 print("Out of current item. Moving to next item.")
                 snd_current += 1
 
@@ -324,10 +323,12 @@ try:
         move_outside_window()
 
         secs = global_timer.elapsed() / 1000
-        mins = secs / 60
-        hrs = mins / 60
 
-        print(f"Total elapsed: {int(hrs)} hrs | {int(mins)} mins | {int(secs)} secs.")
+        hrs = int(secs / 3600)
+        mins = int(secs / 60 - hrs * 60)
+        secs = int(secs - hrs * 3600 - mins * 60)
+
+        print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():

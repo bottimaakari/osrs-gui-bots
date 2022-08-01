@@ -32,7 +32,7 @@ window_title=RuneLite
 
 # Main loop interval (ms)
 loop_min=20000
-loop_max=52000
+loop_max=50000
 
 # Double click range (ms)
 click_min=200
@@ -76,7 +76,7 @@ special_prob=0.75
 # Minimum time elapsed to click an item (ms)
 # Should be e.g. average time elapsed consuming 50 absorb pts
 # 4.75 min
-item_time_min=285000
+item_time_min=275000
 
 # Minimum time elapsed to click a secondary item (ms)
 # Should be e.g. average time elapsed consuming combat potion
