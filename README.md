@@ -25,14 +25,14 @@ You may either run the bots directly (using python) build the bots into executab
 
 # Currently implemented or planned scripts:
 
-## Coordinate based clickers
+## Coordinate clicker bots
 - Superglass Make autoclicker (DONE)
 - Clay Humidify autoclicker (DONE)
 - High alchemy items autoclicker & visual detection bot (DONE)
 - Nightmare Zone AFK autoclicker (DONE)
-- Wine 
+- Cooking / wine maker autoclicker (DONE)
 
-## Bots using gui elements detection
+## GUI-bots
 - Yew woodcutting in Edgeville (WIP)
 - Auto banking (WIP)
 - Auto healing by eating food & potions in combat (PLANNED)
