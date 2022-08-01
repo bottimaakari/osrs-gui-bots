@@ -135,8 +135,9 @@ user_secrets.py
 imglog/
 
 # Inventory items info file
-**/items.txt
-**/settings.txt
+**/*items.txt
+**/*settings.txt
+
 /.idea/.gitignore
 /.idea/misc.xml
 /.idea/modules.xml
