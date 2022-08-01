@@ -2,41 +2,41 @@ echo START BUILD
 
 @REM RUN BUILD PROCESSES
 
+@REM CLEANUP ANY OLD BUILD RESULTS
+ECHO CLEANUP
+
 @REM RMDIR /S /Q .\build
 RMDIR /S /Q .\dist
 
-START /WAIT "NIGHTMARE" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --onefile .\nightmare\nightmare_clicker.py
+SET TARGETS=(nightmare humidify wine superglass alchemy)
 
-START /WAIT "HUMIDIFY" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --onefile .\humidify\humidify_clicker.py
+@REM BUILD EACH CLICKER SCRIPT INTO A SINGLE WINDOWS EXECUTABLE
+ECHO BUILD TARGET BINARIES
 
-START /WAIT "WINE" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --onefile .\wine\wine_clicker.py
+SET PROCN=pyinstaller.exe
 
-START /WAIT "SUPERGLASS" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --onefile .\superglass\superglass_clicker.py
+(FOR %%i IN %TARGETS% DO (
+    START "%PROCN%" pyinstaller --paths . --onefile .\%%i\%%i_clicker.py
+))
 
-START /WAIT "HIGH ALCHEMY" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --onefile .\high_alchemy\alchemy_clicker.py
+@REM WAIT UNTIL ALL BUILDS HAVE FINISHED
+:LOOP
+FOR /F %%i IN ('tasklist /NH /FI "IMAGENAME eq %PROCN%"') DO IF %%i == %PROCN% GOTO EXISTS
+GOTO :DONE
+:EXISTS
+TIMEOUT /T 0
+GOTO :LOOP
+:DONE
+
+ECHO BUILD DONE
 
 @REM COPY DIST BINARIES WITH ASSETS TO CORRESPONDING DIRS
+ECHO COLLECT PACKAGES
 
-MKDIR .\dist\nightmare\
-XCOPY /Y .\dist\nightmare_clicker.exe .\dist\nightmare\
-XCOPY /Y .\nightmare\items-example.txt .\dist\nightmare\
-XCOPY /Y .\nightmare\settings-example.txt .\dist\nightmare\
+FOR %%i IN %TARGETS% DO (
+    MKDIR .\dist\%%i\
+    MOVE /Y .\dist\%%i_clicker.exe .\dist\%%i\
+    XCOPY /Y .\%%i\*-example.txt .\dist\%%i\
+)
 
-MKDIR .\dist\humidify\
-XCOPY /Y .\dist\humidify_clicker.exe .\dist\humidify\
-XCOPY /Y .\humidify\settings-example.txt .\dist\humidify\
-
-MKDIR .\dist\wine\
-XCOPY /Y .\dist\wine_clicker.exe .\dist\wine\
-XCOPY /Y .\wine\settings-example.txt .\dist\wine\
-
-MKDIR .\dist\superglass\
-XCOPY /Y .\dist\superglass_clicker.exe .\dist\superglass\
-XCOPY /Y .\humidify\settings-example.txt .\dist\superglass\
-
-MKDIR .\dist\high_alchemy\
-XCOPY /Y .\dist\alchemy_clicker.exe .\dist\high_alchemy\
-XCOPY /Y .\high_alchemy\items-example.txt .\dist\high_alchemy\
-XCOPY /Y .\high_alchemy\settings-example.txt .\dist\high_alchemy\
-
-echo FINISHED BUILD
+ECHO FINISHED BUILD
