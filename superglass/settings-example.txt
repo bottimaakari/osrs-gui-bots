@@ -39,6 +39,7 @@ deposit_offset2=100
 # Run in debugging mode (debug printouts, etc.)
 # Exception is for long sleep delays
 # Causes lots of console log flood
+# Not recommended on non-development use!
 debug_mode=False
 
 # Run mouse info program only and exit (for determining target(s) coordinates)

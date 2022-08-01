@@ -6,6 +6,7 @@
 # Run in debugging mode (debug printouts, etc.)
 # Exception is for long sleep delays
 # Causes lots of console log flood
+# Not recommended on non-development use!
 debug_mode=False
 
 # Run mouse info program only (for determining coordinates)
