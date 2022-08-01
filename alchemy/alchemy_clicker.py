@@ -143,9 +143,6 @@ try:
     # Print instructions on start before start delay
     clicker_common.print_start_info(interrupt_key)
 
-    # Initial sleep for user to have time to react on startup
-    clicker_common.start_delay(rng)
-
     # Read inventory data file
     # (ITEM POSX, ITEM POSY, ITEM COUNT)
     inventory = clicker_common.read_inventory(items_file)
