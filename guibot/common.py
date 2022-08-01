@@ -2,13 +2,10 @@ import secrets
 from time import sleep
 
 from guibot import config as gconfig
-from guibot import finder as gfinder
 from guibot import guibot as gbot
-from guibot import location as glocation
-from guibot import region as gregion
 from guibot import target as gtarget
 
-import mouse
+from utils import mouse
 
 rng = secrets.SystemRandom()
 

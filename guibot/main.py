@@ -1,5 +1,6 @@
 import woodcut
-import combat
+from guibot import combat
+
 
 def main(*args):
     if len(args) < 1:

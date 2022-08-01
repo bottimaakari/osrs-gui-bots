@@ -1,6 +1,4 @@
-from guibot import finder as gfinder
 from guibot import guibot as gbot
-from guibot import target as gtarget
 
 import common
 

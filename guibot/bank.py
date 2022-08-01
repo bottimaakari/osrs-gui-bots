@@ -1,9 +1,8 @@
 import pytesseract
-from guibot import finder as gfinder
+from guibot import finder as gfinder, common
 from guibot import guibot as gbot
 from guibot import target as gtarget
 
-import common
 import user_secrets
 
 pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'

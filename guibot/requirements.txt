@@ -15,3 +15,5 @@ pyautogui==0.9.52; platform_python_implementation != "PyPy"
 
 # GUI to use for testing
 PyQt5==5.11.3; platform_python_implementation != "PyPy"
+
+guibot

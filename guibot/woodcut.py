@@ -1,10 +1,6 @@
-from time import perf_counter, sleep
-
-from guibot import guibot as gbot
-from guibot import region as bregion
+from guibot import common
 from guibot import target as btarget
 
-import common
 
 def run():
     fr, bot = common.init_bot(True)
