@@ -1,5 +1,5 @@
 # osrs-guibot
-A GUI Bot for OSRS using AutoPy, OpenCV for automating woodcutting.
+A GUI Bot for OSRS (OldSchool Runescape (tm)) using GuiBot, AutoPy and OpenCV libraries for automating different processes.
 
 Scripts for different purposes separated in own Python files.
 
