@@ -133,10 +133,11 @@ try:
     # From this point on, catch any interruption caused by special key
     keyboard.on_press_key(interrupt_key, interrupt)
 
-    print("Started. Hit ESC at any time to stop execution.")
-    print("NOTE: Ensure settings are correctly defined in settings file.")
-    print("NOTE: Ensure item details are correctly set in items data file.")
-    print("NOTE: Please do not move the mouse at all after the program has been started.")
+    # Print instructions on start before start delay
+    clicker_common.print_start_info(interrupt_key)
+
+    # Initial sleep for user to have time to react on startup
+    clicker_common.start_delay(rng)
 
     # Read inventory data file
     # (ITEM POSX, ITEM POSY, ITEM COUNT)
@@ -157,6 +158,8 @@ try:
     # Initial sleep to have time to react
     print("Waiting 4 seconds..")
     clicker_common.rand_sleep(rng, 4000, 4000)
+
+    global_timer = clicker_common.Timer()
 
     move_thread = threading.Thread(
         target=clicker_common.mouse_movement_background,
@@ -207,6 +210,8 @@ try:
             inventory[current][2] -= 1
 
         do_click_spell = True
+
+        clicker_common.print_status(global_timer)
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():

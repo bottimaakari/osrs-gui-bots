@@ -309,3 +309,17 @@ def print_info(key):
     print("NOTE: Ensure settings are correctly defined in settings file.")
     print("NOTE: Ensure item details are correctly set in items data file (if applicable).")
     print("NOTE: Please do not move the mouse anymore since the program has been started.")
+
+
+def start_delay(rng):
+    print("Waiting 4 seconds before starting..")
+    rand_sleep(rng, 4000, 4000)  # debug=True
+
+
+def print_status(timer: Timer):
+    secs = timer.elapsed() / 1000
+    hrs = int(secs / 3600)
+    mins = int(secs / 60 - hrs * 60)
+    secs = int(secs - hrs * 3600 - mins * 60)
+    print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
+    print(f"Timestamp: {datetime.datetime.now()}")

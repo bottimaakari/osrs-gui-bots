@@ -1,4 +1,3 @@
-import datetime
 import secrets
 import threading
 
@@ -295,14 +294,11 @@ try:
     # Key 41 = §
     keyboard.on_press_key(interrupt_key, interrupt)
 
-    print(f"Started. Hit key with code {interrupt_key} at any time to stop execution.")
-    print("NOTE: Ensure settomgs are correctly defined in settings file.")
-    print("NOTE: Ensure item details are correctly set in items data file.")
-    print("NOTE: Please do not move the mouse at all after the program has been started.")
+    # Print instructions on start before start delay
+    clicker_common.print_start_info(interrupt_key)
 
-    # Initial sleep to have time to react
-    print("Waiting 4 seconds before starting..")
-    clicker_common.rand_sleep(rng, 4000, 4000)  # debug=True
+    # Initial sleep for user to have time to react on startup
+    clicker_common.start_delay(rng)
 
     # Timers for keeping track when allowed to commit next actions
     # Separate timer for each task
@@ -419,12 +415,7 @@ try:
         click_spell()
         break_action()
 
-        secs = global_timer.elapsed() / 1000
-        hrs = int(secs / 3600)
-        mins = int(secs / 60 - hrs * 60)
-        secs = int(secs - hrs * 3600 - mins * 60)
-        print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
-        print(f"Timestamp: {datetime.datetime.now()}")
+        clicker_common.print_status(global_timer)
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():
