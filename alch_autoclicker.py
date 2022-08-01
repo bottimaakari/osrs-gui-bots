@@ -20,15 +20,16 @@ def mouse_info():
 
 
 def randomized_sleep(minms, maxms):
-    tm = rng.randint(minms, maxms) / 1000
-    print("Delay for: " + str(tm) + " ms")
-    pyautogui.sleep(tm)
+    tm = rng.randint(minms, maxms)
+    print(f"Delay for: {tm} ms")
+    pyautogui.sleep(tm / 1000)
+    return tm
 
 
 def rand_mouse_speed(minms, maxms):
-    tm = rng.randint(minms, maxms) / 1000
-    print("Mouse speed: " + str(tm) + " ms")
-    return tm
+    tm = rng.randint(minms, maxms)
+    print(f"Mouse speed: {tm} ms")
+    return tm / 1000
 
 
 def randomized_offset(x, y):
@@ -39,6 +40,7 @@ def randomized_offset(x, y):
 
 
 def click_target(x, y):
+    print(f"Click target: ({x}, {y})")
     pyautogui.moveTo(x, y, rand_mouse_speed(mouse_min, mouse_max))
     pyautogui.leftClick()
 
@@ -82,39 +84,50 @@ def on_press_esc(event):
 # TODO enable for pos info
 # mouse_info()
 
+running = True
+doClickSpell = True
+current = 0
+last_sleep = None
+
+print("Started. Hit ESC at any time to stop execution.")
+print("NOTE: Ensure item details are correctly set in items data file.")
+
+# Sleep for 1.5 sec
+randomized_sleep(1500, 1500)
+
 # Key 1 = ESC
 # Key 82 = NUMPAD 0
 keyboard.on_press_key(1, on_press_esc)
 
 # (ITEM POSX, ITEM POSY, ITEM COUNT)
 items = read_items()
-
-running = True
-doClickSpell = True
-current = 0
+print("Read item data from file.")
 
 # First, ensure spell menu open
+print("Opening spell menu..")
 open_spell_menu()
 
 # Start looping
 while running:
-    print(f"Loop: {doClickSpell}")
-    randomized_sleep(0, 500)
+    print(f"DoClickSpell: {doClickSpell}")
+    last_sleep = randomized_sleep(400, 600)
 
     if doClickSpell:
         click_spell()
         doClickSpell = False
 
-    elif not doClickSpell:
-        if items[current][2] <= 0:
-            print(f"Item {current} out. Moving to next..")
-            current += 1
+    else:
 
         if current >= len(items):
             print("Out of items.")
             break
 
+        if items[current][2] <= 0:
+            print(f"Item {current} out. Moving to next..")
+            current += 1
+            continue
+
         click_item(items[current])
-        randomized_sleep(1100, 1200)
+        randomized_sleep(1400 - last_sleep, 1600 - last_sleep)
         items[current][2] -= 1
         doClickSpell = True
