@@ -20,7 +20,7 @@ if __name__ == '__main__':
         # Read configuration file
         settings: dict[str, str] = clicker_common.read_settings(settings_file)
 
-        # Collect game window info (topleft coords)
+        # Collect game window info (top left coords)
         window_name: str = str(settings["window_title"])
 
         # Ensure game window is detected
@@ -97,6 +97,19 @@ if __name__ == '__main__':
         globvals.running = True
         globvals.can_move = True
 
+        common_args = {
+            'rng': rng,
+            'action_min': action_min,
+            'action_max': action_max,
+            'speed_min': speed_min,
+            'speed_max': speed_max,
+            'close_min': close_min,
+            'close_max': close_max,
+            'max_off': max_off,
+            'window_name': window_name,
+            'debug': debug_mode
+        }
+
         keyboard.on_press_key(interrupt_key, clicker_common.interrupt_handler)
         keyboard.on_press_key(pause_key, clicker_common.pause_handler)
 
@@ -110,19 +123,6 @@ if __name__ == '__main__':
         # Separate timer for each task
         global_timer: clicker_common.Timer = clicker_common.Timer()
         break_timer: clicker_common.Timer = clicker_common.Timer()
-
-        common_args = {
-            'rng': rng,
-            'action_min': action_min,
-            'action_max': action_max,
-            'speed_min': speed_min,
-            'speed_max': speed_max,
-            'close_min': close_min,
-            'close_max': close_max,
-            'max_off': max_off,
-            'window_name': window_name,
-            'debug': debug_mode
-        }
 
         move_thread = clicker_common.create_movement_thread(rand_min, rand_max, **common_args)
 
@@ -167,7 +167,7 @@ if __name__ == '__main__':
                 break
 
             # Wait until spell action finished
-            clicker_common.rand_sleep(wait_min, wait_max, debug=True, **common_args)
+            clicker_common.rand_sleep(wait_min, wait_max, **{**common_args, 'debug': True})
 
             clicker_common.pause_action(**common_args)
             if not globvals.running:
@@ -180,14 +180,14 @@ if __name__ == '__main__':
 
             # ACTION LOOP BEGINS HERE
             clicker_common.open_bank(bank_location, **common_args)
-            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             clicker_common.deposit_item(deposit_location, deposit_offset, left_banking, **common_args)
-            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)
             if not globvals.running:
@@ -195,21 +195,21 @@ if __name__ == '__main__':
 
             # Withdraw items from bank
             clicker_common.withdraw_item(withdraw_location, withdraw_offset, left_banking, item_take, **common_args)
-            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             clicker_common.close_interface(close_key, **common_args)
-            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)
             if not globvals.running:
                 break
 
             clicker_common.open_spell_book(spell_book_key, **common_args)
-            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)
             if not globvals.running:
@@ -221,7 +221,7 @@ if __name__ == '__main__':
             # before rolling break dice to get status printed e.g. just before a very long break
             clicker_common.print_status(global_timer)
 
-            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer)
+            clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
         # END WHILE
         print("Main loop stopped.")
