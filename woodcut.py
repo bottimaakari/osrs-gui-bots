@@ -6,57 +6,19 @@ from guibot import target as btarget
 
 import common
 
-
-def click_text_target(bot: gbot.Region, target, text: str):
-    if bot.exists(target):
-        bot.hover(target)
-    else:
-        print("CLICK TARGET LOST")
-        return
-
-    text = bregion.Text(text, bot.cv_backend()).with_similarity(0.5)
-
-    if bot.exists(text):
-        # Minor random delay before clicking
-        print(f"LABEL {text} FOUND")
-        common.delay(False)
-
-        for i in range(common.click_count()):
-            common.micro_delay()
-            bot.click(target)
-            print(f"CLICKED {target}")
-    else:
-        print(f"LABEL {text} NOT FOUND")
-
-
 def run():
     fr, bot = common.init_bot(True)
 
-    stumps = []
-    trees = []
-
     # Collect stump tree image assets
-    for i in range(1, 100):
-        fn = 'yew_stump_' + str(i)
-        try:
-            fr.search(fn)
-            stumps.append(fn)
-        except:
-            pass
+    stumps = common.load_assets('yew_stump_', fr, True)
+    print("STUMPS LOADED: " + str(len(stumps)))
 
     # Collect live tree image assets
-    for i in range(1, 100):
-        fn = 'yew_' + str(i)
-        try:
-            fr.search(fn)
-            trees.append(fn)
-        except:
-            pass
+    trees = common.load_assets('yew_', fr, True)
+    print("TREES LOADED: " + str(len(trees)))
 
-    print("TREES: " + str(len(trees)))
-    print("STUMPS: " + str(len(stumps)))
-
-    # Initially not cutting
+    # Initially, player is not cutting
+    # TODO somehow determine if the player is currently cuttiing or not
     cutting = False
 
     while True:
@@ -115,7 +77,7 @@ def run():
             if common.rand_bool(0.33):
                 print("EXTRA CLICK")
                 try:
-                    click_text_target(bot, tree, 'Chop Down Yew')
+                    common.click_text_target(bot, tree, 'Chop Down Yew')
                 except:
                     print("TREE NO LONGER EXISTS")
                     tree = None
@@ -125,7 +87,7 @@ def run():
             common.delay(long=True)
             print("START CUTTING")
             try:
-                click_text_target(bot, tree, 'Chop Down Yew')
+                common.click_text_target(bot, tree, 'Chop Down Yew')
             except:
                 print("TREE NO LONGER EXISTS")
                 tree = None
@@ -135,3 +97,5 @@ def run():
         else:
             print("TREE NOT FOUND")
             continue
+
+run()

@@ -1,6 +1,8 @@
 import win32gui
 from time import sleep
 
+gname = None
+
 gx = None
 gy = None
 gw = None
@@ -16,7 +18,7 @@ def callback(hwnd, extra):
 
     name = win32gui.GetWindowText(hwnd)
 
-    if not "RuneLite" in name:
+    if not gname in name:
         return
 
     # print("Window %s:" % name)
@@ -33,6 +35,9 @@ def callback(hwnd, extra):
     gh = h
 
 def get_window_pos(name):
+    global gname
+    gname = name
+    
     win32gui.EnumWindows(callback, None)
 
     tries = 50

@@ -2,7 +2,10 @@ from guibot import finder as gfinder
 from guibot import guibot as gbot
 from guibot import target as gtarget
 
+import personal
+
 import common
+
 
 
 def open_bank(bot: gbot.Region, booths: list) -> bool:
@@ -15,7 +18,7 @@ def open_bank(bot: gbot.Region, booths: list) -> bool:
 
 
 def check_pin(bot: gbot.Region) -> bool:
-    tgt = gtarget.Text("Please enter your PIN", gfinder.TextFinder())
+    tgt = gtarget.Text("Please enter your PIN", bot.cv_backend())
 
     if bot.exists(tgt):
         print("PIN TEXT FOUND")
@@ -48,7 +51,7 @@ def test():
 
     if check_pin(bot):
         print("HAS PIN")
-        solve_pin(bot, ***REMOVED***)
+        solve_pin(bot, personal.BANK_PIN)
     else:
         print("NO PIN CONFIGURED")
 

@@ -67,9 +67,7 @@ def init_bot(region: bool):
         return (fr, reg)
     else:
         bot = gbot.GuiBot()
-
         bot.add_path('img/')
-
         return bot
 
 
@@ -84,6 +82,10 @@ def load_assets(name_prefix: str, fr: FileResolver, randomizeOrder: bool):
             assets.append(fn)
         except:
             pass
+        
+    if len(assets) <= 0:
+        print(f"WARNING: NO ASSETS FOUND WITH PREFIX: '{name_prefix}'")
+        return assets
 
     if randomizeOrder:
         rng.shuffle(assets)
@@ -113,9 +115,15 @@ def click_text_target(bot: gbot.Region, target, text: str):
         print(f"LABEL {text} NOT FOUND")
 
 
+# Returns the given object name as finder image with given similarity 
 def as_image(name, similarity):
     return gtarget.Image(name).with_similarity(similarity)
 
 
 def get_window_pos(name):
     return mouse.get_window_pos(name)
+
+
+# Loads bot configuration from given file path, into dict<str, str>
+def load_configuration(path) -> dict:
+    pass
