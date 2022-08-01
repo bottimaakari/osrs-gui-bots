@@ -23,15 +23,15 @@ if __name__ == '__main__':
         # Collect game window info (topleft coords)
         window_name: str = str(settings["window_title"])
 
+        # Ensure game window is detected
+        clicker_common.window(window_name)
+
         # Check if mouse info mode enabled in settings
         if bool(settings['mouse_info'].lower() == 'true'):
             print(f"TopLeft corner location: {clicker_common.window(window_name).topleft}")
             print("Tip: To get correct relative position, calculate: target.x/y - topLeft.x/y")
             pyautogui.mouseInfo()
             exit(0)
-
-        # Ensure game window is detected
-        clicker_common.window(window_name)
 
         # Debug prints etc.
         debug_mode: bool = settings['debug_mode'].lower() == 'true'
@@ -42,7 +42,7 @@ if __name__ == '__main__':
 
         # UI Shortcut keys
         close_key: str = settings['close_menu_key']
-        spell_book_key: str = settings['spellbook_key']
+        spell_book_key: str = settings['spell_book_key']
 
         # Mouse speed limits
         speed_min: int = int(settings['mouse_speed_min'])
@@ -97,10 +97,6 @@ if __name__ == '__main__':
         globvals.running = True
         globvals.can_move = True
 
-        move_thread = clicker_common.create_movement_thread(
-            rng, move_min, move_max, max_off, debug_mode
-        )
-
         keyboard.on_press_key(interrupt_key, clicker_common.interrupt_handler)
         keyboard.on_press_key(pause_key, clicker_common.pause_handler)
 
@@ -127,6 +123,8 @@ if __name__ == '__main__':
             'window_name': window_name,
             'debug': debug_mode
         }
+
+        move_thread = clicker_common.create_movement_thread(**common_args)
 
         # Before each operation, check that we are still running
         # and not interrupted (running == True)
@@ -238,5 +236,13 @@ if __name__ == '__main__':
 
     except Exception as e:
         globvals.running = False
-        print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
-        print(e)
+        print("FATAL EXCEPTION OCCURRED DURING SCRIPT EXECUTION:")
+        if type(e) == KeyError:
+            print("Detected KeyError - Ensure all settings are correctly set with valid values.")
+            print(f"Setting that caused the issue: {e} (Check that it is set and is valid in the settings file.)")
+        elif type(e) == ValueError:
+            print("Detected ValueError - Ensure all settings have valid values set (e.g. string, integer, boolean..)")
+            print(f"The following error message might be helpful for detecting what caused the issue: {e!r}")
+        else:
+            print("Could not determine error cause.")
+            print(f"Error message: {e!r}")

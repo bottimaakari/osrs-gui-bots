@@ -1,7 +1,7 @@
 # Some basic settings for the clicker
 # Read on program startup
 # Lines starting with '#' are ignored
-# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+# Location coordinates are relative from game screen top left corner (x - topLeft.x, y - topLeft.y)
 
 # Amount of hard clay initially in bank
 # (Assuming unlimited supply of supplemental resource items, e.g. Astral Runes)
@@ -18,7 +18,8 @@ debug_mode=False
 # Run mouse info program only and exit (for determining target(s) coordinates)
 mouse_info=False
 
-# Save (overwrite) current item counts to items file on exit
+# Save (append to items file end) current item counts to items file on exit
+# NOTE: The item file must be manually inspected after to contain only correct values
 save_on_exit=False
 
 # 1 = ESC
@@ -27,18 +28,20 @@ save_on_exit=False
 # 12 = +
 
 # Keycode for key to interrupt (stop) the program
+# Use the numerical representation for the selected key (examples above)
 interrupt_key=41
 
 # Pause the program at any time by pressing this key
 # When already paused, the program resumes with the same key
 # Make sure it's different from the interrupt key!
+# Use the numerical representation for the selected key (examples above)
 pause_key=12
 
 # Other action shortcut keys
-spellbook_key=F6
+spell_book_key=F6
 close_menu_key=ESC
 
-# Title of the game window (or some unambigous part of it) to recognize it
+# Title of the game window (or some unambiguous part of it) to recognize it
 window_title=RuneLite
 
 # Mouse speed interval (ms)
@@ -96,7 +99,7 @@ left_click_banking=True
 max_run_time=7200000
 
 #### Static location data (X,Y) ####
-# Relative X,Y from topleft corner
+# Relative X,Y from top left corner
 # Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 bank_location=315,200
 
