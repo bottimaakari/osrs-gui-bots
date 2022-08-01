@@ -1,0 +1,98 @@
+# Some basic settings for the clicker
+# Read on program startup
+# Lines starting with '#' are ignored
+# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+
+# Amount of hard clay initially in bank
+# (Assymign unlimited supply of Astral runes)
+item1_left=9874
+item2_left=979
+
+#### Static location data (X,Y) ####
+# Relative X,Y from topleft corner
+# Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
+bank_location=315,200
+
+spell_location=716,307
+
+withdraw_location=330,162
+withdraw_offset=70
+
+snd_withdraw_location=380,162
+
+# Position (Hor, Vert) (1,7)
+deposit_location1=580,474
+deposit_offset1=15
+
+# Position (Hor, Vert) (1,1)
+deposit_location2=580,255
+deposit_offset2=100
+
+# Run in debugging mode (debug printouts, etc.)
+# Exception is for long sleep delays
+# Causes lots of console log flood
+debug_mode=False
+
+# Run mouse info program only and exit (for determining target(s) coordinates)
+mouse_info=False
+
+# Save (overwrite) current item counts to items file on exit
+save_on_exit=False
+
+# Keycode for key to interrupt (stop) the program
+# 1 = ESC
+# 82 = Numpad 0
+# 41 = §
+interrupt_key=41
+
+# Other action shortcut keys
+spellbook_key=F6
+close_menu_key=ESC
+
+# Title of the game window (or some unambigous part of it) to recognize it
+window_title=RuneLite
+
+# Mouse speed interval (ms)
+mouse_speed_min=100
+mouse_speed_max=180
+
+# Delays between common actions (ms)
+action_min=140
+action_max=180
+
+# Wait time for the spell action to finish
+wait_min=2000
+wait_max=2200
+
+# Random breaks' interval (ms)
+# 1 min - 4,5min (idle logout at 5min!)
+break_min=55000
+break_max=275000
+
+# Probability to take a break (in percent decimal)
+# Breaks only once per loop
+# e.g. 5 % => 0.05
+break_prob=0.02
+
+# Minimum time between breaks
+# No new breaks are taken before this time has elapsed after the last break
+# e.g. 15 min = 900 000 ms
+break_time_min=900000
+
+# How much the random movement moves the mouse
+rand_min=-10
+rand_max=10
+
+# How much the click can be randomized off of the precise target
+# Affects both X and Y (X in range(X +- max_off), Y in range (Y +- max_off))
+max_off=3
+
+# Run all (enabled) actions at start?
+# Excluding primary item click (e.g. absorb points always full at start)
+act_start=True
+
+# Maximum time the script runs before exiting
+# This is to prevent running more than max login time, etc.
+# Current max logged in time: 6 hours
+# 2 h = 120 min = 7,200,000 ms
+max_run_time=7200000
