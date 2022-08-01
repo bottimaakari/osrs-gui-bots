@@ -291,6 +291,7 @@ try:
     snd_deposit = settings['snd_deposit'].lower() == "true"
     act_start = settings['act_start'].lower() == "true"
     left_banking = settings['left_click_banking'].lower() == "true"
+    idle_move = settings['idle_movement'].lower() == "true"
 
     running = True
     can_move = True
@@ -378,8 +379,10 @@ try:
             print("Not running anymore.")
             break
 
+        can_move = idle_move
         # Wait until spell action finished
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
+        can_move = True
 
         if not running:
             print("Not running anymore.")

@@ -109,6 +109,9 @@ max_off=4
 # Excluding primary item click (e.g. absorb points always full at start)
 act_start=True
 
+# Randomly move the mouse during idle (waiting for task to finish)
+idle_movement=False
+
 # Assume correct withdraw/deposit amount is set using quantity menu
 # Uses then left-clicking for withdrawal/deposits for faster and more accurate actions
 left_click_banking=True
