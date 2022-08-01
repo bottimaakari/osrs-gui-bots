@@ -1,0 +1,119 @@
+# Some basic settings for the clicker
+# Read on program startup
+# Lines starting with '#' are ignored
+# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+
+# Amount of hard clay initially in bank
+# (Assuming unlimited supply of additional resources e.g. Astral runes)
+item1_left=9500
+item2_left=9500
+
+# How much of each item is withdrawn in every loop?
+item1_take=14
+item2_take=14
+
+#### Static location data (X,Y) ####
+# Relative X,Y from topleft corner
+# Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
+bank_location=315,200
+
+combine1_location=716,307
+combine2_location=716,307
+
+withdraw_location=330,162
+withdraw_offset=70
+
+snd_withdraw_location=380,162
+snd_withdraw_offset=70
+
+# Position (Hor, Vert) (1,7)
+deposit_location1=580,474
+deposit_offset1=15
+
+# Do a second deposit on a second position?
+# Coordinates defined below
+snd_deposit=False
+
+# Position (Hor, Vert) (1,1)
+deposit_location2=580,255
+deposit_offset2=100
+
+# Run in debugging mode (debug printouts, etc.)
+# Exception is for long sleep delays
+# Causes lots of console log flood
+debug_mode=False
+
+# Run mouse info program only and exit (for determining target(s) coordinates)
+mouse_info=False
+
+# Save (overwrite) current item counts to items file on exit
+save_on_exit=False
+
+# Keycode for key to interrupt (stop) the program
+# 1 = ESC
+# 82 = Numpad 0
+# 41 = §
+interrupt_key=41
+
+# Other action shortcut keys
+inventory_key=ESC
+close_menu_key=ESC
+confirm_key=SPACE
+
+# Title of the game window (or some unambigous part of it) to recognize it
+window_title=RuneLite
+
+# Mouse speed interval (ms)
+mouse_speed_min=140
+mouse_speed_max=180
+
+# Delays between common actions (ms)
+action_min=150
+action_max=170
+
+# Wait time for the spell action to finish
+wait_min=28000
+wait_max=32000
+
+# An additional delay before closing an interface using hotkey
+# This is to e.g. prevent closing bank too early
+close_min=140
+close_max=160
+
+# Random breaks' interval (ms)
+# 1 min - 4,5min (idle logout at 5min!)
+break_min=30000
+break_max=275000
+
+# Probability to take a break (in percent decimal)
+# Breaks only once per loop
+# e.g. 5 % => 0.05
+break_prob=0.025
+
+# Minimum time between breaks
+# No new breaks are taken before this time has elapsed after the last break
+# e.g. 15 min = 900 000 ms
+break_time_min=900000
+
+# How much the random movement moves the mouse
+rand_min=-7
+rand_max=7
+
+# How much the click can be randomized off of the precise target
+# Affects both X and Y (X in range(X +- max_off), Y in range (Y +- max_off))
+max_off=4
+
+# Run all (enabled) actions at start?
+# Excluding primary item click (e.g. absorb points always full at start)
+act_start=True
+
+# Assume correct withdraw/deposit amount is set using quantity menu
+# Uses then left-clicking for withdrawal/deposits for faster and more accurate actions
+left_click_banking=True
+
+# Maximum time the script runs before exiting
+# This is to prevent running more than max login time, etc.
+# Current max logged in time: 6 hours
+# 2 h = 120 min = 7,200,000 ms
+# 3 h = 180 min = 10 800 000 ms
+max_run_time=10800000
