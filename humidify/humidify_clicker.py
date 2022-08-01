@@ -1,34 +1,11 @@
 import datetime
-import secrets
 import threading
 
 import keyboard
 import pyautogui
 
 import clicker_common
-
-
-def mouse_movement_background():
-    print("BG Thread started.")
-    while running:
-        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
-
-        if not can_move:
-            continue
-
-        for i in range(0, rng.randint(0, rng.randint(0, 8))):
-            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
-            if not running or not can_move:
-                break
-            x, y = clicker_common.randomized_offset(rng,
-                                                    rng.randint(move_min, move_max),
-                                                    rng.randint(move_min, move_max),
-                                                    max_off,
-                                                    debug=debug_mode
-                                                    )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
-
-    print("BG Thread terminated.")
+import globvals
 
 
 def hover_target(x, y):
@@ -41,13 +18,12 @@ def left_click_target(x, y):
 
     # Temporarily prevent background movement
     # to ensure the click hits target correctly
-    global can_move
-    can_move = False
+    globvals.can_move = False
 
     pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.leftClick()
 
-    can_move = True
+    globvals.can_move = True
 
 
 def right_click_target(x, y):
@@ -55,13 +31,12 @@ def right_click_target(x, y):
 
     # Temporarily prevent background movement
     # to ensure the click hits target correctly
-    global can_move
-    can_move = False
+    globvals.can_move = False
 
     pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.rightClick()
 
-    can_move = True
+    globvals.can_move = True
 
 
 def hotkey_press(key):
@@ -123,39 +98,35 @@ def focus_window():
 
 def click_spell():
     print("Click spell.")
-    loc = tuple(map(int, settings['spell_location'].split(',')))
-    hover_click(loc)
+    hover_click(spell_location)
 
-    loc = tuple(map(int, settings['bank_location'].split(',')))
-    hover(loc)
+    print("Hover on bank.")
+    hover(bank_location)
 
 
 def open_bank():
     print("Open bank.")
-    loc = tuple(map(int, settings['bank_location'].split(',')))
-    hover_click(loc)
+    hover_click(bank_location)
 
 
 def deposit_item():
     print("Deposit item(s).")
-    loc = tuple(map(int, settings['deposit_location'].split(',')))
 
     if left_banking:
-        hover_click(loc)
+        print("Using left click.")
+        hover_click(deposit_location)
     else:
-        off = int(settings['deposit_offset'])
-        hover_context_click(loc, off)
+        print("Using right click context menu.")
+        hover_context_click(deposit_location, deposit_offset)
 
 
 def withdraw_item():
     print("Withdraw item(s).")
-    loc = tuple(map(int, settings['withdraw_location'].split(',')))
 
     if left_banking:
-        hover_click(loc)
+        hover_click(withdraw_location)
     else:
-        off = int(settings['withdraw_offset'])
-        hover_context_click(loc, off)
+        hover_context_click(withdraw_location, withdraw_offset)
 
 
 def open_spellbook():
@@ -182,15 +153,14 @@ def window():
 # Gracefully erminates the program
 def interrupt(ev):
     print("Program interrupted.")
-    global running
-    running = False
+    globvals.running = False
     print("Possibly still waiting for a sleep to finish..")
 
 
-# Use system random data source
-rng = secrets.SystemRandom()
-
 try:
+    # Use quantumrandom as random data source for better entropy
+    rng = clicker_common.init_rng()
+
     settings_file = "settings.txt"
 
     # Read configuration file
@@ -262,14 +232,27 @@ try:
 
     left_banking = settings['left_click_banking'].lower() == "true"
 
-    running = True
-    can_move = True
-    break_taken = False
+    spell_location = tuple(map(int, settings['spell_location'].split(',')))
+    bank_location = tuple(map(int, settings['bank_location'].split(',')))
+    deposit_location = tuple(map(int, settings['deposit_location'].split(',')))
+    withdraw_location = tuple(map(int, settings['withdraw_location'].split(',')))
+
+    deposit_offset = int(settings['deposit_offset'])
+    withdraw_offset = int(settings['withdraw_offset'])
 
     item_left = int(settings['item_left'])
     item_take = int(settings['item_take'])
 
-    move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
+    globvals.running = True
+    globvals.can_move = True
+    globvals.break_taken = False
+
+    move_thread = threading.Thread(
+        target=clicker_common.mouse_movement_background,
+        name="bg_mouse_movement",
+        args=(rng, move_min, move_max, max_off, debug_mode)
+    )
+    move_thread.start()
 
     # Key 1 = ESC
     # Key 82 = NUMPAD 0
@@ -294,104 +277,102 @@ try:
     # and not interrupted (running == True)
 
     # Start the bg mouse movement thread
-    if running:
+    if globvals.running:
         move_thread.start()
         print("Mouse movement BG thread started.")
 
-    if running and act_start:
+    if globvals.running and act_start:
         print("Running actions at program start..")
-        if running:
+        if globvals.running:
             focus_window()
-        if running:
+        if globvals.running:
             close_interface()
-        if running:
+        if globvals.running:
             open_bank()
-        if running:
+        if globvals.running:
             if item_left < item_take:
                 print("Out of item(s). Exiting.")
-                running = False
+                globvals.running = False
             else:
                 withdraw_item()
                 item_left -= item_take
-        if running:
+        if globvals.running:
             close_interface()
-        if running:
+        if globvals.running:
             open_spellbook()
-        if running:
+        if globvals.running:
             click_spell()
 
 
     def break_action():
-        break_rnd = rng.random()
-        global break_taken, can_move
         # If break not yet taken in this loop, enough time from previous break passed, and random number hits prob
-        if not break_taken and break_timer.elapsed() >= break_time and break_rnd < break_prob:
+        if not globvals.break_taken and break_timer.elapsed() >= break_time and rng.random() < break_prob:
             break_timer.reset()
-            can_move = False
+            globvals.can_move = False
             take_break()
-            can_move = True
-            break_taken = True
+            globvals.can_move = True
+            globvals.break_taken = True
 
 
     # Start looping
-    while running:
+    while globvals.running:
         # Reset break status every iteration
-        break_taken = False
+        globvals.break_taken = False
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
         # Wait until spell action finished
         clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
         if global_timer.elapsed() >= run_max:
             print("Max runtime reached. Stopping.")
-            running = False
+            globvals.running = False
             break
 
         open_bank()
         break_action()
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
         deposit_item()
         break_action()
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
         # Withdraw 27 items from bank
         if item_left < item_take:
             print("Out of item(s). Exiting.")
-            running = False
+            globvals.running = False
             break
         withdraw_item()
         item_left -= item_take
         break_action()
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
         close_interface()
         break_action()
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
         open_spellbook()
         break_action()
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
@@ -411,7 +392,7 @@ try:
         move_thread.join()
 
 except Exception as e:
-    running = False
+    globvals.running = False
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
 
