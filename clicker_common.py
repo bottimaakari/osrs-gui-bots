@@ -34,10 +34,13 @@ class Random:
     ARRAY_SIZE: int = 10  # Values in total: DATA_COUNT * CHUNK_SIZE
     CHUNK_SIZE: int = 1024  # Hardcoded API Limit: 1024
 
-    AUTOFILL_INTEVAL: float = 1.0  # How often to check whether needed to refill random data (to limit CPU usage)
+    AUTOFILL_INTERVAL: float = 1.0  # How often to check whether needed to refill random data (to limit CPU usage)
 
     FETCH_TIMEOUT: float = 5.0  # How long to wait if no values are available, until error is thrown
     INSERT_TIMEOUT: float = 60.0  # How long to wait if queue is full
+    ERROR_TIMEOUT: float = 10.0  # How long to wait if an error occurred during fetch until trying again
+
+    MAX_ERROR_COUNT: int = 10  # How many times retry to fetch data from the API (failed due to connection error etc.)
 
     if BITS < 8 or BITS % 8 != 0:
         raise ValueError("BITS must be at least 8 and divisible by 8.")
@@ -58,6 +61,9 @@ class Random:
             raise ValueError("array_size must be positive (>= 1).")
         if not 0 < self._chunk_size <= 1024:
             raise ValueError("size must be between 1 and 1024.")
+
+        self._fail_count = 0
+        self._fail_max = self.MAX_ERROR_COUNT
 
         self._max_size = self._array_size * self._chunk_size
 
@@ -101,7 +107,7 @@ class Random:
 
     def __fill_bg(self):
         while self._running:
-            time.sleep(self.AUTOFILL_INTEVAL)
+            time.sleep(self.AUTOFILL_INTERVAL)
             if self._running and self._data.qsize() < self._chunk_size:
                 print("Random data at critical level. Fetch more data.")
                 if self._debug:
@@ -124,12 +130,29 @@ class Random:
             print("Random: Generate data..")
             print(f"Random: LIMIT: {limit}")
             print(f"Random: DATA STATUS: {self._data.qsize()} / {self._max_size}")
+        # If queue size is limit - 1 or less (at least block + 1 space available)
         while self._data.qsize() < limit:
             # GET CHUNK_SIZE number of BITS-bit unsigned integers
             # One full chunk at a time for maximum efficiency
-            for val in [int(h, 16) for h in quantumrandom.get_data('hex16', self._chunk_size, int(self.BITS / 8))]:
-                # For each iteration, ensure we are stil running
-                # To minimize unresponsive time
+            try:
+                data = [int(h, 16) for h in quantumrandom.get_data('hex16', self._chunk_size, int(self.BITS / 8))]
+                # Reset fail counter on fetch success
+                self._fail_count = 0
+            except Exception as ex:
+                self._fail_count += 1
+                print(f"Random: ERROR: Failed to fetch random data. Try {self._fail_count} of {self._fail_max}.")
+                if self._fail_count >= self._fail_max:
+                    print("Random: FATAL: FETCH FAIL TRIES LIMIT EXCEEDED!")
+                    raise ex
+                # If tries still left, wait for timeout and try again
+                print(f"Random: Wait for {self.ERROR_TIMEOUT} secs before retrying..")
+                time.sleep(self.ERROR_TIMEOUT)
+                continue
+
+            # After fetching full block, start inserting the values into the queue
+            # For each iteration, ensure we are still running
+            # To minimize unresponsive time
+            for val in data:
                 if self._running:
                     self._data.put(val, block=True, timeout=self.INSERT_TIMEOUT)
 
@@ -259,7 +282,7 @@ def save_inventory(filename: str, items: list) -> None:
     # Then, append items with their curent status
     for it in items:
         file.write(str(it[0]) + ";" + str(it[1]) + ";" + str(it[2]))
-        file.write(os.linesep)  # TODO CRLF on win, LF on *nix
+        file.write(os.linesep)
 
     # Write the footer to separate from other runs
     file.write(f"### END OF ITEMS ON {stamp}{os.linesep}")
