@@ -242,7 +242,14 @@ def read_settings(filename: str) -> dict[str, str]:
         if line == "" or line[0] == "#":
             continue
         values = line.split("=")
-        data[str(values[0]).strip()] = str(values[1]).strip()
+        val_key = values[0].strip()
+        if val_key in data:
+            print(
+                f"ERROR: Setting '{val_key}' was defined multiple times. Remove any duplicate definitions from "
+                f"settings file.")
+            raise KeyError("Duplicate setting found in settings file.")
+        val_val = values[1].strip()
+        data[val_key] = val_val
 
     file.close()
     return data
