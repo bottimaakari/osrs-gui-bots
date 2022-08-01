@@ -509,7 +509,7 @@ def _take_break(break_min, break_max, **kwargs) -> None:
     rand_sleep(break_min, break_max, **{**kwargs, 'debug': True})  # Longer break -> always debug print output
 
 
-def key_press(key: str, **kwargs) -> None:
+def _key_press(key: str, **kwargs) -> None:
     # Read common parameters from packed kwargs
     action_min: int = kwargs['action_min']
     action_max: int = kwargs['action_max']
@@ -518,7 +518,7 @@ def key_press(key: str, **kwargs) -> None:
     _key_press_raw(key, **kwargs)
 
 
-def hover(location: tuple[int, int], **kwargs) -> None:
+def _hover(location: tuple[int, int], **kwargs) -> None:
     # Read common parameters from packed kwargs
     action_min: int = kwargs['action_min']
     action_max: int = kwargs['action_max']
@@ -531,7 +531,7 @@ def hover(location: tuple[int, int], **kwargs) -> None:
     _hover_raw(x, y, **kwargs)
 
 
-def hover_click(location: tuple[int, int], **kwargs) -> None:
+def _hover_click(location: tuple[int, int], **kwargs) -> None:
     # Read common parameters from packed kwargs
     action_min: int = kwargs['action_min']
     action_max: int = kwargs['action_max']
@@ -548,7 +548,7 @@ def hover_click(location: tuple[int, int], **kwargs) -> None:
     _left_click_raw(x, y, **kwargs)
 
 
-def hover_context_click(location: tuple[int, int], offset: int, **kwargs) -> None:
+def _hover_context_click(location: tuple[int, int], offset: int, **kwargs) -> None:
     # Read common parameters from packed kwargs
     action_min: int = kwargs['action_min']
     action_max: int = kwargs['action_max']
@@ -585,7 +585,7 @@ def focus_window(**kwargs) -> None:
     # NOTE! This target depends on screen resolution! It should be compatible at least for FHD, 2K, 4K
     # The lower resolution, the less pixels the correct area is!
     # 4K: x=0-600 y=0-60 2K: x=0-300 y=0-30 FHD: x=0-150 y=0-15
-    hover_click((rng.randint(100, 350), rng.randint(8, 12)), **{**kwargs, 'max_off': 1})
+    _hover_click((rng.randint(100, 350), rng.randint(8, 12)), **{**kwargs, 'max_off': 1})
 
 
 def close_interface(key: str, **kwargs) -> None:
@@ -595,17 +595,17 @@ def close_interface(key: str, **kwargs) -> None:
 
     print("Close current interface.")
     rand_sleep(close_min, close_max, **kwargs)
-    key_press(key, **kwargs)
+    _key_press(key, **kwargs)
 
 
 def open_location(location: tuple[int, int], **kwargs) -> None:
     print("Open location.")
-    hover_click(location, **kwargs)
+    _hover_click(location, **kwargs)
 
 
 def open_menu(key: str, **kwargs) -> None:
     print("Ensure menu open.")
-    key_press(key, **kwargs)
+    _key_press(key, **kwargs)
 
 
 def withdraw_item(location: tuple[int, int], offset: int, left_banking: bool, item_take: int, **kwargs) -> None:
@@ -627,10 +627,10 @@ def withdraw_item(location: tuple[int, int], offset: int, left_banking: bool, it
 
     if left_banking:
         print("Using left click method.")
-        hover_click(location, **kwargs)
+        _hover_click(location, **kwargs)
     else:
         print("Using context menu method.")
-        hover_context_click(location, offset, **kwargs)
+        _hover_context_click(location, offset, **kwargs)
 
 
 def deposit_item(
@@ -651,10 +651,10 @@ def deposit_item(
 
     if left_banking:
         print("Deposit using left click.")
-        hover_click(location, **kwargs)
+        _hover_click(location, **kwargs)
     else:
         print("Deposit using right click context menu.")
-        hover_context_click(location, offset, **kwargs)
+        _hover_context_click(location, offset, **kwargs)
 
 
 def withdraw_items(
@@ -686,11 +686,11 @@ def withdraw_items(
     globvals.item2_left -= item2_take
 
     if left_banking:
-        hover_click(first_location, **kwargs)
-        hover_click(second_location, **kwargs)
+        _hover_click(first_location, **kwargs)
+        _hover_click(second_location, **kwargs)
     else:
-        hover_context_click(first_location, first_offset, **kwargs)
-        hover_context_click(second_location, second_offset, **kwargs)
+        _hover_context_click(first_location, first_offset, **kwargs)
+        _hover_context_click(second_location, second_offset, **kwargs)
 
 
 def deposit_items(
@@ -712,26 +712,26 @@ def deposit_items(
         rand_sleep(close_min, close_max, **kwargs)
 
     if left_banking:
-        hover_click(first_location, **kwargs)
-        hover_click(second_location, **kwargs)
+        _hover_click(first_location, **kwargs)
+        _hover_click(second_location, **kwargs)
     else:
-        hover_context_click(first_location, first_offset, **kwargs)
-        hover_context_click(second_location, second_offset, **kwargs)
+        _hover_context_click(first_location, first_offset, **kwargs)
+        _hover_context_click(second_location, second_offset, **kwargs)
 
 
 def combine_items(first_location: tuple[int, int], second_location: tuple[int, int], **kwargs) -> None:
     print("Combine items.")
-    hover_click(first_location, **kwargs)
-    hover_click(second_location, **kwargs)
+    _hover_click(first_location, **kwargs)
+    _hover_click(second_location, **kwargs)
 
 
 def click_spell(spell_location: tuple[int, int], bank_location: tuple[int: int], **kwargs) -> None:
     print("Click spell.")
-    hover_click(spell_location, **kwargs)
+    _hover_click(spell_location, **kwargs)
 
     if bank_location is not None:
         print("Already hover on bank right after.")
-        hover(bank_location, **kwargs)
+        _hover(bank_location, **kwargs)
 
 
 def confirm_action(key: str, next_location: tuple[int, int] = None, **kwargs):
@@ -742,11 +742,11 @@ def confirm_action(key: str, next_location: tuple[int, int] = None, **kwargs):
     print("Confirm action.")
 
     rand_sleep(close_min, close_max, **kwargs)
-    key_press(key, **kwargs)
+    _key_press(key, **kwargs)
 
     # Immediately hover mouse over bank after started action
     if next_location is not None:
-        hover(next_location, **kwargs)
+        _hover(next_location, **kwargs)
 
 
 def break_action(break_min: int, break_max: int, break_time: int, break_prob: float, break_timer: Timer,
