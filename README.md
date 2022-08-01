@@ -1,6 +1,7 @@
 # osrs-guibot
-A GUI Bot for OSRS (OldSchool Runescape (tm)) using GuiBot, AutoPy and OpenCV libraries for automating different processes.
+A GUI Bot collection for OSRS (OldSchool RuneScape (tm)) using AutoPy and OpenCV for automating different processes. Repository also contains several blind coordinate clicker bots to serve the purpose until guibots have been finished.
 
+# GUI-bots
 Scripts for different purposes separated in own Python files.
 
 Main.py acts as the launcher for any of the scripts.
@@ -22,16 +23,16 @@ You may either run the bots directly (using python) build the bots into executab
 3. Adjust the configuration for your needs. The example configurations are pretty close to comfortable but might need some adjustments.
 4. Ensure that the bots seem to work as intended. If not, please see the possible error messages, and fix by error messages / configuration accordingly.
 
-## Currently implemented or planned scripts:
+# Currently implemented or planned scripts:
 
-### Coordinate based clickers
+## Coordinate based clickers
 - Superglass Make autoclicker (DONE)
 - Clay Humidify autoclicker (DONE)
 - High alchemy items autoclicker & visual detection bot (DONE)
 - Nightmare Zone AFK autoclicker (DONE)
 - Wine 
 
-### Bots using gui elements detection
+## Bots using gui elements detection
 - Yew woodcutting in Edgeville (WIP)
 - Auto banking (WIP)
 - Auto healing by eating food & potions in combat (PLANNED)
