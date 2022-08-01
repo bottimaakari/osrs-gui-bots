@@ -95,7 +95,8 @@ class Random:
     def __generate(self):
         # print("Fetching data..")
         # Fetch as much data than it roughly fits in the queue at the moment
-        while self._data.qsize() < self._array_size * self._chunk_size - self._chunk_size:
+        size = (self._array_size * self._chunk_size - self._chunk_size) if self._array_size > 1 else self._chunk_size
+        while self._data.qsize() < size:
             # GET CHUNK_SIZE number of BITS-bit unsigned integers
             # One full chunk at a time for maximum efficiency
             for val in [int(h, 16) for h in quantumrandom.get_data('hex16', self._chunk_size, int(self.BITS / 8))]:
