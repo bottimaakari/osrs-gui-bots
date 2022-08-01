@@ -150,7 +150,6 @@ if __name__ == '__main__':
         # Start the bg mouse movement thread
         if globvals.running:
             move_thread.start()
-            print("Mouse movement BG thread started.")
 
         if globvals.running and act_start:
             print("Running actions at program start..")
