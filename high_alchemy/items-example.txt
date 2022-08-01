@@ -1,18 +1,21 @@
 # Inventory item data for autoclicker
+# Lines starting with '#' are ignored
 # Coordinates and item count of the items in noted form
 # Coordinates are X and Y relative offsets (from game window top left corner)
 # Expects the game window is in minimal size, using classic, fixed view.
 # X;Y;Count
 
-580;328;35
-625;328;57
-665;328;19
+# Define locations for absorb potions here
+
+580;328;0
+625;328;0
+#665;328;0
 708;328;98
 584;362;60
-626;362;32
+#626;362;0
 668;362;81
-709;362;62
+709;362;0
 583;400;28
-625;400;15
-665;400;22
-708;400;13
+#625;400;0
+#665;400;22
+708;400;0

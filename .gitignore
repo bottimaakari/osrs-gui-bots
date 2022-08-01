@@ -135,4 +135,5 @@ user_secrets.py
 imglog/
 
 # Inventory items info file
-items.txt
+**/items.txt
+**/settings.txt

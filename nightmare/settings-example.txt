@@ -1,0 +1,38 @@
+# Some basic settings for the clicker
+# Read on program startup
+# Lines starting with '#' are ignored
+# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+
+# Run mouse info program only (for determining coordinates)
+mouse_info=False
+
+# Save (overwrite) current item counts to items file on exit
+save_on_exit=False
+
+items_file=items.txt
+
+# Prayer click range (ms)
+prayer_min=10000
+prayer_max=55000
+
+# Double click range (ms)
+click_min=200
+click_max=800
+
+# Potion click range (ms)
+potion_min=240000
+potion_max=300000
+
+# Mouse speed interval (ms)
+mouse_min=50
+mouse_max=300
+
+# How much the random movement moves the mouse
+rand_min=-8
+rand_max=8
+
+# How much the click can be randomized off of the precise target
+max_off=6
+
+# Static location data (X,Y)
+prayer_location=560,120
