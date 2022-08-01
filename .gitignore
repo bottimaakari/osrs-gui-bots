@@ -133,3 +133,6 @@ user_secrets.py
 
 # Debug files from autopy finder
 imglog/
+
+# Inventory items info file
+items.txt

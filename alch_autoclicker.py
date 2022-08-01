@@ -2,10 +2,16 @@ import secrets
 import keyboard
 import pyautogui
 
+# Use system random data source
 rng = secrets.SystemRandom()
 
-mouse_min = 100
-mouse_max = 300
+# Mouse speed limits
+mouse_min = 50
+mouse_max = 150
+
+# Collect game window info (topleft coords)
+window_name = "RuneLite"
+window = pyautogui.getWindowsWithTitle(window_name)[0].topleft
 
 
 def mouse_info():
@@ -13,7 +19,7 @@ def mouse_info():
     exit(0)
 
 
-def random_sleep(minms, maxms):
+def randomized_sleep(minms, maxms):
     tm = rng.randint(minms, maxms) / 1000
     print("Delay for: " + str(tm) + " ms")
     pyautogui.sleep(tm)
@@ -25,25 +31,46 @@ def rand_mouse_speed(minms, maxms):
     return tm
 
 
-def open_spell_menu():
-    x = rng.randint(1575, 1585)
-    y = rng.randint(992, 1002)
+def randomized_offset(x, y):
+    max_off = 5
+    return \
+        rng.randint((window.x + x) - max_off, (window.x + x) + max_off), \
+        rng.randint((window.y + y) - max_off, (window.y + y) + max_off)
+
+
+def click_target(x, y):
     pyautogui.moveTo(x, y, rand_mouse_speed(mouse_min, mouse_max))
     pyautogui.leftClick()
+
+
+def open_spell_menu():
+    x, y = randomized_offset(745, 210)
+    click_target(x, y)
 
 
 def click_spell():
-    x = rng.randint(1545, 1555)
-    y = rng.randint(1105, 1115)
-    pyautogui.moveTo(x, y, rand_mouse_speed(mouse_min, mouse_max))
-    pyautogui.leftClick()
+    x, y = randomized_offset(718, 328)
+    click_target(x, y)
 
 
 def click_item(item):
-    x = rng.randint(item[0] - 5, item[0] + 5)
-    y = rng.randint(item[1] - 5, item[1] + 5)
-    pyautogui.moveTo(x, y, rand_mouse_speed(mouse_min, mouse_max))
-    pyautogui.leftClick()
+    x, y = randomized_offset(item[0], item[1])
+    click_target(x, y)
+
+
+def read_items():
+    name = "items.txt"
+    file = open(name, "r")
+
+    data = []
+    for line in file:
+        line = line.strip()
+        if line == "" or line[0] == "#":
+            continue
+        values = line.split(";")
+        data.append([int(values[0]), int(values[1]), int(values[2])])
+
+    return data
 
 
 def on_press_esc(event):
@@ -60,11 +87,7 @@ def on_press_esc(event):
 keyboard.on_press_key(1, on_press_esc)
 
 # (ITEM POSX, ITEM POSY, ITEM COUNT)
-items = [
-    [1455, 1113, 25],
-    [1500, 1113, 30],
-    [1540, 1113, 36]
-]
+items = read_items()
 
 running = True
 doClickSpell = True
@@ -76,7 +99,7 @@ open_spell_menu()
 # Start looping
 while running:
     print(f"Loop: {doClickSpell}")
-    random_sleep(0, 500)
+    randomized_sleep(0, 500)
 
     if doClickSpell:
         click_spell()
@@ -92,6 +115,6 @@ while running:
             break
 
         click_item(items[current])
-        random_sleep(1200, 1400)
+        randomized_sleep(1100, 1200)
         items[current][2] -= 1
         doClickSpell = True
