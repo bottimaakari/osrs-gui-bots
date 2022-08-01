@@ -1,5 +1,4 @@
 import atexit
-import threading
 
 import keyboard
 import pyautogui
@@ -7,230 +6,220 @@ import pyautogui
 import clicker_framework
 import globvals
 
-
-def hover_target(x, y):
-    print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_framework._rand_mouse_speed(rng, speed_min, speed_max))
-
-
-def left_click_target(x, y):
-    print(f"Left Click target: ({x}, {y})")
-
-    # Temporarily prevent background movement
-    # to ensure the click hits target correctly
-    globvals.can_move = False
-
-    pyautogui.moveTo(x, y, clicker_framework._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
-    pyautogui.leftClick()
-
-    globvals.can_move = True
-
-
-def hover_click(location, delay_min, delay_max):
-    # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-
-    # Wait for a while before next action
-    clicker_framework.rand_sleep(rng, delay_min, delay_max, debug_mode)
-
-    # Recalculate random-off x,y and click the target
-    x, y = clicker_framework._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    left_click_target(x, y)
-
-
-def hotkey_press(key):
-    print(f"Press Key: {key}")
-    clicker_framework.rand_sleep(rng, 50, 400, debug_mode)
-    pyautogui.press(key, presses=1)
-
-
-def focus_window():
-    print("Focus on game window.")
-    hover_click((50, 5), 50, 400)
-
-
-def open_spellbook():
-    print("Open spellbook menu.")
-    hotkey_press(spellbook_key)
-
-
-def click_spell():
-    print("Click spell.")
-    loc = tuple(map(int, settings['spell_location'].split(',')))
-    hover_click(loc, 1200, 1300)
-
-
-def click_item(item):
-    print("Click item.")
-    hover_click((item[0], item[1]), 50, 400)
-
-
-def window():
-    return clicker_framework.window(window_name)
-
-
-# Catches key interrupt events
-# Gracefully erminates the program
-def interrupt(ev):
-    print("Program interrupted.")
-    globvals.running = False
-    print("Possibly still waiting for a sleep to finish..")
-
-
-try:
-    # Register a custom exit handler
-    # To make sure things happen after everything else is done
-    atexit.register(clicker_framework.exit_handler)
-
-    # Use system random data source
-    rng = clicker_framework.init_rng()
-
-    settings_file = "settings.txt"
-
-    # Read configuration file
-    settings = clicker_framework.read_settings(settings_file)
-
-    # Collect game window info (topleft coords)
-    window_name = str(settings["window_title"])
-
+if __name__ == '__main__':
     try:
-        window()
-    except Exception as ex:
-        print("ERROR: Game client window was not detected. Ensure the game client is running first.")
-        print("Also check that window title is correct in settings.")
-        raise ex
+        # Register a custom exit handler
+        # To make sure things happen after everything else is done
+        atexit.register(clicker_framework.exit_handler)
 
-    # Debug prints etc.
-    debug_mode = settings['debug_mode'].lower() == 'true'
+        settings_file: str = "settings.txt"
 
-    mouse_info = settings['mouse_info'].lower() == 'true'
+        # Read configuration file
+        settings: dict[str, str] = clicker_framework.read_settings(settings_file)
 
-    if mouse_info:
-        print(f"TopLeft corner location: {window}")
-        pyautogui.mouseInfo()
-        exit(0)
+        # Collect game window info (top left coords)
+        window_name: str = str(settings["window_title"])
 
-    # Mouse speed limits
-    speed_min = int(settings['mouse_min'])
-    speed_max = int(settings['mouse_max'])
+        # Ensure game window is detected
+        clicker_framework.window(window_name)
 
-    # Random movement offset limits
-    move_min = int(settings['rand_min'])
-    move_max = int(settings['rand_max'])
+        # Check if mouse info mode enabled in settings
+        if bool(settings['mouse_info'].lower() == 'true'):
+            print(f"TopLeft corner location: {clicker_framework.window(window_name).topleft}")
+            print("Tip: To get correct relative position, calculate: target.x/y - topLeft.x/y")
+            pyautogui.mouseInfo()
+            exit(0)
 
-    # Maximum precise target offset
-    max_off = int(settings['max_off'])
+        # Inventory file
+        items_file: str = str(settings['items_file'])
 
-    # Probability to open the spellbook menu
-    spellbook_prob = float(settings['spellbook_prob'])
+        # Debug prints etc.
+        debug_mode: bool = settings['debug_mode'].lower() == 'true'
 
-    # Filename of the items file
-    items_file = settings['items_file']
+        # Key codes
+        interrupt_key: int = int(settings['interrupt_key'])
+        pause_key: int = int(settings['pause_key'])
 
-    # Keyboard event key codes
-    interrupt_key = int(settings['interrupt_key'])
+        # UI Shortcut keys
+        spellbook_key: str = settings['spellbook_key']
+        close_key: str = settings['close_menu_key']
 
-    # UI Shortcut keys
-    spellbook_key = settings['spellbook_key']
+        # Mouse speed limits
+        speed_min: int = int(settings['mouse_speed_min'])
+        speed_max: int = int(settings['mouse_speed_max'])
 
-    # Script maximum run time
-    run_max = int(settings['max_run_time'])
+        # Random movement offset limits
+        rand_min: int = int(settings['rand_min'])
+        rand_max: int = int(settings['rand_max'])
 
-    # From this point on, catch any interruption caused by special key
-    keyboard.on_press_key(interrupt_key, interrupt)
+        # Action delays
+        action_min: int = int(settings['action_min'])
+        action_max: int = int(settings['action_max'])
 
-    # Print instructions on start before start delay
-    clicker_framework.print_start_info(interrupt_key)
+        # Loop interval - time to wait before every cycle
+        wait_min = int(settings['wait_min'])
+        wait_max = int(settings['wait_max'])
 
-    # Read inventory data file
-    # (ITEM POSX, ITEM POSY, ITEM COUNT)
-    inventory = clicker_framework.read_inventory(items_file)
+        # Additional delay before closing an interface
+        close_min = int(settings['close_min'])
+        close_max = int(settings['close_max'])
 
-    if len(inventory) <= 0:
-        print(f"ERROR: No items found in items file ({items_file}). Ensure items configured correctly first. See the "
-              f"items example file for reference.")
-        raise ValueError("No items defined in items file.")
+        # Random breaks interval
+        break_min = int(settings['break_min'])
+        break_max = int(settings['break_max'])
 
-    print("Read item data from items file.")
+        # Probability to take a random break
+        break_prob = float(settings['break_prob'])
 
-    globvals.running = True
-    globvals.can_move = True
+        # Break timer elapsed min
+        break_time = int(settings['break_time_min'])
 
-    do_click_spell: bool = True
-    current: int = 0
+        # Maximum precise target offset
+        max_off = int(settings['max_off'])
 
-    # Print instructions on start before start delay
-    clicker_framework.print_start_info(interrupt_key)
+        # Script max run time
+        run_max: int = int(settings['max_run_time'])
 
-    # Initial sleep for user to have time to react on startup
-    clicker_framework.start_delay(rng)
+        act_start: bool = settings['act_start'].lower() == "true"
+        idle_move: bool = settings['idle_movement'].lower() == "true"
 
-    global_timer = clicker_framework.Timer()
+        # Location coordinates for click & hover targets
+        spell_location: tuple = tuple(map(int, settings['spell_location'].split(',')[:2]))
 
-    move_thread = threading.Thread(
-        target=clicker_framework._mouse_movement_background,
-        name="bg_mouse_movement",
-        args=(rng, move_min, move_max, max_off, debug_mode)
-    )
-    move_thread.start()
+        # Configure global (shared) variables
+        # Inventory management
+        globvals.inventories = [
+            {
+                'current': 0,
+                'content': clicker_framework.read_inventory(items_file)
+            }
+        ]
+        globvals.running = True
+        globvals.can_move = True
+        globvals.paused = False
 
-    # Ensure game window focused
-    focus_window()
+        # Use quantumrandom as random data source for better entropy
+        rng: any = clicker_framework.init_rng()
 
-    # First, ensure spell menu open
-    open_spellbook()
+        common: dict[str, any] = {
+            'rng': rng,
+            'action_min': action_min,
+            'action_max': action_max,
+            'speed_min': speed_min,
+            'speed_max': speed_max,
+            'close_min': close_min,
+            'close_max': close_max,
+            'max_off': max_off,
+            'window_name': window_name,
+            'debug': debug_mode
+        }
 
-    # Start looping
-    while globvals.running:
-        # Must sleep enough between the moves
-        # should be close to a constant value
-        clicker_framework.rand_sleep(rng, 50, 90)
+        # Click spell, or click item
+        action: bool = True
 
-        if not globvals.running:
-            break
+        keyboard.on_press_key(interrupt_key, clicker_framework.interrupt_handler)
+        keyboard.on_press_key(pause_key, clicker_framework.pause_handler)
 
-        if global_timer.elapsed() >= run_max:
-            print("Max runtime reached. Stopping.")
-            globvals.running = False
-            break
+        # Print instructions on start before start delay
+        clicker_framework.print_start_info(interrupt_key)
 
-        print(f"Click spell: {do_click_spell}")
+        # Initial sleep for user to have time to react on startup
+        clicker_framework.start_delay(rng)
 
-        # 33 % chance for ensuring spell menu is open
-        # before clicking the spell
-        if do_click_spell and rng.random() < spellbook_prob:
-            open_spellbook()
+        # Timers for keeping track when allowed to commit next actions
+        # Separate timer for each task
+        global_timer: clicker_framework.Timer = clicker_framework.Timer()
+        break_timer: clicker_framework.Timer = clicker_framework.Timer()
 
-        if do_click_spell:
-            click_spell()
-            do_click_spell = False
-            continue
+        move_thread = clicker_framework.init_movement_thread(rand_min, rand_max, **common)
 
-        while current < len(inventory) and inventory[current][2] <= 0:
-            print("Out of current item. Moving to next item.")
-            current += 1
+        # Before each operation, check that we are still running
+        # and not interrupted (running == True)
 
-        if current >= len(inventory):
-            print("Out of items.")
-            running = False
-            break
+        # Start the bg mouse movement thread
+        if globvals.running:
+            move_thread.start()
 
+        if globvals.running and act_start:
+            print("Running actions at program start..")
+            clicker_framework.pause_action(**common)
+            if globvals.running:
+                clicker_framework.focus_window(**common)
+                clicker_framework.pause_action(**common)
+            if globvals.running:
+                clicker_framework.close_interface(close_key, **common)
+                clicker_framework.pause_action(**common)
+            if globvals.running:
+                clicker_framework.open_menu(spellbook_key, **common)
+                clicker_framework.pause_action(**common)
+            if globvals.running:
+                clicker_framework.open_location(spell_location, **common)
+                clicker_framework.pause_action(**common)
+            if globvals.running:
+                clicker_framework.consume_item(0, **common)
+                clicker_framework.pause_action(**common)
+
+        # Start looping
+        while globvals.running:
+            clicker_framework.pause_action(**common)
+            if not globvals.running:
+                break
+
+            # Wait until spell action finished
+            if action:
+                globvals.can_move = idle_move
+                clicker_framework.rand_sleep(wait_min, wait_max, **{**common, 'debug': True})
+                globvals.can_move = True
+
+            clicker_framework.pause_action(**common)
+            if not globvals.running:
+                break
+
+            if global_timer.elapsed() >= run_max:
+                print("Max runtime reached. Stopping.")
+                globvals.running = False
+                break
+
+            # ACTION LOOP BEGINS HERE
+
+            if action:
+                clicker_framework.open_location(spell_location, **common)
+                clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+                action = False
+            else:
+                clicker_framework.consume_item(0, **common)
+                clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+                action = True
+
+            clicker_framework.pause_action(**common)
+            if not globvals.running:
+                break
+
+            clicker_framework.print_status(global_timer)
+
+            # Do possible breaking right status info print to keep track of script runtime
+            clicker_framework.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+
+        # END WHILE
+        print("Main loop stopped.")
+
+        # Cleanup resources
+        del rng
+
+        # Gracefully let the bg thread to exit
+        if move_thread.is_alive():
+            print("Waiting for BG thread to stop..")
+            move_thread.join()
+
+    except Exception as e:
+        globvals.running = False
+        print("FATAL EXCEPTION OCCURRED DURING SCRIPT EXECUTION:")
+        if type(e) == KeyError:
+            print("Detected KeyError - Ensure all settings are correctly set with valid values.")
+            print(f"Setting that caused the issue: {e} (Check that it is set and is valid in the settings file.)")
+        elif type(e) == ValueError:
+            print("Detected ValueError - Ensure all settings have valid values set (e.g. string, integer, boolean..)")
+            print(f"The following error message might be helpful for detecting what caused the issue: {e!r}")
         else:
-            print("Use item.")
-            click_item(inventory[current])
-            inventory[current][2] -= 1
-
-        do_click_spell = True
-
-        clicker_framework.print_status(global_timer)
-
-    # Gracefully let the bg thread to exit
-    if move_thread.is_alive():
-        print("Waiting for BG thread(s) to stop..")
-        move_thread.join()
-
-except Exception as e:
-    globvals.running = False
-    print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
-    print(e)
+            print("Could not determine error cause.")
+            print(f"Error message: {e!r}")
