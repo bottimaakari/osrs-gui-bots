@@ -1,4 +1,21 @@
+import time
+
 import pyautogui
+
+
+class Timer:
+    _stamp = None
+
+    def __init__(self):
+        self.reset()
+
+    # Resets the timer to present
+    def reset(self):
+        self._stamp = time.perf_counter()
+
+    # Returns elapsed time floored to ms
+    def elapsed(self) -> int:
+        return int((time.perf_counter() - self._stamp) * 1000)
 
 
 def read_settings(filename):

@@ -1,7 +1,6 @@
 import operator
 import secrets
 import threading
-import time
 
 import keyboard
 import pyautogui
@@ -119,11 +118,6 @@ def move_outside_window():
     hover_target(target[0], target[1])
 
 
-# Returns elapsed time floored to ms
-def elapsed():
-    return int(time.perf_counter() * 1000 - start_time)
-
-
 # Catches key interrupt events
 # Gracefully erminates the program
 def interrupt(ev):
@@ -213,8 +207,8 @@ try:
 
     print("Read item data from items file.")
 
-    can_move = True
     running = True
+    can_move = True
     current = 0
 
     # Initial sleep to have time to react
@@ -234,9 +228,9 @@ try:
 
     # Collect timestamp right before starting to loop
     # Time point at start in ms
-    start_time = time.perf_counter() * 1000
-
-    err_margin = 10000
+    global_timer = clicker_common.Timer()
+    item_timer = clicker_common.Timer()
+    special_timer = clicker_common.Timer()
 
     # Start looping
     while running:
@@ -256,7 +250,8 @@ try:
 
         # TODO rock cake
 
-        if use_special and elapsed() % special_time <= err_margin and rng.random() >= special_prob:
+        if use_special and special_timer.elapsed() >= special_time and rng.random() <= special_prob:
+            special_timer.reset()
             print("Click special attack.")
             click_special_attack()
 
@@ -266,8 +261,9 @@ try:
             ensure_inventory_open()
 
         # After Looped 4 times in a row, click the first item available
-        if use_item and elapsed() % item_time <= err_margin and rng.random() >= item_prob:
-            print("Click next non-empty item.")
+        if use_item and item_timer.elapsed() >= item_time and rng.random() <= item_prob:
+            item_timer.reset()
+            print("Click next non-empty item if available.")
 
             while inventory[current][2] <= 0 and current < len(inventory):
                 print("Out of current item. Moving to next item.")
@@ -281,7 +277,7 @@ try:
 
         move_outside_window()
 
-        print(f"Total elapsed: {(elapsed()):0.4f} seconds.")
+        print(f"Total elapsed: {(global_timer.elapsed() / 1000):0.2f} seconds.")
 
     # Gracefully let the bg thread to exit
     move_thread.join()
