@@ -1,5 +1,4 @@
 import datetime
-import operator
 import secrets
 import threading
 
@@ -68,26 +67,6 @@ def right_click_target(x, y):
 def press_key(key):
     print(f"Press Key: {key}")
     pyautogui.press(key, presses=1)
-
-
-def move_outside_window():
-    w = window()
-
-    tl = w.topleft
-    tr = w.topright
-    bl = w.bottomleft
-    br = w.bottomright
-
-    targets = [
-        tuple(map(operator.add, (tl.x, tl.y), (-50, -50))),
-        tuple(map(operator.add, (tr.x, tr.y), (50, -50))),
-        tuple(map(operator.add, (bl.x, bl.y), (-50, 50))),
-        tuple(map(operator.add, (br.x, br.y), (50, 50))),
-    ]
-
-    target = rng.choice(targets)
-    clicker_common.rand_sleep(rng, 50, 500, debug_mode)
-    hover_target(target[0], target[1])
 
 
 def click_spell():
@@ -270,7 +249,6 @@ try:
 
         if running:
             close_interface()
-            open_spellbook()
             open_bank()
             if item_left < 27:
                 print("Out of item(s). Exiting.")
@@ -278,6 +256,7 @@ try:
             withdraw_item()
             item_left -= 27
             close_interface()
+            open_spellbook()
             click_spell()
 
     # Start looping
@@ -293,8 +272,6 @@ try:
             running = False
             break
 
-        open_spellbook()
-
         open_bank()
 
         deposit_item()
@@ -309,6 +286,8 @@ try:
         item_left -= 27
 
         close_interface()
+
+        open_spellbook()
 
         click_spell()
 
