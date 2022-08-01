@@ -349,8 +349,8 @@ def mouse_movement_background(rng: any, move_min: int, move_max: int, max_off: i
         if not globvals.can_move:
             continue
 
-        for i in range(0, rng.randint(0, rng.randint(0, 10))):
-            rand_sleep(rng, 20, 50, debug)
+        for i in range(0, rng.randint(0, 10)):
+            rand_sleep(rng, 10, 100, debug)
             if not globvals.running or not globvals.can_move:
                 break
             x, y = randomized_offset(rng,
@@ -365,16 +365,18 @@ def mouse_movement_background(rng: any, move_min: int, move_max: int, max_off: i
 
 
 def create_movement_thread(
-        rng: any,
-        move_min: int,
-        move_max: int,
-        max_off: int,
-        debug: bool = True
+        rand_min: int,
+        rand_max: int,
+        **kwargs
 ) -> threading.Thread:
+    rng: any = kwargs['rng']
+    max_off: int = kwargs['max_off']
+    debug: bool = kwargs['debug']
+
     return threading.Thread(
         target=mouse_movement_background,
         name="bg_mouse_movement",
-        args=(rng, move_min, move_max, max_off, debug),
+        args=(rng, rand_min, rand_max, max_off, debug),
         # daemon=True
     )
 
@@ -482,7 +484,7 @@ def key_press(
         debug: bool = True
 ) -> None:
     rand_sleep(rng, action_min, action_max, debug)
-    key_press_raw(key)
+    key_press_raw(key, debug)
 
 
 def hover(
@@ -624,7 +626,7 @@ def withdraw_item(
         print(f"Item subtraction: {globvals.item_left} - {item_take}")
 
     if globvals.item_left < item_take:
-        print("Out of item(s)! Stopping and exiting.")
+        print("Out of item(s)! Stopping and exiting..")
         globvals.running = False
         return
 

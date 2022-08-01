@@ -49,8 +49,8 @@ if __name__ == '__main__':
         speed_max: int = int(settings['mouse_speed_max'])
 
         # Random movement offset limits
-        move_min: int = int(settings['rand_min'])
-        move_max: int = int(settings['rand_max'])
+        rand_min: int = int(settings['rand_min'])
+        rand_max: int = int(settings['rand_max'])
 
         # Action delays
         action_min: int = int(settings['action_min'])
@@ -124,7 +124,7 @@ if __name__ == '__main__':
             'debug': debug_mode
         }
 
-        move_thread = clicker_common.create_movement_thread(**common_args)
+        move_thread = clicker_common.create_movement_thread(rand_min, rand_max, **common_args)
 
         # Before each operation, check that we are still running
         # and not interrupted (running == True)
