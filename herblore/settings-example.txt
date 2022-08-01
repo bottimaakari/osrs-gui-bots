@@ -19,8 +19,8 @@ bank_location=315,200
 
 # Location for both items to click on to start the combination process
 # E.g. a jug of water for item1 and grapes for item2 in inventory
-combine1_location=626,366
-combine2_location=666,366
+combine_location=626,366
+snd_combine_location=666,366
 
 withdraw_location=379,234
 withdraw_offset=72
@@ -29,16 +29,16 @@ snd_withdraw_location=428,234
 snd_withdraw_offset=70
 
 # Bank all items button (only left click)
-deposit_location1=448,340
-deposit_offset1=NULL
+deposit_location=448,340
+deposit_offset=NULL
 
 # Do a second deposit on a second position?
 # Coordinates defined below
 snd_deposit=False
 
-# Position (Hor, Vert) (1,1)
-deposit_location2=580,255
-deposit_offset2=100
+# Position (Horiz, Vert) (1,1)
+snd_deposit_location=580,255
+snd_deposit_offset=100
 
 # Run in debugging mode (debug printouts, etc.)
 # Exception is for long sleep delays

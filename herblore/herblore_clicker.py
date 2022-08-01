@@ -1,455 +1,264 @@
 import atexit
-import secrets
-import threading
 
 import keyboard
 import pyautogui
 
 import clicker_common
+import globvals
 
-
-def mouse_movement_background():
-    print("BG Thread started.")
-    while running:
-        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
-
-        if not can_move:
-            continue
-
-        for i in range(0, rng.randint(0, rng.randint(0, 8))):
-            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
-            if not running or not can_move:
-                break
-            x, y = clicker_common.randomized_offset(rng,
-                                                    rng.randint(move_min, move_max),
-                                                    rng.randint(move_min, move_max),
-                                                    max_off,
-                                                    debug=debug_mode
-                                                    )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
-
-    print("BG Thread terminated.")
-
-
-def hover_target(x, y):
-    print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
-
-
-def left_click_target(x, y):
-    print(f"Left Click target: ({x}, {y})")
-
-    # Temporarily prevent background movement
-    # to ensure the click hits target correctly
-    global can_move
-    can_move = False
-
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
-    pyautogui.leftClick()
-
-    can_move = True
-
-
-def right_click_target(x, y):
-    print(f"Right Click target: ({x}, {y})")
-
-    # Temporarily prevent background movement
-    # to ensure the click hits target correctly
-    global can_move
-    can_move = False
-
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
-    pyautogui.rightClick()
-
-    can_move = True
-
-
-def hotkey_press(key):
-    print(f"Press Key: {key}")
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    pyautogui.press(key, presses=1)
-
-
-def hover(location):
-    # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-
-
-def hover_click(location):
-    # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-
-    # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Recalculate random-off x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    left_click_target(x, y)
-
-
-def hover_context_click(location, offset):
-    # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-
-    # Wait for a while before next action
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Right click the target to open context menu
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
-    right_click_target(x, y)
-
-    # Hover to the context menu offset
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
-    hover_target(x, y)
-
-    # Wait a bit before proceeding
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-
-    # Finally, click the menu option in the predefined offset
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
-    left_click_target(x, y)
-
-
-def focus_window():
-    print("Focus on game window.")
-    hover_click((50, 5))
-
-
-def combine_items():
-    print("Combine items.")
-    loc = tuple(map(int, settings['combine1_location'].split(',')))
-    hover_click(loc)
-
-    loc = tuple(map(int, settings['combine2_location'].split(',')))
-    hover_click(loc)
-
-
-def open_bank():
-    print("Open bank.")
-    loc = tuple(map(int, settings['bank_location'].split(',')))
-    hover_click(loc)
-
-
-def deposit_items():
-    print("Deposit item(s).")
-
-    loc = tuple(map(int, settings['deposit_location1'].split(',')))
-
-    if left_banking:
-        hover_click(loc)
-    else:
-        off = int(settings['deposit_offset1'])
-        hover_context_click(loc, off)
-
-    if snd_deposit:
-        loc = tuple(map(int, settings['deposit_location2'].split(',')))
-
-        if left_banking:
-            hover_click(loc)
-        else:
-            off = int(settings['deposit_offset2'])
-            hover_context_click(loc, off)
-
-
-def withdraw_items():
-    print("Withdraw item(s).")
-
-    loc = tuple(map(int, settings['withdraw_location'].split(',')))
-
-    if left_banking:
-        hover_click(loc)
-    else:
-        off = int(settings['withdraw_offset'])
-        hover_context_click(loc, off)
-
-    loc = tuple(map(int, settings['snd_withdraw_location'].split(',')))
-
-    if left_banking:
-        hover_click(loc)
-    else:
-        off = int(settings['snd_withdraw_offset'])
-        hover_context_click(loc, off)
-
-
-def open_inventory():
-    print("Ensure spellbook open.")
-    hotkey_press(inventory_key)
-
-
-def close_interface():
-    print("Close current interface.")
-    clicker_common.rand_sleep(rng, close_min, close_max, debug_mode)
-    hotkey_press(close_key)
-
-
-def confirm_action():
-    print("Confirm action.")
-    clicker_common.rand_sleep(rng, close_min, close_max, debug_mode)
-    hotkey_press(confirm_key)
-
-    # Immediately hover mouse over bank after started action
-    loc = tuple(map(int, settings['bank_location'].split(',')))
-    hover(loc)
-
-
-def take_break():
-    print("Taking a break.")
-    clicker_common.rand_sleep(rng, break_min, break_max, debug=True)  # Longer break -> debug output
-
-
-def window():
-    return clicker_common.window(window_name)
-
-
-# Catches key interrupt events
-# Gracefully erminates the program
-def interrupt(ev):
-    print("Program interrupted.")
-    global running
-    running = False
-    print("Possibly still waiting for a sleep to finish..")
-
-
-try:
-    # Register a custom exit handler
-    # To make sure things happen after everything else is done
-    atexit.register(clicker_common.exit_handler)
-
-    # Use system random data source
-    rng = secrets.SystemRandom()
-
-    settings_file = "settings.txt"
-
-    # Read configuration file
-    settings = clicker_common.read_settings(settings_file)
-
-    # Collect game window info (topleft coords)
-    window_name = str(settings["window_title"])
-
+if __name__ == '__main__':
     try:
-        window()
-    except Exception as ex:
-        print("ERROR: Game client window was not detected. Ensure the game client is running first.")
-        print("Also check that window title is correct in settings.")
-        raise ex
+        # Register a custom exit handler
+        # To make sure things happen after everything else is done
+        atexit.register(clicker_common.exit_handler)
 
-    mouse_info = settings['mouse_info'].lower() == 'true'
+        # Use quantumrandom as random data source for better entropy
+        rng = clicker_common.init_rng()
 
-    if mouse_info:
-        print(f"TopLeft corner location: {window().topleft}")
-        pyautogui.mouseInfo()
-        exit(0)
+        settings_file: str = "settings.txt"
 
-    # Debug prints etc.
-    debug_mode = settings['debug_mode'].lower() == 'true'
+        # Read configuration file
+        settings: dict[str, str] = clicker_common.read_settings(settings_file)
 
-    # Key codes
-    interrupt_key = int(settings['interrupt_key'])
+        # Collect game window info (top left coords)
+        window_name: str = str(settings["window_title"])
 
-    # UI Shortcut keys
-    close_key = settings['close_menu_key']
-    inventory_key = settings['inventory_key']
-    confirm_key = settings['confirm_key']
+        # Ensure game window is detected
+        clicker_common.window(window_name)
 
-    # Mouse speed limits
-    speed_min = int(settings['mouse_speed_min'])
-    speed_max = int(settings['mouse_speed_max'])
+        # Check if mouse info mode enabled in settings
+        if bool(settings['mouse_info'].lower() == 'true'):
+            print(f"TopLeft corner location: {clicker_common.window(window_name).topleft}")
+            print("Tip: To get correct relative position, calculate: target.x/y - topLeft.x/y")
+            pyautogui.mouseInfo()
+            exit(0)
 
-    # Random movement offset limits
-    move_min = int(settings['rand_min'])
-    move_max = int(settings['rand_max'])
+        # Debug prints etc.
+        debug_mode: bool = settings['debug_mode'].lower() == 'true'
 
-    # Action delays
-    action_min = int(settings['action_min'])
-    action_max = int(settings['action_max'])
+        # Key codes
+        interrupt_key: int = int(settings['interrupt_key'])
+        pause_key: int = int(settings['pause_key'])
 
-    # Loop interval - time to wait before every cycle
-    wait_min = int(settings['wait_min'])
-    wait_max = int(settings['wait_max'])
+        # UI Shortcut keys
+        close_key = settings['close_menu_key']
+        inventory_key = settings['inventory_key']
+        confirm_key = settings['confirm_key']
 
-    # Additional delay before closing an interface
-    close_min = int(settings['close_min'])
-    close_max = int(settings['close_max'])
+        # Mouse speed limits
+        speed_min = int(settings['mouse_speed_min'])
+        speed_max = int(settings['mouse_speed_max'])
 
-    # Random breaks interval
-    break_min = int(settings['break_min'])
-    break_max = int(settings['break_max'])
+        # Random movement offset limits
+        rand_min = int(settings['rand_min'])
+        rand_max = int(settings['rand_max'])
 
-    # Probability to take a random break
-    break_prob = float(settings['break_prob'])
+        # Action delays
+        action_min = int(settings['action_min'])
+        action_max = int(settings['action_max'])
 
-    # Break timer elapsed min
-    break_time = int(settings['break_time_min'])
+        # Loop interval - time to wait before every cycle
+        wait_min = int(settings['wait_min'])
+        wait_max = int(settings['wait_max'])
 
-    # Maximum precise target offset
-    max_off = int(settings['max_off'])
+        # Additional delay before closing an interface
+        close_min = int(settings['close_min'])
+        close_max = int(settings['close_max'])
 
-    run_max = int(settings['max_run_time'])
+        # Random breaks interval
+        break_min = int(settings['break_min'])
+        break_max = int(settings['break_max'])
 
-    snd_deposit = settings['snd_deposit'].lower() == "true"
-    act_start = settings['act_start'].lower() == "true"
-    left_banking = settings['left_click_banking'].lower() == "true"
-    idle_move = settings['idle_movement'].lower() == "true"
+        # Probability to take a random break
+        break_prob = float(settings['break_prob'])
 
-    running = True
-    can_move = True
-    break_taken = False
+        # Break timer elapsed min
+        break_time = int(settings['break_time_min'])
 
-    item1_left = int(settings['item1_left'])
-    item2_left = int(settings['item2_left'])
+        # Maximum precise target offset
+        max_off = int(settings['max_off'])
 
-    item1_take = int(settings['item1_take'])
-    item2_take = int(settings['item2_take'])
+        # Script max run time
+        run_max = int(settings['max_run_time'])
 
-    move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
+        snd_deposit = settings['snd_deposit'].lower() == "true"
+        act_start = settings['act_start'].lower() == "true"
+        left_banking = settings['left_click_banking'].lower() == "true"
+        idle_move = settings['idle_movement'].lower() == "true"
 
-    # Key 1 = ESC
-    # Key 82 = NUMPAD 0
-    # Key 41 = §
-    keyboard.on_press_key(interrupt_key, interrupt)
+        # Location coordinates for click & hover targets
+        bank_location: tuple = tuple(map(int, settings['bank_location'].split(',')[:2]))
 
-    # Print instructions on start before start delay
-    clicker_common.print_start_info(interrupt_key)
+        fst_combine_location: tuple = tuple(map(int, settings['combine_location'].split(',')[:2]))
+        snd_combine_location: tuple = tuple(map(int, settings['snd_combine_location'].split(',')[:2]))
 
-    # Initial sleep for user to have time to react on startup
-    clicker_common.start_delay(rng)
+        fst_withdraw_location: tuple = tuple(map(int, settings['withdraw_location'].split(',')[:2]))
+        snd_withdraw_location: tuple = tuple(map(int, settings['snd_withdraw_location'].split(',')[:2]))
 
-    # Timers for keeping track when allowed to commit next actions
-    # Separate timer for each task
-    global_timer = clicker_common.Timer()
-    break_timer = clicker_common.Timer()
+        fst_deposit_location: tuple = tuple(map(int, settings['deposit_location'].split(',')[:2]))
+        snd_deposit_location: tuple = tuple(map(int, settings['snd_deposit_location'].split(',')[:2]))
 
-    # Before each operation, check that we are still running
-    # and not interrupted (running == True)
+        withdraw_offset: int = int(settings['withdraw_offset'])
+        snd_withdraw_offset: int = int(settings['snd_withdraw_offset'])
 
-    # Start the bg mouse movement thread
-    if running:
-        move_thread.start()
-        print("Mouse movement BG thread started.")
+        deposit_offset: int = int(settings['deposit_offset'])
+        snd_deposit_offset: int = int(settings['snd_deposit_offset'])
 
-    if running and act_start:
-        print("Running actions at program start..")
-        if running:
-            focus_window()
-        if running:
-            close_interface()
-        if running:
+        # Items management
+        item1_take: int = int(settings['item1_take'])
+        item2_take: int = int(settings['item2_take'])
+
+        # Configure global (shared) variables
+        globvals.item_left = int(settings['item1_left'])
+        globvals.item2_left = int(settings['item2_left'])
+        globvals.running = True
+        globvals.can_move = True
+        globvals.paused = False
+
+        common = {
+            'rng': rng,
+            'action_min': action_min,
+            'action_max': action_max,
+            'speed_min': speed_min,
+            'speed_max': speed_max,
+            'close_min': close_min,
+            'close_max': close_max,
+            'max_off': max_off,
+            'window_name': window_name,
+            'debug': debug_mode
+        }
+
+        keyboard.on_press_key(interrupt_key, clicker_common.interrupt_handler)
+        keyboard.on_press_key(pause_key, clicker_common.pause_handler)
+
+        # Print instructions on start before start delay
+        clicker_common.print_start_info(interrupt_key)
+
+        # Initial sleep for user to have time to react on startup
+        clicker_common.start_delay(rng)
+
+        # Timers for keeping track when allowed to commit next actions
+        # Separate timer for each task
+        global_timer: clicker_common.Timer = clicker_common.Timer()
+        break_timer: clicker_common.Timer = clicker_common.Timer()
+
+        move_thread = clicker_common.init_movement_thread(rand_min, rand_max, **common)
+
+        # Before each operation, check that we are still running
+        # and not interrupted (running == True)
+
+        # Start the bg mouse movement thread
+        if globvals.running:
+            move_thread.start()
+            print("Mouse movement BG thread started.")
+
+        if globvals.running and act_start:
+            print("Running actions at program start..")
+            if globvals.running:
+                clicker_common.focus_window(**common)
+                clicker_common.pause_action(**common)
+            if globvals.running:
+                clicker_common.close_interface(close_key, **common)
+                clicker_common.pause_action(**common)
+            if globvals.running:
+                clicker_common.open_location(bank_location, **common)
+                clicker_common.pause_action(**common)
+            if globvals.running:
+                clicker_common.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
+                                              snd_withdraw_offset, item2_take, left_banking, **common)
+                clicker_common.pause_action(**common)
+            if globvals.running:
+                clicker_common.close_interface(close_key, **common)
+                clicker_common.pause_action(**common)
+            if globvals.running:
+                clicker_common.open_menu(inventory_key, **common)
+                clicker_common.pause_action(**common)
+            if globvals.running:
+                clicker_common.combine_items(fst_combine_location, snd_combine_location, **common)
+                clicker_common.pause_action(**common)
+            if globvals.running:
+                clicker_common.confirm_action(confirm_key, bank_location, **common)
+                clicker_common.pause_action(**common)
+
+        # Start looping
+        while globvals.running:
+            # Reset break status every iteration
+            break_taken = False
+
+            can_move = idle_move
+            # Wait until spell action finished
+            clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
+            can_move = True
+
+            if not globvals.running:
+                print("Not running anymore.")
+                break
+
+            if global_timer.elapsed() >= run_max:
+                print("Max runtime reached. Stopping.")
+                globvals.running = False
+                break
+
             open_bank()
-        if running:
+            break_action()
+
+            if not running:
+                print("Not running anymore.")
+                break
+
+            deposit_items()
+            break_action()
+
+            if not running:
+                print("Not running anymore.")
+                break
+
+            # Withdraw 27 items from bank
             if item1_left < item1_take or item2_left < item2_take:
                 print("Out of item(s). Exiting.")
                 running = False
-            else:
-                withdraw_items()
-                item1_left -= item1_take
-                item2_left -= item2_take
-        if running:
+                break
+            withdraw_items()
+            item1_left -= item1_take
+            item2_left -= item2_take
+            break_action()
+
+            if not running:
+                print("Not running anymore.")
+                break
+
             close_interface()
-        if running:
+            break_action()
+
+            if not running:
+                print("Not running anymore.")
+                break
+
             open_inventory()
-        if running:
+            break_action()
+
+            if not running:
+                print("Not running anymore.")
+                break
+
             combine_items()
-        if running:
+            break_action()
+
+            if not running:
+                print("Not running anymore.")
+                break
+
             confirm_action()
+            break_action()
 
+            clicker_common.print_status(global_timer)
 
-    def break_action():
-        break_rnd = rng.random()
-        global break_taken, can_move
-        # If break not yet taken in this loop, enough time from previous break passed, and random number hits prob
-        if not break_taken and break_timer.elapsed() >= break_time and break_rnd < break_prob:
-            break_timer.reset()
-            can_move = False
-            take_break()
-            can_move = True
-            break_taken = True
+        # Gracefully let the bg thread to exit
+        if move_thread.is_alive():
+            print("Waiting for BG thread to stop..")
+            move_thread.join()
 
-
-    # Start looping
-    while running:
-        # Reset break status every iteration
-        break_taken = False
-
-        can_move = idle_move
-        # Wait until spell action finished
-        clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
-        can_move = True
-
-        if not running:
-            print("Not running anymore.")
-            break
-
-        if global_timer.elapsed() >= run_max:
-            print("Max runtime reached. Stopping.")
-            running = False
-            break
-
-        open_bank()
-        break_action()
-
-        if not running:
-            print("Not running anymore.")
-            break
-
-        deposit_items()
-        break_action()
-
-        if not running:
-            print("Not running anymore.")
-            break
-
-        # Withdraw 27 items from bank
-        if item1_left < item1_take or item2_left < item2_take:
-            print("Out of item(s). Exiting.")
-            running = False
-            break
-        withdraw_items()
-        item1_left -= item1_take
-        item2_left -= item2_take
-        break_action()
-
-        if not running:
-            print("Not running anymore.")
-            break
-
-        close_interface()
-        break_action()
-
-        if not running:
-            print("Not running anymore.")
-            break
-
-        open_inventory()
-        break_action()
-
-        if not running:
-            print("Not running anymore.")
-            break
-
-        combine_items()
-        break_action()
-
-        if not running:
-            print("Not running anymore.")
-            break
-
-        confirm_action()
-        break_action()
-
-        clicker_common.print_status(global_timer)
-
-    # Gracefully let the bg thread to exit
-    if move_thread.is_alive():
-        print("Waiting for BG thread to stop..")
-        move_thread.join()
-
-except Exception as e:
-    running = False
-    print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
-    print(e)
+    except Exception as e:
+        running = False
+        print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
+        print(e)
