@@ -1,3 +1,4 @@
+import datetime
 import threading
 import time
 from typing import List
@@ -241,7 +242,10 @@ def init_rng():
 def rand_sleep(rng, minms: int, maxms: int, debug: bool = True):
     if minms > maxms:
         raise ValueError("Min must be less than max.")
-    tm = rng.randint(minms, maxms)
+    if minms == maxms:
+        tm = minms
+    else:
+        tm = rng.randint(minms, maxms)
     if debug:
         print(f"Delay for: {tm} ms")
     time.sleep(tm / 1000)
@@ -304,7 +308,7 @@ def window(name):
     return pyautogui.getWindowsWithTitle(name)[0]
 
 
-def print_info(key):
+def print_start_info(key):
     print(f"Started. Hit key with code {key} at any time to stop execution.")
     print("NOTE: Ensure settings are correctly defined in settings file.")
     print("NOTE: Ensure item details are correctly set in items data file (if applicable).")

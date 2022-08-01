@@ -152,12 +152,16 @@ try:
 
     globvals.running = True
     globvals.can_move = True
-    do_click_spell = True
-    current = 0
 
-    # Initial sleep to have time to react
-    print("Waiting 4 seconds..")
-    clicker_common.rand_sleep(rng, 4000, 4000)
+    do_click_spell: bool = True
+    current: int = 0
+
+
+    # Print instructions on start before start delay
+    clicker_common.print_start_info(interrupt_key)
+
+    # Initial sleep for user to have time to react on startup
+    clicker_common.start_delay(rng)
 
     global_timer = clicker_common.Timer()
 

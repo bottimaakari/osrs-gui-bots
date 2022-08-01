@@ -1,4 +1,3 @@
-import datetime
 import threading
 
 import keyboard
@@ -252,7 +251,6 @@ try:
         name="bg_mouse_movement",
         args=(rng, move_min, move_max, max_off, debug_mode)
     )
-    move_thread.start()
 
     # Key 1 = ESC
     # Key 82 = NUMPAD 0
