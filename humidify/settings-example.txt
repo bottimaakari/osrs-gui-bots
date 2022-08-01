@@ -20,6 +20,10 @@ save_on_exit=False
 # 41 = §
 interrupt_key=41
 
+# Other action shortcut keys
+spellbook_key=F6
+close_menu_key=ESC
+
 # Title of the game window (or some unambigous part of it) to recognize it
 window_title=RuneLite
 
@@ -61,8 +65,6 @@ item_left=13000
 max_run_time=7200000
 
 #### Static location data (X,Y) ####
-spellbook_location=745,210
-
 bank_location=319,200
 
 spell_location=572,307

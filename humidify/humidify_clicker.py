@@ -12,13 +12,13 @@ import clicker_common
 def mouse_movement_background():
     print("BG Thread started.")
     while running:
-        clicker_common.rand_sleep(rng, 10, 900, debug_mode)
+        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
 
         if not can_move:
             continue
 
-        for i in range(0, rng.randint(0, 8)):
-            clicker_common.rand_sleep(rng, 10, 50, debug_mode)
+        for i in range(0, rng.randint(0, rng.randint(0, 8))):
+            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
             if not running or not can_move:
                 break
             x, y = clicker_common.randomized_offset(rng,
@@ -27,7 +27,7 @@ def mouse_movement_background():
                                                     max_off,
                                                     debug=debug_mode
                                                     )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 90, debug_mode))
+            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
 
     print("BG Thread terminated.")
 
@@ -90,17 +90,6 @@ def move_outside_window():
     hover_target(target[0], target[1])
 
 
-def open_spellbook():
-    print("Ensure spellbook open.")
-    loc = tuple(map(int, settings['spellbook_location'].split(',')))
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    hover_target(x, y)
-    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    # Recalculate x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
-    left_click_target(x, y)
-
-
 def click_spell():
     print("Click spell.")
     loc = tuple(map(int, settings['spell_location'].split(',')))
@@ -158,10 +147,16 @@ def withdraw_item():
     left_click_target(x, y)
 
 
+def open_spellbook():
+    print("Ensure spellbook open.")
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+    press_key(spellbook_key)
+
+
 def close_interface():
     print("Close current interface.")
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
-    press_key("ESC")
+    press_key(close_key)
 
 
 def window():
@@ -205,7 +200,12 @@ try:
     # Debug prints etc.
     debug_mode = settings['debug_mode'].lower() == 'true'
 
+    # Key codes
     interrupt_key = int(settings['interrupt_key'])
+
+    # Shortcut keys
+    close_key = settings['close_menu_key']
+    spellbook_key = settings['spellbook_key']
 
     # Mouse speed limits
     speed_min = int(settings['mouse_speed_min'])
@@ -292,6 +292,8 @@ try:
             print("Max runtime reached. Stopping.")
             running = False
             break
+
+        open_spellbook()
 
         open_bank()
 
