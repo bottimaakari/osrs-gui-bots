@@ -297,6 +297,7 @@ try:
         global break_taken, can_move
         # If break not yet taken in this loop, enough time from previous break passed, and random number hits prob
         if not break_taken and break_timer.elapsed() >= break_time and break_rnd < break_prob:
+            break_timer.reset()
             can_move = False
             take_break()
             can_move = True
