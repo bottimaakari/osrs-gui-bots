@@ -11,6 +11,8 @@ START /WAIT "NIGHTMARE" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --on
 
 START /WAIT "HUMIDIFY" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --onefile .\humidify\humidify_clicker.py
 
+START /WAIT "SUPERGLASS" "%APPDATA%\Python\Python39\Scripts\pyinstaller.exe" --onefile .\superglass\superglass_clicker.py
+
 @REM COPY DIST BINARIES WITH ASSETS TO CORRESPONDING DIRS
 
 MKDIR .\dist\high_alchemy\
@@ -26,5 +28,9 @@ XCOPY /Y .\nightmare\settings-example.txt .\dist\nightmare\
 MKDIR .\dist\humidify\
 XCOPY /Y .\dist\humidify_clicker.exe .\dist\humidify\
 XCOPY /Y .\humidify\settings-example.txt .\dist\humidify\
+
+MKDIR .\dist\superglass\
+XCOPY /Y .\dist\superglass_clicker.exe .\dist\superglass\
+XCOPY /Y .\humidify\settings-example.txt .\dist\superglass\
 
 echo FINISHED BUILD
