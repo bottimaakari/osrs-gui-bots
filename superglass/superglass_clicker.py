@@ -70,6 +70,15 @@ def hotkey_press(key):
     pyautogui.press(key, presses=1)
 
 
+def hover(location):
+    # Wait for a while before next action
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    hover_target(x, y)
+
+
 def hover_click(location):
     # Calculate randomized-off x,y and hover to the target first
     x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
@@ -117,6 +126,9 @@ def click_spell():
     loc = tuple(map(int, settings['spell_location'].split(',')))
     hover_click(loc)
 
+    loc = tuple(map(int, settings['bank_location'].split(',')))
+    hover(loc)
+
 
 def open_bank():
     print("Open bank.")
@@ -128,23 +140,36 @@ def deposit_items():
     print("Deposit item(s).")
 
     loc = tuple(map(int, settings['deposit_location1'].split(',')))
-    off = int(settings['deposit_offset1'])
-    hover_context_click(loc, off)
+
+    if left_banking:
+        hover_click(loc)
+    else:
+        off = int(settings['deposit_offset1'])
+        hover_context_click(loc, off)
 
     if snd_deposit:
         loc = tuple(map(int, settings['deposit_location2'].split(',')))
-        off = int(settings['deposit_offset2'])
-        hover_context_click(loc, off)
+
+        if left_banking:
+            hover_click(loc)
+        else:
+            off = int(settings['deposit_offset2'])
+            hover_context_click(loc, off)
 
 
 def withdraw_items():
     print("Withdraw item(s).")
 
     loc = tuple(map(int, settings['withdraw_location'].split(',')))
-    off = int(settings['withdraw_offset'])
-    hover_context_click(loc, off)
+
+    if left_banking:
+        hover_click(loc)
+    else:
+        off = int(settings['withdraw_offset'])
+        hover_context_click(loc, off)
 
     loc = tuple(map(int, settings['snd_withdraw_location'].split(',')))
+
     for i in range(item2_take):
         hover_click(loc)
 
@@ -250,18 +275,18 @@ try:
     run_max = int(settings['max_run_time'])
 
     snd_deposit = settings['snd_deposit'].lower() == "true"
-
     act_start = settings['act_start'].lower() == "true"
+    left_banking = settings['left_click_banking'].lower() == "true"
 
     running = True
     can_move = True
     break_taken = False
 
-    item1_take = 18
-    item2_take = 3
-
     item1_left = int(settings['item1_left'])
     item2_left = int(settings['item2_left'])
+
+    item1_take = int(settings['item1_take'])
+    item2_take = int(settings['item2_take'])
 
     move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
 

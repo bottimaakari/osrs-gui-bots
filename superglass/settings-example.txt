@@ -4,9 +4,13 @@
 # Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
 
 # Amount of hard clay initially in bank
-# (Assymign unlimited supply of Astral runes)
+# (Assuming unlimited supply of additional resources e.g. Astral runes)
 item1_left=9874
 item2_left=979
+
+# How much of each item is withdrawn in every loop?
+item1_take=18
+item2_take=3
 
 #### Static location data (X,Y) ####
 # Relative X,Y from topleft corner
@@ -99,6 +103,10 @@ max_off=3
 # Run all (enabled) actions at start?
 # Excluding primary item click (e.g. absorb points always full at start)
 act_start=True
+
+# Assume correct withdraw/deposit amount is set using quantity menu
+# Uses then left-clicking for withdrawal/deposits for faster and more accurate actions
+left_click_banking=True
 
 # Maximum time the script runs before exiting
 # This is to prevent running more than max login time, etc.

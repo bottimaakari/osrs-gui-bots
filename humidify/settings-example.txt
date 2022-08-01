@@ -3,6 +3,13 @@
 # Lines starting with '#' are ignored
 # Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
 
+# Amount of hard clay initially in bank
+# (Assuming unlimited supply of supplemental resource items, e.g. Astral Runes)
+item_left=13000
+
+# How much of the item is withdrawn at a time
+item_take=27
+
 # Run in debugging mode (debug printouts, etc.)
 # Exception is for long sleep delays
 # Causes lots of console log flood
@@ -71,9 +78,9 @@ max_off=3
 # Excluding primary item click (e.g. absorb points always full at start)
 act_start=True
 
-# Amount of hard clay initially in bank
-# (Assymign unlimited supply of Astral runes)
-item_left=13000
+# Assume correct withdraw/deposit amount is set using quantity menu
+# Uses then left-clicking for withdrawal/deposits for faster and more accurate actions
+left_click_banking=True
 
 # Maximum time the script runs before exiting
 # This is to prevent running more than max login time, etc.

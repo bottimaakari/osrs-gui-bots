@@ -70,6 +70,15 @@ def hotkey_press(key):
     pyautogui.press(key, presses=1)
 
 
+def hover(location):
+    # Wait for a while before next action
+    clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
+
+    # Calculate randomized-off x,y and hover to the target first
+    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    hover_target(x, y)
+
+
 def hover_click(location):
     # Calculate randomized-off x,y and hover to the target first
     x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
@@ -117,6 +126,9 @@ def click_spell():
     loc = tuple(map(int, settings['spell_location'].split(',')))
     hover_click(loc)
 
+    loc = tuple(map(int, settings['bank_location'].split(',')))
+    hover(loc)
+
 
 def open_bank():
     print("Open bank.")
@@ -127,15 +139,23 @@ def open_bank():
 def deposit_item():
     print("Deposit item(s).")
     loc = tuple(map(int, settings['deposit_location'].split(',')))
-    off = int(settings['deposit_offset'])
-    hover_context_click(loc, off)
+
+    if left_banking:
+        hover_click(loc)
+    else:
+        off = int(settings['deposit_offset'])
+        hover_context_click(loc, off)
 
 
 def withdraw_item():
     print("Withdraw item(s).")
     loc = tuple(map(int, settings['withdraw_location'].split(',')))
-    off = int(settings['withdraw_offset'])
-    hover_context_click(loc, off)
+
+    if left_banking:
+        hover_click(loc)
+    else:
+        off = int(settings['withdraw_offset'])
+        hover_context_click(loc, off)
 
 
 def open_spellbook():
@@ -240,10 +260,14 @@ try:
 
     act_start = settings['act_start'].lower() == "true"
 
+    left_banking = settings['left_click_banking'].lower() == "true"
+
     running = True
     can_move = True
     break_taken = False
+
     item_left = int(settings['item_left'])
+    item_take = int(settings['item_take'])
 
     move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
 
@@ -283,12 +307,12 @@ try:
         if running:
             open_bank()
         if running:
-            if item_left < 27:
+            if item_left < item_take:
                 print("Out of item(s). Exiting.")
                 running = False
             else:
                 withdraw_item()
-                item_left -= 27
+                item_left -= item_take
         if running:
             close_interface()
         if running:
@@ -341,12 +365,12 @@ try:
             break
 
         # Withdraw 27 items from bank
-        if item_left < 27:
+        if item_left < item_take:
             print("Out of item(s). Exiting.")
             running = False
             break
         withdraw_item()
-        item_left -= 27
+        item_left -= item_take
         break_action()
 
         if not running:
