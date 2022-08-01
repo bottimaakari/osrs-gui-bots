@@ -244,10 +244,28 @@ try:
         move_thread.start()
         print("Mouse movement bg thread started.")
 
+    if running:
+        print("Ensure inventory open.")
+        ensure_inventory_open()
+
     # Double click the prayer button to reset regeneration
     if running and use_prayer:
         print("Double click quick prayer.")
         click_prayer()
+
+    if running and use_special:
+        print("Click special attack.")
+        click_special_attack()
+
+    if running and use_item:
+        print("Use item.")
+        click_item(inventory[current])
+        inventory[current][2] -= 1
+
+    if running and use_snd_item:
+        print("Use secondary item.")
+        click_item(snd_inv[snd_current])
+        snd_inv[snd_current][2] -= 1
 
     # Initially, ensure mouse is outside game window
     if running:
@@ -293,7 +311,7 @@ try:
             print("Ensure inventory open.")
             ensure_inventory_open()
 
-        # After Looped 4 times in a row, click the first item available, if is enabled, if odds hit
+        # Click the first item available, if is enabled, if odds hit, if minimum time passed
         item_rnd = rng.random()
         if debug_mode:
             print(f"Item: {use_item}|{item_timer.elapsed()}|{item_time}|{item_rnd}|{item_prob}")
@@ -308,10 +326,11 @@ try:
             if current >= len(inventory):
                 print("Out of items.")
             else:
+                print("Use item.")
                 click_item(inventory[current])
                 inventory[current][2] -= 1
 
-        # After Looped 4 times in a row, click the first secondary item available, if feature enabled, if odds hit
+        # Click the first secondary item available, if is enabled, if odds hit, if minimum time passed
         snd_rnd = rng.random()
         if debug_mode:
             print(f"Secondary item: {use_snd_item}|{snd_timer.elapsed()}|{snd_time}|{snd_rnd}|{snd_prob}")
@@ -326,9 +345,11 @@ try:
             if snd_current >= len(snd_inv):
                 print("Out of items.")
             else:
+                print("Use secondary item.")
                 click_item(snd_inv[snd_current])
                 snd_inv[snd_current][2] -= 1
 
+        # Finally, move the cursor outside the game window
         move_outside_window()
 
         secs = global_timer.elapsed() / 1000
