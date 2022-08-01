@@ -1,33 +1,10 @@
-import secrets
 import threading
 
 import keyboard
 import pyautogui
 
 import clicker_common
-
-
-def mouse_movement_background():
-    print("BG Thread started.")
-    while running:
-        clicker_common.rand_sleep(rng, 10, 1000, debug_mode)
-
-        if not can_move:
-            continue
-
-        for i in range(0, rng.randint(0, rng.randint(0, 8))):
-            clicker_common.rand_sleep(rng, 20, 50, debug_mode)
-            if not running or not can_move:
-                break
-            x, y = clicker_common.randomized_offset(rng,
-                                                    rng.randint(move_min, move_max),
-                                                    rng.randint(move_min, move_max),
-                                                    max_off,
-                                                    debug=debug_mode
-                                                    )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
-
-    print("BG Thread terminated.")
+import globvals
 
 
 def hover_target(x, y):
@@ -139,15 +116,14 @@ def window():
 # Gracefully erminates the program
 def interrupt(ev):
     print("Program interrupted.")
-    global running
-    running = False
+    globvals.running = False
     print("Possibly still waiting for a sleep to finish..")
 
 
-# Use system random data source
-rng = secrets.SystemRandom()
-
 try:
+    # Use system random data source
+    rng = clicker_common.init_rng()
+
     settings_file = "settings.txt"
 
     # Read configuration file
@@ -247,12 +223,17 @@ try:
         else:
             print("Read item data from secondary items file.")
 
-    running = True
-    can_move = True
-    current = 0
-    snd_current = 0
+    globvals.running = True
+    globvals.can_move = True
 
-    move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
+    current: int = 0
+    snd_current: int = 0
+
+    move_thread: threading.Thread = threading.Thread(
+        target=clicker_common.mouse_movement_background,
+        name="bg_mouse_movement",
+        args=(rng, move_min, move_max, max_off, debug_mode)
+    )
 
     # Key 1 = ESC
     # Key 82 = NUMPAD 0
@@ -269,27 +250,27 @@ try:
     # and not interrupted (running == True)
 
     # Start the bg mouse movement thread
-    if running:
+    if globvals.running:
         move_thread.start()
         print("Mouse movement BG thread started.")
 
-    if running and act_start:
+    if globvals.running and act_start:
         print("Running actions at program start..")
 
         # Ensure game window focused
-        if running:
+        if globvals.running:
             focus_window()
 
         # First, ensure inventory tab is open
-        if running:
+        if globvals.running:
             ensure_inventory_open()
 
         # Double click the prayer button to reset regeneration
-        if running and use_prayer:
+        if globvals.running and use_prayer:
             click_prayer()
 
         # use the special attack
-        if running and use_special:
+        if globvals.running and use_special:
             click_special_attack()
 
         # No need for using the primary item
@@ -297,12 +278,12 @@ try:
         # because points already full
 
         # Use the snd item (e.g. stats potion)
-        if running and use_snd_item:
+        if globvals.running and use_snd_item:
             click_snd_item(snd_inv[snd_current])
             snd_inv[snd_current][2] -= 1
 
         # Initially, ensure mouse is outside game window
-        if running:
+        if globvals.running:
             move_outside_window()
 
     # Timers for keeping track when allowed to commit next actions
@@ -377,19 +358,19 @@ try:
         actions.append(snd_item_action)
 
     # Start looping
-    while running:
+    while globvals.running:
         # Sleep for a random time, at maximum the time the health regenerates
         can_move = False
         clicker_common.rand_sleep(rng, loop_min, loop_max)  # debug=True
         can_move = True
 
-        if not running:
+        if not globvals.running:
             print("Not running anymore.")
             break
 
         if global_timer.elapsed() >= run_max:
             print("Max runtime reached. Stopping.")
-            running = False
+            globvals.running = False
             break
 
         # If the probability was hit, ensure the inventory tab is open
@@ -416,7 +397,7 @@ try:
         move_thread.join()
 
 except Exception as e:
-    running = False
+    globvals.running = False
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
 
