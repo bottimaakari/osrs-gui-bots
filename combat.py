@@ -29,7 +29,7 @@ def init_bot(region: bool):
     GlobalConfig.smooth_mouse_drag = False
     
     if region:
-        pos = mouse.get_pos()
+        pos = mouse.get_window_pos()
 
         fr = gbot.FileResolver()
         reg = gbot.Region(pos[0], pos[1], pos[2], pos[3])

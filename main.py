@@ -18,4 +18,4 @@ def main(*args):
         print("Name of the bot not recognized.")
         return
 
-main("woodcut")
+# main("woodcut")
