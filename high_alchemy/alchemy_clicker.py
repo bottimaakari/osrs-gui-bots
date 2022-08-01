@@ -8,8 +8,10 @@ import clicker_common
 
 
 def randomized_offset(x, y, use_window=True):
-    ox = window.x + x if use_window else x
-    oy = window.y + y if use_window else y
+    w = window().topleft
+
+    ox = w.x + x if use_window else x
+    oy = w.y + y if use_window else y
 
     return \
         rng.randint(ox - max_off, ox + max_off), \
@@ -81,6 +83,10 @@ def click_item(item):
     # Recalculate x,y and click the target
     x, y = randomized_offset(item[0], item[1])
     click_target(x, y)
+
+
+def window():
+    return clicker_common.window(window_name)
 
 
 def interrupt(event):
