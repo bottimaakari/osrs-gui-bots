@@ -1,3 +1,4 @@
+import threading
 import time
 from typing import List
 
@@ -22,28 +23,77 @@ class Timer:
 
 
 class Random:
+    # Store class level constants
+    # To have some reliable, tested defaults
     CHUNK_SIZE: int = 1024  # API Limit: 1024
     VALUE_SIZE: int = 16  # API: int16 -> 16
-    DATA_COUNT: int = 30  # Values in total: DATA_COUNT * DATA_SIZE
+    ARRAY_SIZE: int = 30  # Values in total: DATA_COUNT * CHUNK_SIZE
+    AUTOFILL_INTEVAL: float = 1.0  # How often to check whether needed to refill random data
+    AUTOFILL_THRESHOLD: int = 50  # Threshold when its time to refill the random data (nums left in the last list)
 
-    def __init__(self, count: int = None, size: int = None):
-        self._data_count = count if count is not None else self.DATA_COUNT
-        self._data_size = size if size is not None else self.CHUNK_SIZE
+    def __init__(self, count: int = None, size: int = None, autofill: bool = True):
+        # Parameters for setting up data
+        self._array_size = count if count is not None else self.ARRAY_SIZE
+        self._chunk_size = size if size is not None else self.CHUNK_SIZE
+
+        # Object for storing random data fetched from the API
         self._data: List[List[int]] = []
+
+        # Pointers foor iterating over the data object
         self._len_data: int = 0
         self._list_it: int = 0
         self._value_it: int = -1
+
+        # Limit for int size, base of single random unit size in bits (decimal)
         self._limit: int = 2 ** self.VALUE_SIZE
-        self._call_count = 0
+
+        # For multithreading to prevent external access during critical operations
+        self._initializing = False
+        self._critical = False
+        self._running = True
+
+        # Initialize the RNG when calling constructor
         self.init()
 
+        # Start autofill thread if autofill enabled
+        if autofill:
+            print("Autofill enabled.")
+            self._fill_thread = threading.Thread(target=self.__fill_thread, name="autofill_bg", daemon=True)
+            self._fill_thread.start()
+        else:
+            print("Autofill disabled.")
+
+    def __fill_thread(self):
+        while self._running:
+            # print("Autofill loop.")
+            time.sleep(self.AUTOFILL_INTEVAL)
+            # When critical level reached (1 slot with 10% left)
+            # if self._running and self._list_it >= self._len_data - 1 and self._value_it >= self._chunk_size * 0.1:
+            if self._running and \
+                    self._list_it >= self._len_data - 1 and \
+                    self._value_it >= self._chunk_size - self.AUTOFILL_THRESHOLD - 1:
+                print("Random data at critical level. Reinit data.")
+                self.init()
+            # else:
+            #     print("No need to fill.")
+
+        print("Autofill thread exiting.")
+
     def __get_value(self) -> int:
-        self._call_count += 1
-        if self._value_it >= self._data_size - 1:
+        # If initialization is in progress
+        # Sleep until the initialization is done
+        while self._critical:
+            time.sleep(0.01)
+        if self._value_it >= self._chunk_size - 1:
             self._list_it += 1
             self._value_it = -1
         self._value_it += 1
         return self._data[self._list_it][self._value_it]
+
+    def __del__(self):
+        # Ensure internal thread(s) are terminated before destructing the class
+        self._running = False
+        self._fill_thread.join(5)
 
     def init(self) -> None:
         """
@@ -52,24 +102,46 @@ class Random:
         CAUTION! Most expensive method, use only when necessary
         :return:
         """
+        # Ensure no one tries to init the same instance at the same time
+        if self._initializing:
+            print("Already initializing. No need to initialize this often.")
+            return
+
+        self._initializing = True
         print("Initializing RNG..")
 
+        new_data: List[List[int]] = []
+
+        for i in range(self._array_size):
+            new_data.append(quantumrandom.get_data('uint16', self._chunk_size))
+
+        # ENTER CRITICAL SECTION
+        self._critical = True
+        # Ensure nobody is in middle of fetching data etc.
+        time.sleep(0.5)
+
+        # Free the memory of old random data
+        # and ensure its garbage collected
         self._data.clear()
+        del self._data
+        self._data = new_data
 
-        for i in range(self._data_count):
-            self._data.append(quantumrandom.get_data('uint16', self._data_size))
-
-        # Define len data as constant for later use
+        # (Re)Define len data as constant for later use
         # Reset list pointers
         self._len_data = len(self._data)
         self._list_it = 0
         self._value_it = -1
 
-        # Sanity check -> does the generated data match anyclose what was requested
-        if self._len_data < self._data_count or len(self._data[self._len_data - 1]) < self._data_size:
+        # Sanity check -> does the generated data match any close what was requested
+        # If not - a programming error exists
+        if self._len_data != self._array_size or len(self._data[self._len_data - 1]) != self._chunk_size:
             raise Exception("Failed to initialize RNG: Data count mismatch!")
 
+        self._critical = False
+        # EXIT CRITICAL SECTION
+
         print("Initializing RNG done.")
+        self._initializing = False
 
     def random(self) -> float:
         """
@@ -80,6 +152,7 @@ class Random:
         # Since we are dealing with int16 (16 bits integer)
         # To get a value between 0..1 we need to break down the random value into 2^16 pieces
         # Then return the percentual value of the current number (to distribute value uniformly)
+        # Entropy is: 1 / 2**16 = 0.0000152587890625 per single random value
         return self.__get_value() / self._limit
 
     def randint(self, lo: int, hi: int) -> int:
