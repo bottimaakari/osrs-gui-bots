@@ -168,13 +168,12 @@ class Random:
         if self._debug:
             print(f"Random: BEFORE init: DATA STATUS {self._data.qsize()} / {self._max_size}")
 
-        # Initialize only ~50% of the limit at start to optimize for speed
-        size = int(self._array_size / 2) * self._chunk_size if self._array_size > 1 else self._chunk_size
-
+        # Initialize only one chunk at startup to optimize for speed
+        # More data will be generated on background during runtime
         if self._debug:
-            print(f"Init fill size: {size}")
+            print(f"Init fill size: {self._chunk_size}")
 
-        self.__generate(size)
+        self.__generate(self._chunk_size)
 
         if self._debug:
             print(f"Random: AFTER init: DATA STATUS {self._data.qsize()} / {self._max_size}")
