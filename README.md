@@ -10,6 +10,10 @@ Based on the randomness of the clicker bots and independecy over the OSRS client
 
 DISCLAIMER: This is solely a study project on creating automation over OSRS. Note that it is against the TOS and rules of Runescape to use any kind of automation while playing, thus I (the author) will not hold any responsibility on any account bans, loss of money or effort, or any other kind of loss caused to you by these bots. You have been warned.
 
+Demonstration of alchemy clicker bot in action:
+
+![Bot Demonstration](assets/bot-demo.gif)
+
 # GUI-bots
 Scripts for different purposes separated in own Python files.
 
