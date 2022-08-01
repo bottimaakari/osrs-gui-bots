@@ -10,7 +10,7 @@ import globvals
 
 def hover_target(x, y):
     print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max))
+    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max))
 
 
 def left_click_target(x, y):
@@ -20,7 +20,7 @@ def left_click_target(x, y):
     # to ensure the click hits target correctly
     globvals.can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.leftClick()
 
     globvals.can_move = True
@@ -28,14 +28,14 @@ def left_click_target(x, y):
 
 def hover_click(location, delay_min, delay_max):
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait for a while before next action
     clicker_common.rand_sleep(rng, delay_min, delay_max, debug_mode)
 
     # Recalculate random-off x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     left_click_target(x, y)
 
 
@@ -169,7 +169,7 @@ try:
     global_timer = clicker_common.Timer()
 
     move_thread = threading.Thread(
-        target=clicker_common.mouse_movement_background,
+        target=clicker_common._mouse_movement_background,
         name="bg_mouse_movement",
         args=(rng, move_min, move_max, max_off, debug_mode)
     )

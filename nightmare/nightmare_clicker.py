@@ -10,7 +10,7 @@ import globvals
 
 def hover_target(x, y):
     print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
 
 
 def left_click_target(x, y):
@@ -21,7 +21,7 @@ def left_click_target(x, y):
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, mouse_min, mouse_max, debug_mode))
     pyautogui.leftClick()
 
     can_move = True
@@ -29,14 +29,14 @@ def left_click_target(x, y):
 
 def hover_click(location):
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait for a while before next action
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Recalculate random-off x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     left_click_target(x, y)
 
 
@@ -72,7 +72,7 @@ def click_prayer():
     loc = tuple(map(int, settings['prayer_location'].split(',')))
     hover_click(loc)
     clicker_common.rand_sleep(rng, wmin, wmax, debug_mode)  # Special sleep between double click
-    x, y = clicker_common.randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, loc[0], loc[1], max_off, window_name, debug_mode)
     left_click_target(x, y)
 
 
@@ -235,7 +235,7 @@ try:
     snd_current: int = 0
 
     move_thread: threading.Thread = threading.Thread(
-        target=clicker_common.mouse_movement_background,
+        target=clicker_common._mouse_movement_background,
         name="bg_mouse_movement",
         args=(rng, move_min, move_max, max_off, debug_mode)
     )

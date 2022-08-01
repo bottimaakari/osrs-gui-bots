@@ -20,20 +20,20 @@ def mouse_movement_background():
             clicker_common.rand_sleep(rng, 20, 50, debug_mode)
             if not running or not can_move:
                 break
-            x, y = clicker_common.randomized_offset(rng,
-                                                    rng.randint(move_min, move_max),
-                                                    rng.randint(move_min, move_max),
-                                                    max_off,
-                                                    debug=debug_mode
-                                                    )
-            pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 80, debug_mode))
+            x, y = clicker_common._randomized_offset(rng,
+                                                     rng.randint(move_min, move_max),
+                                                     rng.randint(move_min, move_max),
+                                                     max_off,
+                                                     debug=debug_mode
+                                                     )
+            pyautogui.moveRel(x, y, clicker_common._rand_mouse_speed(rng, 30, 80, debug_mode))
 
     print("BG Thread terminated.")
 
 
 def hover_target(x, y):
     print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
 
 
 def left_click_target(x, y):
@@ -44,7 +44,7 @@ def left_click_target(x, y):
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.leftClick()
 
     can_move = True
@@ -58,7 +58,7 @@ def right_click_target(x, y):
     global can_move
     can_move = False
 
-    pyautogui.moveTo(x, y, clicker_common.rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
+    pyautogui.moveTo(x, y, clicker_common._rand_mouse_speed(rng, speed_min, speed_max, debug_mode))
     pyautogui.rightClick()
 
     can_move = True
@@ -75,44 +75,44 @@ def hover(location):
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
 
 def hover_click(location):
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait for a while before next action
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Recalculate random-off x,y and click the target
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     left_click_target(x, y)
 
 
 def hover_context_click(location, offset):
     # Calculate randomized-off x,y and hover to the target first
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait for a while before next action
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Right click the target to open context menu
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1], max_off, window_name, debug_mode)
     right_click_target(x, y)
 
     # Hover to the context menu offset
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
     hover_target(x, y)
 
     # Wait a bit before proceeding
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
 
     # Finally, click the menu option in the predefined offset
-    x, y = clicker_common.randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
+    x, y = clicker_common._randomized_offset(rng, location[0], location[1] + offset, 1, window_name, debug_mode)
     left_click_target(x, y)
 
 

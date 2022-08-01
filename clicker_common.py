@@ -220,7 +220,7 @@ class Random:
         return round(self.random() * dist) + lo
 
 
-def get_timestamp(local: bool, sep: str = ' ') -> str:
+def _get_timestamp(local: bool, sep: str = ' ') -> str:
     if local:
         tm = datetime.datetime.now()
     else:
@@ -278,7 +278,7 @@ def save_inventory(filename: str, items: list) -> None:
         raise ex
 
     # Get ISO timestamp in local TZ
-    stamp: str = get_timestamp(local=True)
+    stamp: str = _get_timestamp(local=True)
 
     # First, append header to separate from previous runs
     file.write(f"{os.linesep}### ITEMS SAVED ON {stamp} ###{os.linesep}")
@@ -316,7 +316,7 @@ def rand_sleep(min_ms: int, max_ms: int, **kwargs) -> float:
     return tm
 
 
-def rand_mouse_speed(min_ms: int, max_ms: int, **kwargs) -> float:
+def _rand_mouse_speed(min_ms: int, max_ms: int, **kwargs) -> float:
     # Read common parameters from packed kwargs
     rng: any = kwargs['rng']
     debug: bool = kwargs['debug']
@@ -329,7 +329,7 @@ def rand_mouse_speed(min_ms: int, max_ms: int, **kwargs) -> float:
     return tm / 1000
 
 
-def randomized_offset(location: tuple[int, int], **kwargs) -> tuple[int, int]:
+def _randomized_offset(location: tuple[int, int], **kwargs) -> tuple[int, int]:
     # Read common parameters from packed kwargs
     rng: any = kwargs['rng']
     max_off: int = kwargs['max_off']
@@ -351,7 +351,7 @@ def randomized_offset(location: tuple[int, int], **kwargs) -> tuple[int, int]:
     return nx, ny
 
 
-def mouse_movement_background(move_min: int, move_max: int, **kwargs) -> None:
+def _mouse_movement_background(move_min: int, move_max: int, **kwargs) -> None:
     print("Mouse movement BG Thread started.")
 
     # Read common parameters from packed kwargs
@@ -371,17 +371,17 @@ def mouse_movement_background(move_min: int, move_max: int, **kwargs) -> None:
             rand_sleep(10, 100, **kwargs)
             if not globvals.running or not globvals.can_move:
                 break
-            x, y = randomized_offset(
+            x, y = _randomized_offset(
                 (rng.randint(move_min, move_max), rng.randint(move_min, move_max)),
                 **{**kwargs, 'window_name': None})
-            pyautogui.moveRel(x, y, rand_mouse_speed(30, 80, **kwargs))
+            pyautogui.moveRel(x, y, _rand_mouse_speed(30, 80, **kwargs))
 
     print("Mouse movement BG Thread terminated.")
 
 
-def create_movement_thread(rand_min: int, rand_max: int, **kwargs) -> threading.Thread:
+def init_movement_thread(rand_min: int, rand_max: int, **kwargs) -> threading.Thread:
     return threading.Thread(
-        target=mouse_movement_background,
+        target=_mouse_movement_background,
         name="bg_mouse_movement",
         args=(rand_min, rand_max),
         kwargs=kwargs
@@ -417,7 +417,7 @@ def print_status(timer: Timer) -> None:
     seconds = int(seconds - hours * 3600 - minutes * 60)
 
     print(f"Total elapsed: {hours} h | {minutes} min | {seconds} sec.")
-    print(f"Timestamp: {get_timestamp(local=True)}")
+    print(f"Timestamp: {_get_timestamp(local=True)}")
 
 
 # Catches key interrupt events
@@ -450,7 +450,7 @@ def exit_handler() -> None:
     input("Press ENTER to EXIT...")
 
 
-def hover_raw(x: int, y: int, **kwargs) -> None:
+def _hover_raw(x: int, y: int, **kwargs) -> None:
     # Read common parameters from packed kwargs
     speed_min: int = kwargs['speed_min']
     speed_max: int = kwargs['speed_max']
@@ -458,10 +458,10 @@ def hover_raw(x: int, y: int, **kwargs) -> None:
 
     if debug:
         print(f"Hover target: ({x}, {y})")
-    pyautogui.moveTo(x, y, rand_mouse_speed(speed_min, speed_max, **kwargs))
+    pyautogui.moveTo(x, y, _rand_mouse_speed(speed_min, speed_max, **kwargs))
 
 
-def left_click_raw(x: int, y: int, **kwargs) -> None:
+def _left_click_raw(x: int, y: int, **kwargs) -> None:
     # Read common parameters from packed kwargs
     speed_min: int = kwargs['speed_min']
     speed_max: int = kwargs['speed_max']
@@ -473,12 +473,12 @@ def left_click_raw(x: int, y: int, **kwargs) -> None:
     # Temporarily prevent background movement
     # to ensure the click hits the target correctly
     globvals.can_move = False
-    pyautogui.moveTo(x, y, rand_mouse_speed(speed_min, speed_max, **kwargs))
+    pyautogui.moveTo(x, y, _rand_mouse_speed(speed_min, speed_max, **kwargs))
     pyautogui.leftClick()
     globvals.can_move = True
 
 
-def right_click_raw(x: int, y: int, **kwargs) -> None:
+def _right_click_raw(x: int, y: int, **kwargs) -> None:
     # Read common parameters from packed kwargs
     speed_min: int = kwargs['speed_min']
     speed_max: int = kwargs['speed_max']
@@ -490,12 +490,12 @@ def right_click_raw(x: int, y: int, **kwargs) -> None:
     # Temporarily prevent background movement
     # to ensure the click hits target correctly
     globvals.can_move = False
-    pyautogui.moveTo(x, y, rand_mouse_speed(speed_min, speed_max, **kwargs))
+    pyautogui.moveTo(x, y, _rand_mouse_speed(speed_min, speed_max, **kwargs))
     pyautogui.rightClick()
     globvals.can_move = True
 
 
-def key_press_raw(key: str, **kwargs):
+def _key_press_raw(key: str, **kwargs):
     # Read common parameters from packed kwargs
     debug: bool = kwargs['debug']
 
@@ -504,13 +504,18 @@ def key_press_raw(key: str, **kwargs):
     pyautogui.press(key, presses=1)
 
 
+def _take_break(break_min, break_max, **kwargs) -> None:
+    print("Taking a break.")
+    rand_sleep(break_min, break_max, **{**kwargs, 'debug': True})  # Longer break -> always debug print output
+
+
 def key_press(key: str, **kwargs) -> None:
     # Read common parameters from packed kwargs
     action_min: int = kwargs['action_min']
     action_max: int = kwargs['action_max']
 
     rand_sleep(action_min, action_max, **kwargs)
-    key_press_raw(key, **kwargs)
+    _key_press_raw(key, **kwargs)
 
 
 def hover(location: tuple[int, int], **kwargs) -> None:
@@ -522,8 +527,8 @@ def hover(location: tuple[int, int], **kwargs) -> None:
     rand_sleep(action_min, action_max, **kwargs)
 
     # Calculate randomized-off x,y and hover to the target first
-    x, y = randomized_offset(location, **kwargs)
-    hover_raw(x, y, **kwargs)
+    x, y = _randomized_offset(location, **kwargs)
+    _hover_raw(x, y, **kwargs)
 
 
 def hover_click(location: tuple[int, int], **kwargs) -> None:
@@ -532,15 +537,15 @@ def hover_click(location: tuple[int, int], **kwargs) -> None:
     action_max: int = kwargs['action_max']
 
     # Calculate randomized-off x,y and hover to the target first
-    x, y = randomized_offset(location, **kwargs)
-    hover_raw(x, y, **kwargs)
+    x, y = _randomized_offset(location, **kwargs)
+    _hover_raw(x, y, **kwargs)
 
     # Wait for a while before next action
     rand_sleep(action_min, action_max, **kwargs)
 
     # Recalculate random-off x,y and click the target
-    x, y = randomized_offset(location, **kwargs)
-    left_click_raw(x, y, **kwargs)
+    x, y = _randomized_offset(location, **kwargs)
+    _left_click_raw(x, y, **kwargs)
 
 
 def hover_context_click(location: tuple[int, int], offset: int, **kwargs) -> None:
@@ -549,26 +554,26 @@ def hover_context_click(location: tuple[int, int], offset: int, **kwargs) -> Non
     action_max: int = kwargs['action_max']
 
     # Calculate randomized-off x,y and hover to the target first
-    x, y = randomized_offset(location, **kwargs)
-    hover_raw(x, y, **kwargs)
+    x, y = _randomized_offset(location, **kwargs)
+    _hover_raw(x, y, **kwargs)
 
     # Wait for a while before next action
     rand_sleep(action_min, action_max, **kwargs)
 
     # Right click the target to open context menu
-    x, y = randomized_offset(location, **kwargs)
-    right_click_raw(x, y, **kwargs)
+    x, y = _randomized_offset(location, **kwargs)
+    _right_click_raw(x, y, **kwargs)
 
     # Hover to the context menu offset
-    x, y = randomized_offset((location[0], location[1] + offset), **{**kwargs, 'max_off': 1})
-    hover_raw(x, y, **kwargs)
+    x, y = _randomized_offset((location[0], location[1] + offset), **{**kwargs, 'max_off': 1})
+    _hover_raw(x, y, **kwargs)
 
     # Wait a bit before proceeding
     rand_sleep(action_min, action_max, **kwargs)
 
     # Finally, click the menu option in the predefined offset
-    x, y = randomized_offset(location, **{**kwargs, 'max_off': 2})
-    left_click_raw(x, y, **kwargs)
+    x, y = _randomized_offset(location, **{**kwargs, 'max_off': 2})
+    _left_click_raw(x, y, **kwargs)
 
 
 def focus_window(**kwargs) -> None:
@@ -704,11 +709,6 @@ def click_spell(spell_location: tuple[int, int], bank_location: tuple[int: int],
         hover(bank_location, **kwargs)
 
 
-def take_break(break_min, break_max, **kwargs) -> None:
-    print("Taking a break.")
-    rand_sleep(break_min, break_max, **{**kwargs, 'debug': True})  # Longer break -> always debug print output
-
-
 def confirm_action(key: str, next_location: tuple[int, int] = None, **kwargs):
     # Read common parameters from packed kwargs
     close_min: int = kwargs['close_min']
@@ -732,7 +732,7 @@ def break_action(break_min: int, break_max: int, break_time: int, break_prob: fl
     if break_timer.elapsed() >= break_time and rng.random() < break_prob:
         break_timer.reset()
         globvals.can_move = False
-        take_break(break_min, break_max, **kwargs)
+        _take_break(break_min, break_max, **kwargs)
         globvals.can_move = True
 
 

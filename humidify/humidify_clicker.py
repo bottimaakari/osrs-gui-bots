@@ -124,7 +124,7 @@ if __name__ == '__main__':
         global_timer: clicker_common.Timer = clicker_common.Timer()
         break_timer: clicker_common.Timer = clicker_common.Timer()
 
-        move_thread = clicker_common.create_movement_thread(rand_min, rand_max, **common_args)
+        move_thread = clicker_common.init_movement_thread(rand_min, rand_max, **common_args)
 
         # Before each operation, check that we are still running
         # and not interrupted (running == True)
