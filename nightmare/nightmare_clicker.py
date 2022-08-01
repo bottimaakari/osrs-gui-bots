@@ -153,8 +153,9 @@ try:
 
     try:
         window()
-    except IndexError as ex:
+    except Exception as ex:
         print("ERROR: Game client window was not detected. Ensure the game client is running first.")
+        print("Also check that window title is correct in settings.")
         raise ex
 
     mouse_info = settings['mouse_info'].lower() == 'true'

@@ -115,9 +115,10 @@ try:
     window_name = str(settings["window_title"])
 
     try:
-        window = pyautogui.getWindowsWithTitle(window_name)[0].topleft
-    except IndexError as ex:
+        window()
+    except Exception as ex:
         print("ERROR: Game client window was not detected. Ensure the game client is running first.")
+        print("Also check that window title is correct in settings.")
         raise ex
 
     # Debug prints etc.
