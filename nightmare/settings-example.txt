@@ -50,6 +50,10 @@ rand_max=9
 # How much the click can be randomized off of the precise target
 max_off=6
 
+# Run all (enabled) actions at start?
+# Excluding primary item click (e.g. absorb points always full at start)
+act_start=True
+
 # Double click quick prayer?
 use_prayer=True
 

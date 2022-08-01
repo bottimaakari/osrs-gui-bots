@@ -188,6 +188,8 @@ try:
     special_time = int(settings['special_time_min'])
     run_max = int(settings['max_run_time'])
 
+    act_start = settings['act_start'].lower() == "true"
+
     use_prayer = settings['use_prayer'].lower() == "true"
     use_item = settings['use_items'].lower() == "true"
     use_snd_item = settings['use_snd_items'].lower() == "true"
@@ -249,34 +251,37 @@ try:
         move_thread.start()
         print("Mouse movement BG thread started.")
 
-    # First, ensure inventory tab is open
-    if running:
-        print("Ensure inventory open.")
-        ensure_inventory_open()
+    if running and act_start:
+        print("Running actions at program start..")
 
-    # Double click the prayer button to reset regeneration
-    if running and use_prayer:
-        print("Double click quick prayer.")
-        click_prayer()
+        # First, ensure inventory tab is open
+        if running:
+            print("Ensure inventory open.")
+            ensure_inventory_open()
 
-    # use the special attack
-    if running and use_special:
-        print("Click special attack.")
-        click_special_attack()
+        # Double click the prayer button to reset regeneration
+        if running and use_prayer:
+            print("Double click quick prayer.")
+            click_prayer()
 
-    # No need for using the primary item
-    # at start (typically absorb potion)
-    # because points already full
+        # use the special attack
+        if running and use_special:
+            print("Click special attack.")
+            click_special_attack()
 
-    # Use the snd item (e.g. stats potion)
-    if running and use_snd_item:
-        print("Use secondary item.")
-        click_item(snd_inv[snd_current])
-        snd_inv[snd_current][2] -= 1
+        # No need for using the primary item
+        # at start (typically absorb potion)
+        # because points already full
 
-    # Initially, ensure mouse is outside game window
-    if running:
-        move_outside_window()
+        # Use the snd item (e.g. stats potion)
+        if running and use_snd_item:
+            print("Use secondary item.")
+            click_item(snd_inv[snd_current])
+            snd_inv[snd_current][2] -= 1
+
+        # Initially, ensure mouse is outside game window
+        if running:
+            move_outside_window()
 
     # Timers for keeping track when allowed to commit next actions
     # Separate timer for each task
