@@ -25,6 +25,7 @@ snd_items_file=snd-items.txt
 # Keycode for key to interrupt (stop) the program
 # 1 = ESC
 # 82 = Numpad 0
+# 41 = §
 interrupt_key=1
 
 # Title of the game window (or some unambigous part of it) to recognize it
