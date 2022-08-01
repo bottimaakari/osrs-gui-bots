@@ -3,6 +3,11 @@
 # Read on program startup
 # Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
 
+# Run in debugging mode (debug printouts, etc.)
+# Exception is for long sleep delays
+# Causes lots of console log flood
+debug_mode=False
+
 # Run mouse info program only (for determining coordinates)
 mouse_info=False
 
@@ -14,6 +19,7 @@ items_file=items.txt
 # Keycode for key to interrupt (stop) the program
 # 1 = ESC
 # 82 = Numpad 0
+# 41 = §
 interrupt_key=1
 
 # Title of the game window (or some unambigous part of it) to recognize it
@@ -35,4 +41,4 @@ rand_min=-8
 rand_max=8
 
 # How much the click can be randomized off of the precise target
-max_off=6
+max_off=5
