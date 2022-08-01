@@ -18,7 +18,7 @@ def mouse_movement_background():
 
         for i in range(0, rng.randint(0, 8)):
             clicker_common.rand_sleep(rng, 10, 50, debug_mode)
-            if not can_move:
+            if not running or not can_move:
                 break
             x, y = clicker_common.randomized_offset(rng,
                                                     rng.randint(move_min, move_max),
@@ -185,6 +185,7 @@ try:
     item_time = int(settings['item_time_min'])
     snd_time = int(settings['snd_item_time_min'])
     special_time = int(settings['special_time_min'])
+    run_max = int(settings['max_run_time'])
 
     use_prayer = settings['use_prayer'].lower() == "true"
     use_item = settings['use_items'].lower() == "true"
@@ -268,6 +269,11 @@ try:
         can_move = True
 
         if not running:
+            break
+
+        if global_timer.elapsed() >= run_max:
+            print("Max runtime reached. Stopping.")
+            running = False
             break
 
         # Double click the prayer button to reset regeneration

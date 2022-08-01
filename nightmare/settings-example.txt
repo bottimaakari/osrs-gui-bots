@@ -77,17 +77,23 @@ special_prob=0.75
 # Minimum time elapsed to click an item (ms)
 # Should be e.g. average time elapsed consuming 50 absorb pts
 # 4.75 min
-item_time_min=275000
+item_time_min=280000
 
 # Minimum time elapsed to click a secondary item (ms)
 # Should be e.g. average time elapsed consuming combat potion
-# 15.x min
-snd_item_time_min=905000
+# 17.xx min
+snd_item_time_min=1025000
 
 # Minimum time elapsed to click special attack (ms)
 # Time for special attack to recharge
 # 5 min
 special_time_min=300000
+
+# Maximum time the script runs before exiting
+# This is to prevent running more than max login time, etc.
+# Current max logged in time: 6 hours
+# 6 h - 10 min = 5 h 50 min
+max_run_time=21000000
 
 # Static location data (X,Y)
 prayer_location=560,120
