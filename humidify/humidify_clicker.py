@@ -159,11 +159,15 @@ def interrupt(ev):
 def pause(ev):
     if not globvals.paused:
         print("Program paused.")
-        globvals.can_move = False
+        # can_move does not globally change from here!
+        # must be changed at the script global level
+        # globvals.can_move = False
         globvals.paused = True
     else:
         print("Program resumed.")
-        globvals.can_move = True
+        # can_move does not globally change from here!
+        # must be changed at the script global level
+        # globvals.can_move = True
         globvals.paused = False
     print("Possibly still waiting for a sleep to finish..")
 
@@ -319,22 +323,26 @@ if __name__ == '__main__':
 
         def pause_action():
             while globvals.paused:
+                if not globvals.running:
+                    break
+                globvals.can_move = False
                 # globvals.can_move = False
                 clicker_common.rand_sleep(rng, 1000, 1000, debug_mode)
+            globvals.can_move = True
 
 
         # Start looping
         while globvals.running:
+            pause_action()
             if not globvals.running:
                 break
-            pause_action()
 
             # Wait until spell action finished
             clicker_common.rand_sleep(rng, wait_min, wait_max, debug=True)
 
+            pause_action()
             if not globvals.running:
                 break
-            pause_action()
 
             if global_timer.elapsed() >= run_max:
                 print("Max runtime reached. Stopping.")
@@ -344,16 +352,16 @@ if __name__ == '__main__':
             open_bank()
             break_action()
 
+            pause_action()
             if not globvals.running:
                 break
-            pause_action()
 
             deposit_item()
             break_action()
 
+            pause_action()
             if not globvals.running:
                 break
-            pause_action()
 
             # Withdraw 27 items from bank
             if item_left < item_take:
@@ -364,23 +372,23 @@ if __name__ == '__main__':
             item_left -= item_take
             break_action()
 
+            pause_action()
             if not globvals.running:
                 break
-            pause_action()
 
             close_interface()
             break_action()
 
+            pause_action()
             if not globvals.running:
                 break
-            pause_action()
 
             open_spellbook()
             break_action()
 
+            pause_action()
             if not globvals.running:
                 break
-            pause_action()
 
             click_spell()
 
@@ -390,6 +398,9 @@ if __name__ == '__main__':
 
         # END WHILE
         print("Main loop stopped.")
+
+        # Cleanup resources
+        del rng
 
         # Gracefully let the bg thread to exit
         if move_thread.is_alive():
