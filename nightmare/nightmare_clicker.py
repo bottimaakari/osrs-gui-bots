@@ -150,6 +150,8 @@ try:
     # Debug prints etc.
     debug_mode = settings['debug_mode'].lower() == 'true'
 
+    interrupt_key = int(settings['interrupt_key'])
+
     # Mouse speed limits
     mouse_min = int(settings['mouse_min'])
     mouse_max = int(settings['mouse_max'])
@@ -225,9 +227,10 @@ try:
 
     # Key 1 = ESC
     # Key 82 = NUMPAD 0
-    keyboard.on_press_key(1, interrupt)
+    # Key 41 = §
+    keyboard.on_press_key(interrupt_key, interrupt)
 
-    print("Started. Hit ESC at any time to stop execution.")
+    print(f"Started. Hit key with code {interrupt_key} at any time to stop execution.")
     print("NOTE: Ensure settomgs are correctly defined in settings file.")
     print("NOTE: Ensure item details are correctly set in items data file.")
     print("NOTE: Please do not move the mouse at all after the program has been started.")
