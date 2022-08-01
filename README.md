@@ -8,6 +8,7 @@ Main.py acts as the launcher for any of the scripts.
 Also some bots implemeted as coordinate-based auto clickers.
 
 ## Currently implemented or planned scripts:
+- Clay Humidify autoclicker (DONE)
 - High alchemy items autoclicker & visual detection bot (DONE)
 - Nightmare Zone AFK autoclicker (DONE)
 - Yew woodcutting in Edgeville (WIP)

@@ -180,8 +180,9 @@ try:
 
     try:
         window()
-    except IndexError as ex:
+    except Exception as ex:
         print("ERROR: Game client window was not detected. Ensure the game client is running first.")
+        print("Also check that window title is correct in settings.")
         raise ex
 
     mouse_info = settings['mouse_info'].lower() == 'true'
@@ -224,6 +225,9 @@ try:
     # Probability to take a random break
     break_prob = float(settings['break_prob'])
 
+    # Break timer elapsed min
+    break_time = int(settings['break_time_min'])
+
     # Maximum precise target offset
     max_off = int(settings['max_off'])
 
@@ -255,6 +259,7 @@ try:
     # Timers for keeping track when allowed to commit next actions
     # Separate timer for each task
     global_timer = clicker_common.Timer()
+    break_timer = clicker_common.Timer()
 
     # Before each operation, check that we are still running
     # and not interrupted (running == True)
@@ -290,7 +295,8 @@ try:
     def break_action():
         break_rnd = rng.random()
         global break_taken, can_move
-        if not break_taken and break_rnd < break_prob:
+        # If break not yet taken in this loop, enough time from previous break passed, and random number hits prob
+        if not break_taken and break_timer.elapsed() >= break_time and break_rnd < break_prob:
             can_move = False
             take_break()
             can_move = True

@@ -44,13 +44,19 @@ wait_max=2100
 break_min=55000
 break_max=275000
 
-# Probability to take a break
+# Probability to take a break (in percent decimal)
 # Breaks only once per loop
-break_prob=0.05
+# e.g. 5 % => 0.05
+break_prob=0.01
+
+# Minimum time between breaks
+# No new breaks are taken before this time has elapsed after the last break
+# e.g. 15 min = 900 000 ms
+break_time_min=900000
 
 # How much the random movement moves the mouse
-rand_min=-9
-rand_max=9
+rand_min=-10
+rand_max=10
 
 # How much the click can be randomized off of the precise target
 max_off=3
