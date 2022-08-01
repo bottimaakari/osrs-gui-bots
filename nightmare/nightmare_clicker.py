@@ -360,13 +360,12 @@ try:
             if snd_current >= len(snd_inv):
                 print("Out of items.")
             else:
-                print("Use secondary item.")
                 click_snd_item(snd_inv[snd_current])
                 snd_inv[snd_current][2] -= 1
 
 
+    # Setup actions
     actions = []
-
     if use_special:
         actions.append(special_action)
     if use_item:
