@@ -369,7 +369,12 @@ def create_movement_thread(rng, move_min: int, move_max: int, max_off: int, debu
 
 
 def window(name):
-    return pyautogui.getWindowsWithTitle(name)[0]
+    try:
+        return pyautogui.getWindowsWithTitle(name)[0]
+    except IndexError:
+        print("ERROR: Game client window was not detected. Ensure the game client is running first.")
+        print("Also check that window title is correct in settings.")
+        raise RuntimeError("Could not detect game window.")
 
 
 def print_start_info(key):
@@ -391,6 +396,32 @@ def print_status(timer: Timer):
     secs = int(secs - hrs * 3600 - mins * 60)
     print(f"Total elapsed: {hrs} hrs | {mins} mins | {secs} secs.")
     print(f"Timestamp: {get_timestamp(local=True)}")
+
+
+# Catches key interrupt events
+# Gracefully erminates the program
+def interrupt_handler(ev):
+    print("Program interrupted.")
+    globvals.running = False
+    print("Possibly still waiting for a sleep to finish..")
+
+
+# Catches pause key presses
+# Pauses the program until resumed
+def pause_handler(ev):
+    if not globvals.paused:
+        print("Program paused.")
+        # can_move does not globally change from here!
+        # must be changed at the script global level
+        # globvals.can_move = False
+        globvals.paused = True
+    else:
+        print("Program resumed.")
+        # can_move does not globally change from here!
+        # must be changed at the script global level
+        # globvals.can_move = True
+        globvals.paused = False
+    print("Possibly still waiting for a sleep to finish..")
 
 
 def exit_handler():

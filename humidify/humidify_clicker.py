@@ -44,6 +44,15 @@ def hotkey_press(key):
     pyautogui.press(key, presses=1)
 
 
+def take_break():
+    print("Taking a break.")
+    clicker_common.rand_sleep(rng, break_min, break_max, debug=True)  # Longer break -> debug output
+
+
+def window():
+    return clicker_common.window(window_name)
+
+
 def hover(location):
     # Wait for a while before next action
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
@@ -139,41 +148,6 @@ def close_interface():
     hotkey_press(close_key)
 
 
-def take_break():
-    print("Taking a break.")
-    clicker_common.rand_sleep(rng, break_min, break_max, debug=True)  # Longer break -> debug output
-
-
-def window():
-    return clicker_common.window(window_name)
-
-
-# Catches key interrupt events
-# Gracefully erminates the program
-def interrupt(ev):
-    print("Program interrupted.")
-    globvals.running = False
-    print("Possibly still waiting for a sleep to finish..")
-
-
-# Catches pause key presses
-# Pauses the program until resumed
-def pause(ev):
-    if not globvals.paused:
-        print("Program paused.")
-        # can_move does not globally change from here!
-        # must be changed at the script global level
-        # globvals.can_move = False
-        globvals.paused = True
-    else:
-        print("Program resumed.")
-        # can_move does not globally change from here!
-        # must be changed at the script global level
-        # globvals.can_move = True
-        globvals.paused = False
-    print("Possibly still waiting for a sleep to finish..")
-
-
 if __name__ == '__main__':
     try:
         # Register a custom exit handler
@@ -191,19 +165,15 @@ if __name__ == '__main__':
         # Collect game window info (topleft coords)
         window_name: str = str(settings["window_title"])
 
-        try:
-            window()
-        except Exception as ex:
-            print("ERROR: Game client window was not detected. Ensure the game client is running first.")
-            print("Also check that window title is correct in settings.")
-            raise ex
-
-        mouse_info: bool = settings['mouse_info'].lower() == 'true'
-
-        if mouse_info:
+        # Check if mouse info mode enabled in settings
+        if bool(settings['mouse_info'].lower() == 'true'):
             print(f"TopLeft corner location: {window().topleft}")
+            print("Tip: To get correct relative position, calculate: target.x/y - topLeft.x/y")
             pyautogui.mouseInfo()
             exit(0)
+
+        # Ensure game window is detected
+        clicker_common.window(window_name)
 
         # Debug prints etc.
         debug_mode: bool = settings['debug_mode'].lower() == 'true'
@@ -273,8 +243,8 @@ if __name__ == '__main__':
             rng, move_min, move_max, max_off, debug_mode
         )
 
-        keyboard.on_press_key(interrupt_key, interrupt)
-        keyboard.on_press_key(pause_key, pause)
+        keyboard.on_press_key(interrupt_key, clicker_common.interrupt_handler)
+        keyboard.on_press_key(pause_key, clicker_common.pause_handler)
 
         # Print instructions on start before start delay
         clicker_common.print_start_info(interrupt_key)
