@@ -72,7 +72,7 @@ if __name__ == '__main__':
         break_prob: float = float(settings['break_prob'])
 
         # Break timer elapsed min
-        break_time: int = int(settings['break_time_min'])
+        break_time_min: int = int(settings['break_time_min'])
 
         # Maximum precise target offset
         max_off: int = int(settings['max_off'])
@@ -113,13 +113,13 @@ if __name__ == '__main__':
 
         common_args = {
             'rng': rng,
-            'max_off': max_off,
             'action_min': action_min,
             'action_max': action_max,
             'speed_min': speed_min,
             'speed_max': speed_max,
             'close_min': close_min,
             'close_max': close_max,
+            'max_off': max_off,
             'window_name': window_name,
             'debug': debug_mode
         }
