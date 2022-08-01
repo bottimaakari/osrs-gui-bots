@@ -1,4 +1,3 @@
-import secrets
 import threading
 
 import keyboard
@@ -80,7 +79,7 @@ def interrupt(ev):
 
 try:
     # Use system random data source
-    rng = secrets.SystemRandom()
+    rng = clicker_common.init_rng()
 
     settings_file = "settings.txt"
 
@@ -155,7 +154,6 @@ try:
 
     do_click_spell: bool = True
     current: int = 0
-
 
     # Print instructions on start before start delay
     clicker_common.print_start_info(interrupt_key)
