@@ -75,3 +75,7 @@ def rand_mouse_speed(rng, minms, maxms):
     tm = rng.randint(minms, maxms)
     print(f"Mouse speed: {tm} ms")
     return tm / 1000
+
+
+def window(name):
+    return pyautogui.getWindowsWithTitle(name)[0]

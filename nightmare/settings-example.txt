@@ -3,7 +3,7 @@
 # Lines starting with '#' are ignored
 # Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
 
-# Run mouse info program only (for determining coordinates)
+# Run mouse info program only and exit (for determining target(s) coordinates)
 mouse_info=False
 
 # Save (overwrite) current item counts to items file on exit
@@ -19,35 +19,54 @@ interrupt_key=1
 # Title of the game window (or some unambigous part of it) to recognize it
 window_title=RuneLite
 
-# Prayer click range (ms)
-loop_min=10000
-loop_max=55000
+# Main loop interval (ms)
+loop_min=20000
+loop_max=52000
 
 # Double click range (ms)
 click_min=200
-click_max=800
-
-# Probability to click the inventory tab on current loop
-inv_menu_prob=0.33
-
-# Do we want to use (absorb) potions?
-use_potions=True
-
-# Potion click range (ms)
-potion_min=240000
-potion_max=300000
+click_max=500
 
 # Mouse speed interval (ms)
 mouse_min=50
 mouse_max=300
 
 # How much the random movement moves the mouse
-rand_min=-8
-rand_max=8
+rand_min=-9
+rand_max=9
 
 # How much the click can be randomized off of the precise target
 max_off=6
 
+# Double click quick prayer?
+use_prayer=True
+
+# Use items defined in items file?
+use_items=True
+
+# Click the special attack when charged?
+use_special=True
+
+# Probability to click the inventory tab on current loop
+inv_menu_prob=0.3
+
+# Probability of clicking an item (uses left) after minimum time passed
+item_prob=0.75
+
+# Special attack probability
+special_prob=0.75
+
+# Minimum time elapsed to click an item (ms)
+# Should be e.g. average time elapsed consuming 50 absorb pts
+# 4,5 min
+item_time_min=270000
+
+# Minimum time elapsed to click special attack (ms)
+# Time for special attack to recharge
+# 5 min
+special_time_min=300000
+
 # Static location data (X,Y)
 prayer_location=560,120
+special_location=591,175
 inv_location=646,212

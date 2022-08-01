@@ -1,19 +1,12 @@
+import operator
 import secrets
 import threading
+import time
 
 import keyboard
 import pyautogui
 
 import clicker_common
-
-
-def randomized_offset(x, y, use_window=True):
-    ox = window.x + x if use_window else x
-    oy = window.y + y if use_window else y
-
-    return \
-        rng.randint(ox - max_off, ox + max_off), \
-        rng.randint(oy - max_off, oy + max_off)
 
 
 def mouse_movement_background():
@@ -31,7 +24,18 @@ def mouse_movement_background():
             x, y = randomized_offset(rng.randint(move_min, move_max), rng.randint(move_min, move_max), use_window=False)
             pyautogui.moveRel(x, y, clicker_common.rand_mouse_speed(rng, 30, 60))
 
-    print("BG Thread exiting.")
+    print("BG Thread terminated.")
+
+
+def randomized_offset(x, y, use_window=True):
+    w = window().topleft
+
+    ox = w.x + x if use_window else x
+    oy = w.y + y if use_window else y
+
+    return \
+        rng.randint(ox - max_off, ox + max_off), \
+        rng.randint(oy - max_off, oy + max_off)
 
 
 def hover_target(x, y):
@@ -53,6 +57,10 @@ def click_target(x, y):
     can_move = True
 
 
+def window():
+    return clicker_common.window(window_name)
+
+
 def ensure_inventory_open():
     loc = tuple(map(int, settings['inv_location'].split(',')))
     x, y = randomized_offset(loc[0], loc[1])
@@ -69,12 +77,21 @@ def click_prayer():
     clicker_common.rand_sleep(rng, 50, 500)
     x, y = randomized_offset(loc[0], loc[1])
     click_target(x, y)
-    clicker_common.rand_sleep(rng, wmin, wmax)
+    clicker_common.rand_sleep(rng, wmin, wmax)  # Special sleep between double click
     x, y = randomized_offset(loc[0], loc[1])
     click_target(x, y)
 
 
-def click_potion(target):
+def click_special_attack():
+    loc = tuple(map(int, settings['special_location'].split(',')))
+    x, y = randomized_offset(loc[0], loc[1])
+    hover_target(x, y)
+    clicker_common.rand_sleep(rng, 50, 500)
+    x, y = randomized_offset(loc[0], loc[1])
+    click_target(x, y)
+
+
+def click_item(target):
     x, y = randomized_offset(target[0], target[1])  # Get randomized coords to the target item
     hover_target(x, y)  # Move to the target
     clicker_common.rand_sleep(rng, 50, 500)  # Sleep for random time
@@ -82,22 +99,34 @@ def click_potion(target):
     click_target(x, y)  # Click the target
 
 
-def click_item(item):
-    x, y = randomized_offset(item[0], item[1])
-    hover_target(x, y)
+def move_outside_window():
+    w = window()
+
+    tl = w.topleft
+    tr = w.topright
+    bl = w.bottomleft
+    br = w.bottomright
+
+    targets = [
+        tuple(map(operator.add, (tl.x, tl.y), (-50, -50))),
+        tuple(map(operator.add, (tr.x, tr.y), (50, -50))),
+        tuple(map(operator.add, (bl.x, bl.y), (-50, 50))),
+        tuple(map(operator.add, (br.x, br.y), (50, 50))),
+    ]
+
+    target = rng.choice(targets)
     clicker_common.rand_sleep(rng, 50, 500)
-    x, y = randomized_offset(item[0], item[1])
-    click_target(x, y)
+    hover_target(target[0], target[1])
 
 
-def mouse_out_screen():
-    x = window.x + 1500
-    y = window.y + 1000
-    clicker_common.rand_sleep(rng, 50, 500)
-    hover_target(x, y)
+# Returns elapsed time floored to ms
+def elapsed():
+    return int(time.perf_counter() * 1000 - start_time)
 
 
-def interrupt(event):
+# Catches key interrupt events
+# Gracefully erminates the program
+def interrupt(ev):
     print("Program interrupted.")
     global running
     running = False
@@ -116,12 +145,12 @@ try:
     window_name = str(settings["window_title"])
 
     try:
-        window = pyautogui.getWindowsWithTitle(window_name)[0].topleft
+        window()
     except IndexError as ex:
         print("ERROR: Game client window was not detected. Ensure the game client is running first.")
         raise ex
 
-    mouse_info = settings['mouse_info'] == 'True'
+    mouse_info = settings['mouse_info'].lower() == 'true'
 
     if mouse_info:
         print(f"TopLeft corner location: {window}")
@@ -143,11 +172,24 @@ try:
     wmin = int(settings['click_min'])
     wmax = int(settings['click_max'])
 
+    # Maximum precise target offset
+    max_off = int(settings['max_off'])
+
     # Probability to open inventory tab
     inv_prob = float(settings['inv_menu_prob'])
 
-    # Maximum precise target offset
-    max_off = int(settings['max_off'])
+    # Probability to click an item
+    item_prob = float(settings['item_prob'])
+
+    # Special attack probability
+    special_prob = float(settings['special_prob'])
+
+    item_time = int(settings['item_time_min'])
+    special_time = int(settings['special_time_min'])
+
+    use_prayer = settings['use_prayer'].lower() == "true"
+    use_item = settings['use_items'].lower() == "true"
+    use_special = settings['use_special'].lower() == "true"
 
     # Key 1 = ESC
     # Key 82 = NUMPAD 0
@@ -173,61 +215,82 @@ try:
 
     can_move = True
     running = True
-    counter = 0
     current = 0
 
     # Initial sleep to have time to react
-    print("Waiting 3 seconds..")
+    print("Waiting 3 seconds before starting..")
     clicker_common.rand_sleep(rng, 3000, 3000)
 
     move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
     move_thread.start()
 
     # Double click the prayer button to reset regeneration
-    print("Double click quick prayer.")
-    click_prayer()
-    mouse_out_screen()
-
-    # Start looping
-    while running:
-        # Sleep for a random time, at maximum the time the health regenerates
-        clicker_common.rand_sleep(rng, loop_min, loop_max)
-
-        # Double click the prayer button to reset regeneration
+    if use_prayer:
         print("Double click quick prayer.")
         click_prayer()
 
+    # Initially, ensure mouse is outside game window
+    move_outside_window()
+
+    # Collect timestamp right before starting to loop
+    # Time point at start in ms
+    start_time = time.perf_counter() * 1000
+
+    err_margin = 10000
+
+    # Start looping
+    while running:
+        # TODO longer max (allow regenerate
+        # Sleep for a random time, at maximum the time the health regenerates
+        can_move = False
+        clicker_common.rand_sleep(rng, loop_min, loop_max)
+        can_move = True
+
+        if not running:
+            break
+
+        # Double click the prayer button to reset regeneration
+        if use_prayer:
+            print("Double click quick prayer.")
+            click_prayer()
+
+        # TODO rock cake
+
+        if use_special and elapsed() % special_time <= err_margin and rng.random() >= special_prob:
+            print("Click special attack.")
+            click_special_attack()
+
         # If the probability was hit, ensure the inventory tab is open
         if rng.random() <= inv_prob:
-            print("Ensure inventory is open.")
+            print("Ensure inventory open.")
             ensure_inventory_open()
 
-        # Looped 4 times, click the first available potion
-        if counter >= 4:
-            print("Click random non-empty potion.")
-            counter = 0
+        # After Looped 4 times in a row, click the first item available
+        if use_item and elapsed() % item_time <= err_margin and rng.random() >= item_prob:
+            print("Click next non-empty item.")
 
-            if inventory[current][2] <= 0:
-                print("Potion out of doses. Moving to next.")
+            while inventory[current][2] <= 0 and current < len(inventory):
+                print("Out of current item. Moving to next item.")
                 current += 1
 
             if current >= len(inventory):
-                print("Out of potions.")
+                print("Out of items.")
             else:
-                click_potion(inventory[current])
+                click_item(inventory[current])
                 inventory[current][2] -= 1
 
-        mouse_out_screen()
-        counter += 1
+        move_outside_window()
+
+        print(f"Total elapsed: {(elapsed()):0.4f} seconds.")
 
     # Gracefully let the bg thread to exit
     move_thread.join()
 
-    print("Sleeping 5 seconds before exiting..")
+    print("Sleep 5 seconds before exiting..")
     clicker_common.rand_sleep(rng, 5000, 5000)
 
 except Exception as e:
     print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
     print(e)
-    print("SLEEPING 10 SECONDS BEFORE EXITING..")
+    print("SLEEP 10 SECONDS BEFORE EXITING..")
     clicker_common.rand_sleep(rng, 10000, 10000)
