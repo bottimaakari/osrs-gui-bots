@@ -1,0 +1,74 @@
+# Some basic settings for the clicker
+# Read on program startup
+# Lines starting with '#' are ignored
+# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+
+# Run in debugging mode (debug printouts, etc.)
+# Exception is for long sleep delays
+# Causes lots of console log flood
+debug_mode=False
+
+# Run mouse info program only and exit (for determining target(s) coordinates)
+mouse_info=false
+
+# Save (overwrite) current item counts to items file on exit
+save_on_exit=False
+
+# Keycode for key to interrupt (stop) the program
+# 1 = ESC
+# 82 = Numpad 0
+# 41 = §
+interrupt_key=41
+
+# Title of the game window (or some unambigous part of it) to recognize it
+window_title=RuneLite
+
+# Double click range (ms)
+click_min=200
+click_max=500
+
+# Mouse speed interval (ms)
+mouse_speed_min=100
+mouse_speed_max=180
+
+# Delays between common actions (ms)
+action_min=140
+action_max=180
+
+# Wait time for the spell action to finish
+wait_min=1800
+wait_max=2100
+
+# How much the random movement moves the mouse
+rand_min=-9
+rand_max=9
+
+# How much the click can be randomized off of the precise target
+max_off=3
+
+# Run all (enabled) actions at start?
+# Excluding primary item click (e.g. absorb points always full at start)
+act_start=True
+
+# Amount of hard clay initially in bank
+# (Assymign unlimited supply of Astral runes)
+item_left=13000
+
+# Maximum time the script runs before exiting
+# This is to prevent running more than max login time, etc.
+# Current max logged in time: 6 hours
+# 2 h = 120 min = 7,200,000 ms
+max_run_time=7200000
+
+#### Static location data (X,Y) ####
+spellbook_location=745,210
+
+bank_location=319,200
+
+spell_location=572,307
+
+withdraw_location=189,163
+withdraw_offset=70
+
+deposit_location=582,327
+deposit_offset=70
