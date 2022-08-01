@@ -28,9 +28,6 @@ spellbook_key=F6
 # Title of the game window (or some unambigous part of it) to recognize it
 window_title=RuneLite
 
-# Static location data (X,Y)
-spell_location=720,330
-
 # Mouse speed interval (ms)
 mouse_min=50
 mouse_max=300
@@ -40,4 +37,10 @@ rand_min=-8
 rand_max=8
 
 # How much the click can be randomized off of the precise target
+# Affects both X and Y (X in range(X +- max_off), Y in range (Y +- max_off))
 max_off=5
+
+#### Static location data (X,Y) ####
+# Relative X,Y from topleft corner
+# Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
+spell_location=720,330

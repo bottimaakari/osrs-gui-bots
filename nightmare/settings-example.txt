@@ -52,7 +52,7 @@ rand_min=-10
 rand_max=10
 
 # How much the click can be randomized off of the precise target
-# Affects both X and Y (X +- max_off, Y +- max_off)
+# Affects both X and Y (X in range(X +- max_off), Y in range (Y +- max_off))
 max_off=4
 
 # Run all (enabled) actions at start?
@@ -104,7 +104,8 @@ special_time_min=300000
 # 6 h - 10 min = 5 h 50 min
 max_run_time=21000000
 
-# Static location data (X,Y)
+# Static location data (relative X,Y from topleft corner)
+# Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 prayer_location=560,120
 special_location=591,175
 inv_location=646,212

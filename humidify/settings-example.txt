@@ -59,6 +59,7 @@ rand_min=-10
 rand_max=10
 
 # How much the click can be randomized off of the precise target
+# Affects both X and Y (X in range(X +- max_off), Y in range (Y +- max_off))
 max_off=3
 
 # Run all (enabled) actions at start?
@@ -76,6 +77,8 @@ item_left=13000
 max_run_time=7200000
 
 #### Static location data (X,Y) ####
+# Relative X,Y from topleft corner
+# Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 bank_location=319,200
 
 spell_location=572,307
