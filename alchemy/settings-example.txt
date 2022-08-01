@@ -44,3 +44,9 @@ max_off=5
 # Relative X,Y from topleft corner
 # Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 spell_location=720,330
+
+# Maximum time the script runs before exiting
+# This is to prevent running more than max login time, etc.
+# Current max logged in time: 6 hours
+# 6 h - 10 min = 5 h 50 min = 21,000,000
+max_run_time=21000000

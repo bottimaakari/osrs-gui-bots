@@ -129,6 +129,9 @@ try:
     # UI Shortcut keys
     spellbook_key = settings['spellbook_key']
 
+    # Script maximum run time
+    run_max = int(settings['max_run_time'])
+
     # From this point on, catch any interruption caused by special key
     keyboard.on_press_key(interrupt_key, interrupt)
 
@@ -183,6 +186,11 @@ try:
         clicker_common.rand_sleep(rng, 50, 90)
 
         if not globvals.running:
+            break
+
+        if global_timer.elapsed() >= run_max:
+            print("Max runtime reached. Stopping.")
+            globvals.running = False
             break
 
         print(f"Click spell: {do_click_spell}")
