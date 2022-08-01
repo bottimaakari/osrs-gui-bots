@@ -8,7 +8,7 @@ ECHO CLEANUP
 @REM RMDIR /S /Q .\build
 RMDIR /S /Q .\dist
 
-SET TARGETS=(nightmare humidify wine superglass alchemy)
+SET TARGETS=(nightmare humidify herblore superglass alchemy)
 
 @REM BUILD EACH CLICKER SCRIPT INTO A SINGLE WINDOWS EXECUTABLE
 ECHO BUILD TARGET BINARIES

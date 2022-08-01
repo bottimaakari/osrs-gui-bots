@@ -21,7 +21,8 @@ You may either run the bots directly (using python) build the bots into executab
 ## Getting started
 Tested and developed with: 
 - **Python 3.9.7** 
-- **Python 3.10**
+- **Python 3.10.1**
+- **Python 3.10.2**
 
 1. Download the bot executable from the pre-built/ directory (or build yourself / run directly from Python file if you have compatible Python 3 installed.
 2. Ensure the bot configuration files are in the same directory with the executable (or source file). You can create the configuration files by collecting the according example files (files with '-example'-suffix).
@@ -35,7 +36,7 @@ Tested and developed with:
 - Clay Humidify autoclicker (DONE)
 - High alchemy items autoclicker & visual detection bot (DONE)
 - Nightmare Zone AFK autoclicker (DONE)
-- Cooking / wine maker autoclicker (DONE)
+- Cooking / Herblore / Wine Maker autoclicker (DONE)
 
 ## GUI-bots
 - Yew woodcutting in Edgeville (WIP)
