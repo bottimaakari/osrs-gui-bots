@@ -24,6 +24,10 @@ snd_withdraw_location=380,162
 deposit_location1=580,474
 deposit_offset1=15
 
+# Do a second deposit on a second position?
+# Coordinates defined below
+snd_deposit=False
+
 # Position (Hor, Vert) (1,1)
 deposit_location2=580,255
 deposit_offset2=100

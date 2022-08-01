@@ -126,19 +126,24 @@ def open_bank():
 
 def deposit_items():
     print("Deposit item(s).")
+
     loc = tuple(map(int, settings['deposit_location1'].split(',')))
     off = int(settings['deposit_offset1'])
     hover_context_click(loc, off)
-    loc = tuple(map(int, settings['deposit_location2'].split(',')))
-    off = int(settings['deposit_offset2'])
-    hover_context_click(loc, off)
+
+    if snd_deposit:
+        loc = tuple(map(int, settings['deposit_location2'].split(',')))
+        off = int(settings['deposit_offset2'])
+        hover_context_click(loc, off)
 
 
 def withdraw_items():
     print("Withdraw item(s).")
+
     loc = tuple(map(int, settings['withdraw_location'].split(',')))
     off = int(settings['withdraw_offset'])
     hover_context_click(loc, off)
+
     loc = tuple(map(int, settings['snd_withdraw_location'].split(',')))
     for i in range(item2_take):
         hover_click(loc)
@@ -243,6 +248,8 @@ try:
     max_off = int(settings['max_off'])
 
     run_max = int(settings['max_run_time'])
+
+    snd_deposit = settings['snd_deposit'].lower() == "true"
 
     act_start = settings['act_start'].lower() == "true"
 
