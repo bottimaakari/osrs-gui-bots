@@ -39,6 +39,11 @@ action_max=180
 wait_min=1800
 wait_max=2100
 
+# An additional delay before closing an interface using hotkey
+# This is to e.g. prevent closing bank too early
+close_min=75
+close_max=100
+
 # Random breaks' interval (ms)
 # 1 min - 4,5min (idle logout at 5min!)
 break_min=55000

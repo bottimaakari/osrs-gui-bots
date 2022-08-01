@@ -151,6 +151,7 @@ def open_spellbook():
 
 def close_interface():
     print("Close current interface.")
+    clicker_common.rand_sleep(rng, close_min, close_max, debug_mode)
     hotkey_press(close_key)
 
 
@@ -223,6 +224,10 @@ try:
     # Loop interval - time to wait before every cycle
     wait_min = int(settings['wait_min'])
     wait_max = int(settings['wait_max'])
+
+    # Additional delay before closing an interface
+    close_min = int(settings['close_min'])
+    close_max = int(settings['close_max'])
 
     # Random breaks interval
     break_min = int(settings['break_min'])
