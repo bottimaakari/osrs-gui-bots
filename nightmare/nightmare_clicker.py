@@ -69,8 +69,6 @@ def click_prayer():
     clicker_common.rand_sleep(rng, 50, 500)
     x, y = randomized_offset(loc[0], loc[1])
     click_target(x, y)
-    wmin = int(settings['click_min'])
-    wmax = int(settings['click_max'])
     clicker_common.rand_sleep(rng, wmin, wmax)
     x, y = randomized_offset(loc[0], loc[1])
     click_target(x, y)
@@ -93,8 +91,8 @@ def click_item(item):
 
 
 def mouse_out_screen():
-    x = window.x + 2000
-    y = window.y + 2000
+    x = window.x + 1500
+    y = window.y + 1000
     clicker_common.rand_sleep(rng, 50, 500)
     hover_target(x, y)
 
@@ -137,6 +135,16 @@ try:
     # Random movement offset limits
     move_min = int(settings['rand_min'])
     move_max = int(settings['rand_max'])
+
+    # Loop interval
+    loop_min = int(settings['loop_min'])
+    loop_max = int(settings['loop_max'])
+
+    wmin = int(settings['click_min'])
+    wmax = int(settings['click_max'])
+
+    # Probability to open inventory tab
+    inv_prob = float(settings['inv_menu_prob'])
 
     # Maximum precise target offset
     max_off = int(settings['max_off'])
@@ -183,14 +191,14 @@ try:
     # Start looping
     while running:
         # Sleep for a random time, at maximum the time the health regenerates
-        clicker_common.rand_sleep(rng, int(settings['loop_min']), int(settings['loop_max']))
+        clicker_common.rand_sleep(rng, loop_min, loop_max)
 
         # Double click the prayer button to reset regeneration
         print("Double click quick prayer.")
         click_prayer()
 
         # If the probability was hit, ensure the inventory tab is open
-        if rng.random() <= float(settings['inv_prob']):
+        if rng.random() <= inv_prob:
             print("Ensure inventory is open.")
             ensure_inventory_open()
 
@@ -205,10 +213,11 @@ try:
 
             if current >= len(inventory):
                 print("Out of potions.")
-                continue
+            else:
+                click_potion(inventory[current])
+                inventory[current][2] -= 1
 
-            click_potion(inventory[current])
-
+        mouse_out_screen()
         counter += 1
 
     # Gracefully let the bg thread to exit

@@ -27,6 +27,12 @@ loop_max=55000
 click_min=200
 click_max=800
 
+# Probability to click the inventory tab on current loop
+inv_menu_prob=0.33
+
+# Do we want to use (absorb) potions?
+use_potions=True
+
 # Potion click range (ms)
 potion_min=240000
 potion_max=300000
