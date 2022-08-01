@@ -158,8 +158,8 @@ def withdraw_item():
     left_click_target(x, y)
 
 
-def close_bank():
-    print("Close bank screen.")
+def close_interface():
+    print("Close current interface.")
     clicker_common.rand_sleep(rng, action_min, action_max, debug_mode)
     press_key("ESC")
 
@@ -269,14 +269,15 @@ try:
         print("Running actions at program start..")
 
         if running:
+            close_interface()
             open_spellbook()
             open_bank()
             if item_left < 27:
-                print("Out of item. Exiting.")
+                print("Out of item(s). Exiting.")
                 running = False
             withdraw_item()
             item_left -= 27
-            close_bank()
+            close_interface()
             click_spell()
 
     # Start looping
@@ -297,7 +298,7 @@ try:
         deposit_item()
 
         if item_left < 27:
-            print("Out of item. Exiting.")
+            print("Out of item(s). Exiting.")
             running = False
             break
 
@@ -305,7 +306,7 @@ try:
         withdraw_item()
         item_left -= 27
 
-        close_bank()
+        close_interface()
 
         click_spell()
 
