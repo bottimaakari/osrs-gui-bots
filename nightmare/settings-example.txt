@@ -1,7 +1,7 @@
 # Some basic settings for the clicker
 # Read on program startup
 # Lines starting with '#' are ignored
-# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+# Location coordinates are relative from game screen top left corner (x - topLeft.x, y - topLeft.y)
 
 # Run in debugging mode (debug printouts, etc.)
 # Exception is for long sleep delays
@@ -28,7 +28,7 @@ snd_items_file=snd-items.txt
 # 41 = §
 interrupt_key=41
 
-# Title of the game window (or some unambigous part of it) to recognize it
+# Title of the game window (or some unambiguous part of it) to recognize it
 window_title=RuneLite
 
 # Main loop interval (ms)
@@ -104,7 +104,7 @@ special_time_min=300000
 # 6 h - 10 min = 5 h 50 min
 max_run_time=21000000
 
-# Static location data (relative X,Y from topleft corner)
+# Static location data (relative X,Y from top left corner)
 # Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 prayer_location=560,120
 special_location=591,175

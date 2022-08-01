@@ -1,7 +1,7 @@
 # Some basic settings for the clicker
 # Lines starting with '#' are ignored
 # Read on program startup
-# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+# Location coordinates are relative from game screen top left corner (x - topLeft.x, y - topLeft.y)
 
 # Run in debugging mode (debug printouts, etc.)
 # Exception is for long sleep delays
@@ -25,7 +25,7 @@ interrupt_key=41
 # Other action shortcut keys
 spellbook_key=F6
 
-# Title of the game window (or some unambigous part of it) to recognize it
+# Title of the game window (or some unambiguous part of it) to recognize it
 window_title=RuneLite
 
 # Mouse speed interval (ms)
@@ -41,7 +41,7 @@ rand_max=8
 max_off=5
 
 #### Static location data (X,Y) ####
-# Relative X,Y from topleft corner
+# Relative X,Y from top left corner
 # Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 spell_location=720,330
 

@@ -1,7 +1,7 @@
 # Some basic settings for the clicker
 # Read on program startup
 # Lines starting with '#' are ignored
-# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+# Location coordinates are relative from game screen top left corner (x - topLeft.x, y - topLeft.y)
 
 # Amount of hard clay initially in bank
 # (Assuming unlimited supply of additional resources e.g. Astral runes)
@@ -57,7 +57,7 @@ interrupt_key=41
 spellbook_key=F6
 close_menu_key=ESC
 
-# Title of the game window (or some unambigous part of it) to recognize it
+# Title of the game window (or some unambiguous part of it) to recognize it
 window_title=RuneLite
 
 # Mouse speed interval (ms)

@@ -1,7 +1,7 @@
 # Some basic settings for the clicker
 # Read on program startup
 # Lines starting with '#' are ignored
-# Location coordinates are relative from game screen topleft corner (x - topleft.x, y - topleft.y)
+# Location coordinates are relative from game screen top left corner (x - topLeft.x, y - topLeft.y)
 
 # Amount of hard clay initially in bank
 # (Assuming unlimited supply of additional resources e.g. Astral runes)
@@ -13,7 +13,7 @@ item1_take=14
 item2_take=14
 
 #### Static location data (X,Y) ####
-# Relative X,Y from topleft corner
+# Relative X,Y from top left corner
 # Use the MouseInfo tool (temporarily set to True) to determine correct coordinates
 bank_location=315,200
 
@@ -62,7 +62,7 @@ inventory_key=ESC
 close_menu_key=ESC
 confirm_key=SPACE
 
-# Title of the game window (or some unambigous part of it) to recognize it
+# Title of the game window (or some unambiguous part of it) to recognize it
 window_title=RuneLite
 
 # Mouse speed interval (ms)
@@ -73,9 +73,12 @@ mouse_speed_max=180
 action_min=150
 action_max=170
 
-# Wait time for the spell action to finish
-wait_min=28000
-wait_max=32000
+# Wait time for the long action to finish
+# Wines taking roughly 16.62s
+# Unfinished potions ~8s
+# Finished potions ~16.62s
+wait_min=16650
+wait_max=16870
 
 # An additional delay before closing an interface using hotkey
 # This is to e.g. prevent closing bank too early
