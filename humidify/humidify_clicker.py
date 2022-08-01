@@ -109,7 +109,7 @@ def hover_context_click(location, offset):
 
 def focus_window():
     print("Focus on game window.")
-    hover_click((10, 10))
+    hover_click((50, 5))
 
 
 def click_spell():

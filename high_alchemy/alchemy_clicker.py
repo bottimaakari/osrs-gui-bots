@@ -70,7 +70,7 @@ def hotkey_press(key):
 
 def focus_window():
     print("Focus on game window.")
-    hover_click((10, 10), 50, 400)
+    hover_click((50, 5), 50, 400)
 
 
 def open_spellbook():

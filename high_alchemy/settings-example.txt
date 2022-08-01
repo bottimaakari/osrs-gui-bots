@@ -20,7 +20,7 @@ items_file=items.txt
 # 1 = ESC
 # 82 = Numpad 0
 # 41 = §
-interrupt_key=1
+interrupt_key=41
 
 # Other action shortcut keys
 spellbook_key=F6
