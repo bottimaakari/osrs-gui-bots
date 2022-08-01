@@ -186,7 +186,8 @@ if __name__ == '__main__':
             if not globvals.running:
                 break
 
-            clicker_common.deposit_item(deposit_location, deposit_offset, left_banking, **common_args)
+            clicker_common.deposit_item(deposit_location, deposit_offset, left_banking, deposit_all=False,
+                                        **common_args)
             clicker_common.break_action(break_min, break_max, break_time_min, break_prob, break_timer, **common_args)
 
             clicker_common.pause_action(**common_args)

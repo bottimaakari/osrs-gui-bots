@@ -154,6 +154,7 @@ if __name__ == '__main__':
 
         if globvals.running and act_start:
             print("Running actions at program start..")
+            clicker_common.pause_action(**common)
             if globvals.running:
                 clicker_common.focus_window(**common)
                 clicker_common.pause_action(**common)
@@ -182,16 +183,17 @@ if __name__ == '__main__':
 
         # Start looping
         while globvals.running:
-            # Reset break status every iteration
-            break_taken = False
-
-            can_move = idle_move
-            # Wait until spell action finished
-            clicker_common.rand_sleep(rng, wait_min, wait_max)  # debug=True for longer delay
-            can_move = True
-
+            clicker_common.pause_action(**common)
             if not globvals.running:
-                print("Not running anymore.")
+                break
+
+            # Wait until spell action finished
+            globvals.can_move = idle_move
+            clicker_common.rand_sleep(wait_min, wait_max, **{**common, 'debug': True})
+            globvals.can_move = True
+
+            clicker_common.pause_action(**common)
+            if not globvals.running:
                 break
 
             if global_timer.elapsed() >= run_max:
@@ -199,59 +201,65 @@ if __name__ == '__main__':
                 globvals.running = False
                 break
 
-            open_bank()
-            break_action()
+            # ACTION LOOP BEGINS HERE
 
-            if not running:
-                print("Not running anymore.")
+            clicker_common.open_location(bank_location, **common)
+            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+
+            clicker_common.pause_action(**common)
+            if not globvals.running:
                 break
 
-            deposit_items()
-            break_action()
+            clicker_common.deposit_items(fst_deposit_location, deposit_offset, snd_deposit_location, snd_deposit_offset,
+                                         left_banking, deposit_all=True, **common)
+            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            if not running:
-                print("Not running anymore.")
+            clicker_common.pause_action(**common)
+            if not globvals.running:
                 break
 
             # Withdraw 27 items from bank
-            if item1_left < item1_take or item2_left < item2_take:
-                print("Out of item(s). Exiting.")
-                running = False
-                break
-            withdraw_items()
-            item1_left -= item1_take
-            item2_left -= item2_take
-            break_action()
+            clicker_common.withdraw_items(fst_withdraw_location, withdraw_offset, item1_take, snd_withdraw_location,
+                                          snd_withdraw_offset, item2_take, left_banking, **common)
+            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            if not running:
-                print("Not running anymore.")
+            clicker_common.pause_action(**common)
+            if not globvals.running:
                 break
 
-            close_interface()
-            break_action()
+            clicker_common.close_interface(close_key, **common)
+            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            if not running:
-                print("Not running anymore.")
+            clicker_common.pause_action(**common)
+            if not globvals.running:
                 break
 
-            open_inventory()
-            break_action()
+            clicker_common.open_menu(inventory_key, **common)
+            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            if not running:
-                print("Not running anymore.")
+            clicker_common.pause_action(**common)
+            if not globvals.running:
                 break
 
-            combine_items()
-            break_action()
+            clicker_common.combine_items(fst_combine_location, snd_combine_location, **common)
+            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
 
-            if not running:
-                print("Not running anymore.")
+            clicker_common.pause_action(**common)
+            if not globvals.running:
                 break
 
-            confirm_action()
-            break_action()
+            clicker_common.confirm_action(confirm_key, bank_location, **common)
 
             clicker_common.print_status(global_timer)
+
+            # Do possible breaking right status info print to keep track of script runtime
+            clicker_common.break_action(break_min, break_max, break_time, break_prob, break_timer, **common)
+
+        # END WHILE
+        print("Main loop stopped.")
+
+        # Cleanup resources
+        del rng
 
         # Gracefully let the bg thread to exit
         if move_thread.is_alive():
@@ -259,6 +267,14 @@ if __name__ == '__main__':
             move_thread.join()
 
     except Exception as e:
-        running = False
-        print("EXCEPTION OCCURRED DURING PROGRAM EXECUTION:")
-        print(e)
+        globvals.running = False
+        print("FATAL EXCEPTION OCCURRED DURING SCRIPT EXECUTION:")
+        if type(e) == KeyError:
+            print("Detected KeyError - Ensure all settings are correctly set with valid values.")
+            print(f"Setting that caused the issue: {e} (Check that it is set and is valid in the settings file.)")
+        elif type(e) == ValueError:
+            print("Detected ValueError - Ensure all settings have valid values set (e.g. string, integer, boolean..)")
+            print(f"The following error message might be helpful for detecting what caused the issue: {e!r}")
+        else:
+            print("Could not determine error cause.")
+            print(f"Error message: {e!r}")

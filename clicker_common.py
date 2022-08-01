@@ -606,6 +606,7 @@ def open_menu(key: str, **kwargs) -> None:
 
 
 def withdraw_item(location: tuple[int, int], offset: int, left_banking: bool, item_take: int, **kwargs) -> None:
+    # Read common parameters from packed kwargs
     debug: bool = kwargs['debug']
 
     print("Withdraw item.")
@@ -629,8 +630,21 @@ def withdraw_item(location: tuple[int, int], offset: int, left_banking: bool, it
         hover_context_click(location, offset, **kwargs)
 
 
-def deposit_item(location: tuple[int, int], offset: int, left_banking: bool, **kwargs) -> None:
+def deposit_item(
+        location: tuple[int, int],
+        offset: int,
+        left_banking: bool,
+        deposit_all: bool = False,
+        **kwargs
+) -> None:
+    # Read common parameters from packed kwargs
+    close_min: int = kwargs['close_min']
+    close_max: int = kwargs['close_max']
+
     print("Deposit item.")
+
+    if deposit_all:
+        rand_sleep(close_min, close_max, **kwargs)
 
     if left_banking:
         print("Deposit using left click.")
@@ -682,9 +696,17 @@ def deposit_items(
         second_location: tuple[int, int],
         second_offset: int,
         left_banking: bool,
+        deposit_all: bool = False,
         **kwargs
 ) -> None:
+    # Read common parameters from packed kwargs
+    close_min: int = kwargs['close_min']
+    close_max: int = kwargs['close_max']
+
     print("Deposit items.")
+
+    if deposit_all:
+        rand_sleep(close_min, close_max, **kwargs)
 
     if left_banking:
         hover_click(first_location, **kwargs)
@@ -715,6 +737,7 @@ def confirm_action(key: str, next_location: tuple[int, int] = None, **kwargs):
     close_max: int = kwargs['close_max']
 
     print("Confirm action.")
+
     rand_sleep(close_min, close_max, **kwargs)
     key_press(key, **kwargs)
 
