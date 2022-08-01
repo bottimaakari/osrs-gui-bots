@@ -45,35 +45,55 @@ def init_bot(region: bool):
         return bot
 
 
-def start_cutting(bot: gbot.Region, target):
-    bot.hover(target)
+def click_text_target(bot: gbot.Region, target, text: str):
+    if bot.exists(target):
+        bot.hover(target)
+    else:
+        print("CLICK TARGET LOST")
+        return
     
-    text = bregion.Text('Chop Down Yew', bfinder.Finder()).with_similarity(0.5)
+    text = bregion.Text(text, bot.cv_backend()).with_similarity(0.5)
     
     if bot.exists(text):
-        print("CUT LABEL FOUND")
-        bot.click(target)
+        # Minor random delay before clicking
+        print(f"LABEL {text} FOUND")
+        delay(False)
+
+        for i in range(click_count()):
+            micro_delay()
+            bot.click(target)
+            print(f"CLICKED {target}")
     else:
-        print("CUT LABEL NOT FOUND")
+        print(f"LABEL {text} NOT FOUND")
+
+
+def click_count():
+    return rng.randint(1, 5)
 
 
 def mouse_speed():
     return rng.randint(83, 241)
 
 
-def delay(long: bool):
-    tm = None
-
-    if long:
-        tm = rng.randint(927, 10358) / 1000  # TODO
-    else:
-        tm = rng.randint(947, 1234) / 1000
-
+def micro_delay():
+    tm = rng.randint(11, 91) / 1000
     sleep(tm)
 
 
-def click_delay():
-    return rng.randint(512, 5221) / 1000
+def delay(long: bool, max=None):
+    if max is not None and max <= 1000:
+        max = None
+    
+    tm = None
+
+    if long:
+        # ~1 sec -- ~10 sec
+        tm = rng.randint(927, 11352 if max is None else max) / 1000  # TODO higher max (4min)
+    else:
+        # ~ 1sec
+        tm = rng.randint(913, 1185 if max is None else max) / 1000
+
+    sleep(tm)
 
 
 def click_offset():
@@ -128,10 +148,11 @@ def main():
         except:
             items = None
 
-        # Check if we have 24 logs in inv
+        # Check if we have 28 logs in inv
         if (items and len(items) >= 28):
             print("INV FULL")
-            break
+            delay(True, 58219) # TODO remove, set default limit higher
+            continue
 
         stump = None
 
@@ -145,6 +166,7 @@ def main():
             print("STUMP EXISTS")
             cutting = False
             continue
+
         else:
             print("STUMP NOT FOUND")
 
@@ -162,25 +184,29 @@ def main():
                 break
 
         if (cutting and tree):
+            delay(long=True)
+
+            # 33% prob
             if rand_bool(0.33):
-                delay(long=True)
                 print("EXTRA CLICK")
                 try:
-                    start_cutting(bot, tree)
+                    click_text_target(bot, tree, 'Chop Down Yew')
                 except:
                     print("TREE NO LONGER EXISTS")
                     tree = None
             continue
+
         elif (tree):
-            print("START CUTTING")
             delay(long=True)
+            print("START CUTTING")
             try:
-                start_cutting(bot, tree)
+                click_text_target(bot, tree, 'Chop Down Yew')
             except:
                 print("TREE NO LONGER EXISTS")
                 tree = None
             cutting = True
             continue
+
         else:
             print("TREE NOT FOUND")
             continue
