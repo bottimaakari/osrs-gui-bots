@@ -1,17 +1,8 @@
 import secrets
+import threading
+
 import keyboard
 import pyautogui
-
-# Use system random data source
-rng = secrets.SystemRandom()
-
-# Mouse speed limits
-mouse_min = 50
-mouse_max = 150
-
-# Collect game window info (topleft coords)
-window_name = "RuneLite"
-window = pyautogui.getWindowsWithTitle(window_name)[0].topleft
 
 
 def mouse_info():
@@ -32,17 +23,45 @@ def rand_mouse_speed(minms, maxms):
     return tm / 1000
 
 
-def randomized_offset(x, y):
+def randomized_offset(x, y, use_window=True):
+    ox = window.x + x if use_window else x
+    oy = window.y + y if use_window else y
     max_off = 5
+
     return \
-        rng.randint((window.x + x) - max_off, (window.x + x) + max_off), \
-        rng.randint((window.y + y) - max_off, (window.y + y) + max_off)
+        rng.randint(ox - max_off, ox + max_off), \
+        rng.randint(oy - max_off, oy + max_off)
+
+
+def random_movement():
+    for i in range(0, rng.randint(0, 5)):
+        randomized_sleep(10, 30)
+        x, y = randomized_offset(rng.randint(move_min, move_max), rng.randint(move_min, move_max,), use_window=False)
+        pyautogui.moveRel(x, y, rand_mouse_speed(30, 60))
+
+
+def mouse_movement_background(arg):
+    while running:
+        randomized_sleep(10, 500)
+        if not can_move:
+            continue
+        random_movement()
 
 
 def click_target(x, y):
     print(f"Click target: ({x}, {y})")
+
+    # Some random mouse movement before action
+    # random_movement()
+
+    global can_move
+    can_move = False
     pyautogui.moveTo(x, y, rand_mouse_speed(mouse_min, mouse_max))
     pyautogui.leftClick()
+    can_move = True
+
+    # Some random mouse movement after action
+    # random_movement()
 
 
 def open_spell_menu():
@@ -84,10 +103,28 @@ def on_press_esc(event):
 # TODO enable for pos info
 # mouse_info()
 
+# Use system random data source
+rng = secrets.SystemRandom()
+
+# Mouse speed limits
+mouse_min = 50
+mouse_max = 200
+
+move_min = -10
+move_max = 10
+
+# Collect game window info (topleft coords)
+window_name = "RuneLite"
+window = pyautogui.getWindowsWithTitle(window_name)[0].topleft
+
+can_move = True
 running = True
 doClickSpell = True
 current = 0
-last_sleep = None
+
+# Key 1 = ESC
+# Key 82 = NUMPAD 0
+keyboard.on_press_key(1, on_press_esc)
 
 print("Started. Hit ESC at any time to stop execution.")
 print("NOTE: Ensure item details are correctly set in items data file.")
@@ -95,13 +132,12 @@ print("NOTE: Ensure item details are correctly set in items data file.")
 # Sleep for 1.5 sec
 randomized_sleep(1500, 1500)
 
-# Key 1 = ESC
-# Key 82 = NUMPAD 0
-keyboard.on_press_key(1, on_press_esc)
-
 # (ITEM POSX, ITEM POSY, ITEM COUNT)
 items = read_items()
 print("Read item data from file.")
+
+move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement", args=(None,))
+move_thread.start()
 
 # First, ensure spell menu open
 print("Opening spell menu..")
@@ -109,8 +145,15 @@ open_spell_menu()
 
 # Start looping
 while running:
+    last_sleep = randomized_sleep(200, 400)
+
     print(f"DoClickSpell: {doClickSpell}")
-    last_sleep = randomized_sleep(400, 600)
+
+    # 20 % chance for ensuring spell menu is open
+    # before clicking the spell
+    if doClickSpell and rng.random() <= 0.2:
+        open_spell_menu()
+        continue
 
     if doClickSpell:
         click_spell()
@@ -131,3 +174,5 @@ while running:
         randomized_sleep(1400 - last_sleep, 1600 - last_sleep)
         items[current][2] -= 1
         doClickSpell = True
+
+move_thread.join()
