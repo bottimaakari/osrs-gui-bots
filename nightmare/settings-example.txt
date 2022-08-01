@@ -11,9 +11,17 @@ save_on_exit=False
 
 items_file=items.txt
 
+# Keycode for key to interrupt (stop) the program
+# 1 = ESC
+# 82 = Numpad 0
+interrupt_key=1
+
+# Title of the game window (or some unambigous part of it) to recognize it
+window_title=RuneLite
+
 # Prayer click range (ms)
-prayer_min=10000
-prayer_max=55000
+loop_min=10000
+loop_max=55000
 
 # Double click range (ms)
 click_min=200
@@ -36,3 +44,4 @@ max_off=6
 
 # Static location data (X,Y)
 prayer_location=560,120
+inv_location=646,212

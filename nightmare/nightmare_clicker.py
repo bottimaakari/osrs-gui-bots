@@ -53,38 +53,54 @@ def click_target(x, y):
     can_move = True
 
 
-def open_spellbook():
-    loc = tuple(map(int, settings['spellbook_location'].split(',')))
+def ensure_inventory_open():
+    loc = tuple(map(int, settings['inv_location'].split(',')))
     x, y = randomized_offset(loc[0], loc[1])
     hover_target(x, y)
     clicker_common.rand_sleep(rng, 50, 500)
-    # Recalculate x,y and click the target
     x, y = randomized_offset(loc[0], loc[1])
     click_target(x, y)
 
 
-def click_spell():
-    loc = tuple(map(int, settings['spell_location'].split(',')))
+def click_prayer():
+    loc = tuple(map(int, settings['prayer_location'].split(',')))
     x, y = randomized_offset(loc[0], loc[1])
     hover_target(x, y)
-    clicker_common.rand_sleep(rng, 1200, 1300)
-    # Recalculate x,y and click the target
+    clicker_common.rand_sleep(rng, 50, 500)
     x, y = randomized_offset(loc[0], loc[1])
     click_target(x, y)
+    wmin = int(settings['click_min'])
+    wmax = int(settings['click_max'])
+    clicker_common.rand_sleep(rng, wmin, wmax)
+    x, y = randomized_offset(loc[0], loc[1])
+    click_target(x, y)
+
+
+def click_potion(target):
+    x, y = randomized_offset(target[0], target[1])  # Get randomized coords to the target item
+    hover_target(x, y)  # Move to the target
+    clicker_common.rand_sleep(rng, 50, 500)  # Sleep for random time
+    x, y = randomized_offset(target[0], target[1])  # Get randomized coords to the target item
+    click_target(x, y)  # Click the target
 
 
 def click_item(item):
     x, y = randomized_offset(item[0], item[1])
-    # Calculate x,y and alredy hover on the target
     hover_target(x, y)
-    clicker_common.rand_sleep(rng, 30, 500)
-    # Recalculate x,y and click the target
+    clicker_common.rand_sleep(rng, 50, 500)
     x, y = randomized_offset(item[0], item[1])
     click_target(x, y)
 
 
+def mouse_out_screen():
+    x = window.x + 2000
+    y = window.y + 2000
+    clicker_common.rand_sleep(rng, 50, 500)
+    hover_target(x, y)
+
+
 def interrupt(event):
-    print("Interrupted.")
+    print("Program interrupted.")
     global running
     running = False
 
@@ -130,7 +146,7 @@ try:
     keyboard.on_press_key(1, interrupt)
 
     print("Started. Hit ESC at any time to stop execution.")
-    print("NOTE: Ensure settings are correctly defined in settings file.")
+    print("NOTE: Ensure settomgs are correctly defined in settings file.")
     print("NOTE: Ensure item details are correctly set in items data file.")
     print("NOTE: Please do not move the mouse at all after the program has been started.")
 
@@ -149,7 +165,7 @@ try:
 
     can_move = True
     running = True
-    do_click_spell = True
+    counter = 0
     current = 0
 
     # Initial sleep to have time to react
@@ -159,41 +175,41 @@ try:
     move_thread = threading.Thread(target=mouse_movement_background, name="bg_mouse_movement")
     move_thread.start()
 
-    # First, ensure spell menu open
-    print("Opening spell menu..")
-    open_spellbook()
+    # Double click the prayer button to reset regeneration
+    print("Double click quick prayer.")
+    click_prayer()
+    mouse_out_screen()
 
     # Start looping
     while running:
-        # Must sleep enough between the moves
-        # should be close to a constant value
-        clicker_common.rand_sleep(rng, 50, 80)
+        # Sleep for a random time, at maximum the time the health regenerates
+        clicker_common.rand_sleep(rng, int(settings['loop_min']), int(settings['loop_max']))
 
-        print(f"do_click_spell: {do_click_spell}")
+        # Double click the prayer button to reset regeneration
+        print("Double click quick prayer.")
+        click_prayer()
 
-        # 33 % chance for ensuring spell menu is open
-        # before clicking the spell
-        if do_click_spell and rng.random() <= float(settings['spellbook_prob']):
-            open_spellbook()
+        # If the probability was hit, ensure the inventory tab is open
+        if rng.random() <= float(settings['inv_prob']):
+            print("Ensure inventory is open.")
+            ensure_inventory_open()
 
-        if do_click_spell:
-            click_spell()
-            do_click_spell = False
-            continue
+        # Looped 4 times, click the first available potion
+        if counter >= 4:
+            print("Click random non-empty potion.")
+            counter = 0
 
-        if current >= len(inventory):
-            print("Out of items.")
-            interrupt(None)
-            break
+            if inventory[current][2] <= 0:
+                print("Potion out of doses. Moving to next.")
+                current += 1
 
-        if inventory[current][2] <= 0:
-            print(f"Item {current} out. Moving to next..")
-            current += 1
-            continue
+            if current >= len(inventory):
+                print("Out of potions.")
+                continue
 
-        click_item(inventory[current])
-        inventory[current][2] -= 1
-        do_click_spell = True
+            click_potion(inventory[current])
+
+        counter += 1
 
     # Gracefully let the bg thread to exit
     move_thread.join()
