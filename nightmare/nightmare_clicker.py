@@ -120,6 +120,7 @@ def interrupt(ev):
     print("Program interrupted.")
     global running
     running = False
+    print("Possibly still waiting for a sleep to finish..")
 
 
 # Use system random data source
@@ -240,10 +241,15 @@ try:
     print("Waiting 4 seconds before starting..")
     clicker_common.rand_sleep(rng, 4000, 4000)  # debug=True
 
+    # Before each operation, check that we are still running
+    # and not interrupted (running == True)
+
+    # Start the bg mouse movement thread
     if running:
         move_thread.start()
-        print("Mouse movement bg thread started.")
+        print("Mouse movement BG thread started.")
 
+    # First, ensure inventory tab is open
     if running:
         print("Ensure inventory open.")
         ensure_inventory_open()
@@ -253,15 +259,16 @@ try:
         print("Double click quick prayer.")
         click_prayer()
 
+    # use the special attack
     if running and use_special:
         print("Click special attack.")
         click_special_attack()
 
-    if running and use_item:
-        print("Use item.")
-        click_item(inventory[current])
-        inventory[current][2] -= 1
+    # No need for using the primary item
+    # at start (typically absorb potion)
+    # because points already full
 
+    # Use the snd item (e.g. stats potion)
     if running and use_snd_item:
         print("Use secondary item.")
         click_item(snd_inv[snd_current])
@@ -362,6 +369,7 @@ try:
 
     # Gracefully let the bg thread to exit
     if move_thread.is_alive():
+        print("Waiting for BG thread to stop..")
         move_thread.join()
 
 except Exception as e:
